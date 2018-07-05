@@ -12,10 +12,10 @@ class Page {
 	 * @global object $db
 	 * @global object $site
 	 */
-	function __construct() {
+	function __construct($vce) {
 	
 		// okay we're going to try this out
-		global $vce;
+		// global $vce;
 		$vce->page = $this;
 
 		// check that http_host and PHP_URL_HOST match

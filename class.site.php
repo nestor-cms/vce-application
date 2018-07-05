@@ -12,10 +12,10 @@ class Site {
 	 * In addition to the Login, builds a $hooks array, preloads javascript, css, themes,
 	 * and other layout-directing information.
 	 */
-	public function __construct() {
+	public function __construct($vce) {
 	
 		// load vce object and add this property to it
-		global $vce;
+		// global $vce;
 		$vce->site = $this;
 		
 		// check that memory_limit is at least set to 40M

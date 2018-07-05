@@ -12,10 +12,10 @@ class Content {
 	 * Add content to vce object
 	 *
 	 */
-    public function __construct() {
+    public function __construct($vce) {
     
     	// add vce object
-    	global $vce;
+    	// global $vce;
     	$vce->content = $this;
     	
     }

@@ -9,10 +9,10 @@ class DB {
 	/**
 	 * Instantiates MYSQLI and creates connection.
 	 */
-    public function __construct() {
+    public function __construct($vce) {
     
     	// add db to vce object
-    	global $vce;
+    	// global $vce;
     	$vce->db = $this;
     
         mb_internal_encoding('UTF-8');

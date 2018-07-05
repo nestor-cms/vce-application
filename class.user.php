@@ -10,9 +10,9 @@ class User {
 	 * Starts session and checks for User login.
 	 * Takes care of the basic login and session creation, checking for a cookie if the user session is nonexistant.
 	 */
-	public function __construct() {
+	public function __construct($vce) {
 	
-		global $vce;
+		// global $vce;
 		$vce->user = $this;
 		
 		// start session
