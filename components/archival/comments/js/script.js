@@ -1,0 +1,185 @@
+$(document).ready(function() {
+
+	function findplayer(clickbar) {
+		var clickbarParent = $(clickbar).parent();
+		var mediaItem = $(clickbarParent).find('.media-item');
+		if (mediaItem.length !== 0) {
+			return $(mediaItem).find('.vidbox');
+		}
+		return findplayer($(clickbarParent));
+	}
+
+	$('.comments-clickbar').on('click touchend', function(e) {
+
+		if ($(this).hasClass('clickbar-closed')) {
+			if (typeof videoPlayer === 'object') {	
+				var player = findplayer($(this)).attr('player');
+				if (typeof videoPlayer[player] !== 'undefined') {
+					videoPlayer[player].startVideoPlayer();
+				}
+				
+			}
+		} else {
+			if (typeof videoPlayer === 'object') {
+				var player = findplayer($(this)).attr('player');
+				if (typeof videoPlayer[player] !== 'undefined') {
+					videoPlayer[player].pauseVideoPlayer();
+				}
+			}
+		}
+		
+	});
+
+	$(document).on('click touchend','.comment-timestamp', function(e) {
+		var timestamp = $(this).attr('timestamp');
+		if (typeof videoPlayer === 'object') {
+			var vidbox = findplayer($(this));
+			var player = vidbox.attr('player');
+			videoPlayer[player].shuttleVideoPlayer(timestamp);
+			var vidPosition = vidbox.closest('.media-item').position();
+			$("html, body").animate({ scrollTop: (vidPosition.top + 200) }, "slow");
+		}
+	});
+
+	$(document).on('submit','.asynchronous-comment-form', function(e) {
+		e.preventDefault();
+	
+		var formsubmitted = $(this);
+		var layout_container = $(this).attr('combar');
+		var submittable = true;
+
+		var textareatest = $(this).find('textarea');
+		textareatest.each(function(index) {
+			if ($(this).val() == "" && $(this).attr('tag') == 'required') {
+				$(this).parent('label').addClass('highlight-alert');
+				submittable = false;
+			}
+		});
+
+		if (submittable) {
+	
+			var comment_text = $(this).find('textarea').val();
+
+			var postdata = [];
+			postdata.push(
+				{name: 'dossier', value: $(this).find('input[name=dossier]').val()},
+				{name: 'text', value: comment_text}
+			);
+		
+			if (typeof videoPlayer === 'object') {
+				var player = findplayer($(this)).attr('player');
+				if (typeof videoPlayer[player] !== 'undefined') {
+					var timestamp = videoPlayer[player].getVideoPlayerTimestamp();
+					if (timestamp > 0) {
+						postdata.push(
+							{name: 'timestamp', value: timestamp}
+						);
+					}
+				}
+			}
+		
+			$.post($(this).attr('action'), postdata, function(data) {
+			
+				if (data.response === "success") {
+	
+					if (typeof videoPlayer !== 'object') {
+						$('#comments-asynchronous-content').find('.comment-timestamp').remove();
+					}
+
+					var asynchronousContent = $('#comments-asynchronous-content').html();
+				
+					comment_text = comment_text.replace(/(?:\r\n|\r|\n)/g, '<br>');
+
+					asynchronousContent = asynchronousContent.replace("{text}", comment_text);
+			
+					var date = new Date();
+					var created_at = date.toLocaleDateString('en-US') + ', ' + date.toLocaleTimeString('en-US');
+
+					asynchronousContent = asynchronousContent.replace("{created-at}", created_at);
+
+					if (typeof videoPlayer === 'object') {
+						if (typeof videoPlayer[player] !== 'undefined') {
+							var timestamp = videoPlayer[player].getVideoPlayerTimestamp();
+							var nicetimestamp = videoPlayer[player].getVideoPlayerNiceTime();
+						} else {
+							var timestamp = 0;
+							var nicetimestamp = '0:00:00';
+						}
+					
+						asynchronousContent = asynchronousContent.replace("{timestamp}", timestamp);
+						asynchronousContent = asynchronousContent.replace("{nice-timestamp}", nicetimestamp);
+					}
+				
+					var newComment = $.parseHTML(asynchronousContent);
+				
+					if (timestamp === 0) {
+						$(newComment).find('.comment-timestamp').remove();
+					}
+				
+					$('#' + layout_container).before(newComment);
+
+					if (typeof videoPlayer === 'object') {
+						$(formsubmitted).closest('.vidbox-content').fadeOut('slow');
+						if (typeof videoPlayer[player] !== 'undefined') {
+							videoPlayer[player].startVideoPlayer();
+						}
+					
+					}
+
+					$(formsubmitted).find('textarea').val('');
+					if (!$('#' + layout_container).find('.clickbar-title').hasClass('clickbar-closed')) {
+						$('#' + layout_container).find('.clickbar-title').trigger( "click" );
+					}
+					
+				} else {
+				
+					alert('Something went wrong...');
+				
+				}
+
+			}, "json");
+		}
+
+	});
+	
+	$('.delete-comment').click(function() {
+		if (confirm("Are you sure you want to delete?")) {
+			var comment_id = '#comment-' + $(this).attr('comment');
+			var postdata = [];
+			postdata.push(
+				{name: 'dossier', value: $(this).attr('dossier')}
+			);
+			$.post($(this).attr('action'), postdata, function(data) {
+			
+				if (data.response === "success") {
+					$(comment_id).remove();
+				}
+			}, "json");
+		}
+	});
+
+	$('.reply-form-link').click(function() {
+		$(this).closest('.comment-row-content').find('.reply-form').slideDown();
+	});
+
+	$('.reply-form-cancel').click(function(e) {
+		e.preventDefault();
+		$(this).closest('.reply-form').slideUp();
+	});
+
+	$('.edit-form-link').click(function() {
+		$(this).closest('.comment-row-content').find('.update-form').show();
+		$(this).closest('.comment-row-content').find('.comment-text').hide();
+	});
+
+	$('.update-form-cancel').click(function(e) {
+		e.preventDefault();
+		$(this).closest('.update-form').hide();
+		$(this).closest('.comment-row-content').find('.comment-text').show();
+	});
+	
+	$(document).on('click touchend','.comment-reload', function(e) {
+		window.location.reload(true);
+	});
+
+});

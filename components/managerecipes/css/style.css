@@ -1,0 +1,100 @@
+.left-block {
+display: inline-block;
+vertical-align: top;
+width: 30%;
+min-height: 500px;
+background: #fefefe;
+border-radius: 5px;
+}
+
+.right-block {
+display: inline-block;
+vertical-align: top;
+position: relative;
+width: 68.5%;
+min-height: 500px;
+background: #fefefe;
+border-radius: 5px;
+}
+
+.sort-block-title {
+position: relative;
+background: #000;
+color: #fff;
+padding: 5px 0px;
+text-align: center;
+border-radius: 5px 5px 0px 0px;
+}
+
+#nestable {
+width: 100%;
+}
+
+#nestable2 {
+width: 100%;
+}
+
+#nestable .dd-toggle {
+display: none;
+}
+
+.dd-content-extended {
+display: none;
+}
+
+#nestable2 .dd-item {
+}
+
+#nestable2 .dd-content-extended {
+display: none;
+margin: 10px 0px 0px 0px;
+}
+
+.remove-item {
+margin-bottom: 10px;
+cursor: pointer;
+color: #333;
+}
+
+.remove-item:hover {
+color: #ff9900;
+}
+
+.dd-item {
+ border: 0;
+}
+
+.select-component-type {
+display: inline-block;
+vertical-align: top;
+width: calc(100% - 20px);
+padding: 3px;
+margin: 0;
+font-size: 15px;
+font-weight: bold;
+}
+
+#nestable li.all-components {
+display: none;
+}
+
+#nestable li.site-component {
+display: block;
+}
+
+.recipe-object {
+display: none;
+}
+
+.recipe-object textarea {
+height: 200px;
+}
+
+.category-display {
+margin-bottom: 10px;
+}
+
+.category-display.highlight {
+background: #999;
+color: #fff;
+}

@@ -1,0 +1,125 @@
+/* card css */
+
+.card-container {
+position: relative;
+display: flex;
+width: 100%;
+margin: 0px 0px 20px 0px;
+justify-content: center;
+flex-wrap: wrap;
+align-items: flex-start;
+}
+
+.card {
+position: relative;
+display: inline-block;
+top: 0px;
+left: 0px;
+border-width: 1px;
+border-style: solid;
+border-color: #d3d3d3;
+border-radius: 5px;
+background: #fff;
+vertical-align: top;
+flex-shrink: 0;
+margin: 5px;
+}
+
+.card-content {
+position: relative;
+display: block;
+width: 100%;
+background: transparent;
+}
+
+.card-title {
+min-height: 20px;
+background: #d3d3d3;
+color: #333;
+text-align: center;
+font-size: 14px;
+line-height: 20px;
+font-weight: 600;
+border-radius: 3px 3px 0px 0px;
+padding: 5px 2.5%;
+word-wrap: break-word;
+}
+
+.card-content-each {
+display: none;
+}
+
+.current-content {
+display: block;
+}
+
+.card-content-inner {
+padding: 10px 10px 60px 10px;
+}
+
+.card-tabs {
+position: absolute;
+display: block;
+bottom: 0px;
+left: 0px;
+width: 100%;
+height: 50px; 
+cursor: pointer;
+}
+
+.card-tabs-each {
+position: relative;
+display: inline-block;
+float: left;
+height: 50px;
+line-height: 50px;
+background: #d3d3d3;
+color: #777;
+text-align: center;
+}
+
+.card-tabs-each:hover {
+color: #333;
+}
+
+.card-tabs-each.current-tab {
+color: #333;
+}
+
+.tab-icon {
+position: relative;
+display: block;
+opacity: .5;
+margin-left: 4px;
+}
+
+.tab-icon:hover {
+opacity: 1;
+}
+
+.current-tab {
+background: #fff;
+opacity: 1;
+border-radius: 3px;
+}
+
+.current-tab-before {
+border-radius: 0px 6px 0px 0px;
+}
+
+.current-tab-after {
+border-radius: 6px 0px 0px 0px;
+}
+
+.tab-icon img {
+height: 100%;
+width: auto;
+}
+
+.tab-icon img:hover {
+opacity: 1;
+}
+
+.card-tabs-each.current-tab .tab-icon, .card-tabs-each.current-tab .tab-icon img {
+opacity: 1;
+}

@@ -1,0 +1,232 @@
+.user-image-comment {
+position: absolute;
+display: block;
+top: 20px;
+left: 0;
+}
+
+.user-image-comment img {
+width: 32px;
+height: 32px;
+border-radius: 5px;
+border-width: 1px;
+border-style: solid;
+border-color: #fff;
+}
+
+.comment-group-container {}
+
+.indent-comment {
+position: relative;
+padding: 0px 0px 0px 20px;
+}
+
+.comment-row-content {
+position: relative;
+display: block;
+margin: 10px 0px 10px 50px;
+padding: 0px 10px 0px 10px;
+}
+
+.arrow-box {
+position: relative;
+background: #fff;
+border: 1px solid #d3d3d3;
+border-radius: 5px;
+}
+
+.arrow-box:after, .arrow-box:before {
+right: 100%;
+top: 35px;
+border: solid transparent;
+content: " ";
+height: 0;
+width: 0;
+position: absolute;
+pointer-events: none;
+}
+
+.arrow-box:after {
+border-color: rgba(255, 255, 255, 0);
+border-right-color: #fff;
+border-width: 10px;
+margin-top: -10px;
+}
+
+.arrow-box:before {
+border-color: rgba(239, 239, 239, 0);
+border-right-color: #d3d3d3;
+border-width: 11px;
+margin-top: -11px;
+}
+
+.arrow-box:hover {
+border-color: #999;
+}
+
+.arrow-box:hover:before {
+border-color: rgba(102, 102, 102, 0);
+border-right-color: #666;
+}
+
+.user-name-comment {
+font-weight: 600;
+}
+
+.user-region-comment {
+display: block;
+font-size: 12px;
+font-weight: 400;
+font-style: italic;
+clear: both;
+}
+
+.comment-date {
+font-size: 12px;
+font-style: italic;
+float: right;
+}
+
+.comment-timestamp {
+width: 100px;
+height: 20px;
+border: 1px solid #ccc;
+border-radius: 10px;
+background: #fbfbfb;
+color: #333;
+margin: 10px 0px;
+text-align: center;
+cursor: pointer;
+line-height: 20px;
+}
+
+.comment-timestamp:hover {
+border: 1px solid #999;
+background: #999;
+color: #fff;
+}
+
+.discussion_media {
+}
+
+.discussion_media img {
+max-width: 100%;
+height: auto;
+}
+
+.comment-reply-delete {
+position: relative;
+display: block;
+width: 100%;
+height: 20px;
+background: #d3d3d3;
+color: #999;
+text-align: center;
+margin: 0px 0px 0px -10px;
+padding: 0px 20px 0px 0px;
+}
+
+.comment-reply-delete a {
+font-size: 12px;
+line-height: 20px;
+color: #999;
+text-decoration: none;
+}
+
+.comment-reply-delete a:hover {
+color: #333;
+}
+
+.pipe {
+display: inline-block;
+width: 1px;
+height: 10px;
+background: #999;
+margin: 0px 5px;
+}
+
+.arrow-box:hover .comment-reply-delete {
+background: #999;
+color: #fff;
+}
+
+.arrow-box:hover .comment-reply-delete a {
+color: #fff;
+}
+
+.arrow-box:hover .comment-reply-delete a:hover {
+color: #333;
+}
+
+.arrow-box:hover .pipe, .tile:hover .pipe {
+background: #fff;
+}
+
+.edit-comment-form {
+margin: 0px 0px 10px 0px;
+}
+
+.comment-artifact {}
+
+.comment-holder {
+margin: 20px 0px 0px 0px;
+}
+
+.comment-group-container {
+}
+
+.update-form, .reply-form, .update-form {
+display: none;
+padding: 0px 0px 10px 0px;
+}
+
+#comment-insert {
+display: none;
+}
+
+.responsive-hide {
+display: inline;
+}
+
+.comment-row-content .link-inline {
+color: #999;
+}
+
+.comment-row-content:hover .link-inline, .comment-row-content:hover .link-item-form input[type=submit] {
+color: #fff;
+}
+
+.comment-row-content:hover .link-inline:hover, .comment-row-content:hover .link-item-form input[type=submit]:hover {
+color: #333;
+}
+
+.link-inline {
+display: inline;
+padding: 0;
+margin: 0;
+font-size: 12px;
+cursor: pointer;
+}
+
+.link-item-form {
+display: inline;
+padding: 0;
+margin: 0;
+}
+
+.link-item-form input[type=submit] {
+padding: 0;
+margin: 0;
+border: 0;
+background: none;
+font-size: 12px;
+}
+
+.comment-remote-container {
+display: none;
+}
+
+.textarea-input-remote {
+height: 50px;
+}
+

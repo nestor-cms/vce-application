@@ -1,0 +1,56 @@
+/* edit */
+
+.media-item {
+position: relative;
+}
+
+.media-edit-container {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: auto;
+}
+
+.media-edit-open {
+position: absolute;
+top: 0px;
+left: -20px;
+width: 18px;
+height: 18px;
+background: #efefef;
+border-radius: 9px;
+text-align: center;
+font-size: .9em;
+color: #333;
+cursor: pointer;
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+
+.media-edit-open:hover  {
+color: #666;
+}
+
+.media-edit-current {
+padding-right: 2px;
+background: #f0f8ff;
+border-radius: 10px 0px 0px 10px;
+}
+
+.media-edit-form {
+position: relative;
+display: none;
+padding: 10px;
+background: #f0f8ff;
+border-radius: 0px 10px 10px 10px;
+z-index: 100;
+}
+
+.media-edit-form.display-form {
+display: block;
+}
