@@ -111,11 +111,11 @@ class Content {
 			// check for full url
 			$link = '<li';
 			// check if current page
-			if ($menu->url == $vce->page->requested_url) {
+			if ($menu->url == $vce->requested_url) {
 				$link .= ' class="current-menu-item"';
 			}
 			// check if the current page contains part of the url from another menu item, making it a parent of the item
-			if ($menu->url != "" && strpos($vce->page->requested_url,$menu->url . '/') !== false) {
+			if ($menu->url != "" && strpos($vce->requested_url,$menu->url . '/') !== false) {
 				$link .= ' class="current-menu-ancestor"';
 			}
 			$link .= '>';
