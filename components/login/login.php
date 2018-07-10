@@ -83,6 +83,14 @@ EOF;
 	
 		} else {
 		
+			// login_check_access_true
+			// method should return true of false
+			if (isset($vce->site->hooks['login_check_access_true'])) {
+				foreach($vce->site->hooks['login_check_access_true'] as $hook) {
+					return call_user_func($hook, $each_component, $vce);
+				}
+			}
+		
 			return true;
 		
 		}
