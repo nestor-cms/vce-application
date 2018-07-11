@@ -5,7 +5,7 @@
 label, .label-style {
 position: relative;
 display: block;
-background: #fbfbfb;
+background-color: #fbfbfb;
 border-width: 1px;
 border-style: solid;
 border-color: #d3d3d3;
@@ -33,7 +33,7 @@ border-color: #d3d3d3;
 label.ignore {
 position: relative;
 display: inline;
-background: transparent;
+background-color: transparent;
 border: 0;
 padding: 0;
 margin: 0;
@@ -48,7 +48,7 @@ position: relative;
 display: block;
 width: 100%;
 height: 20px;
-background: #d3d3d3;
+background-color: #d3d3d3;
 text-align: center;
 padding: 0px 0px;
 margin: -4px 0px 0px 0px;
@@ -62,7 +62,7 @@ margin: 0px;
 display: block;
 font-size: 12px;
 line-height: 20px;
-color: #777;
+color: #666;
 }
 
 a.label-style {
@@ -74,7 +74,7 @@ border-color: #999;
 }
 
 a.label-style:hover .label-text, a.label-style:hover .label-message  {
-background: #999;
+background-color: #999;
 color: #fff;
 }
 
@@ -89,7 +89,7 @@ border-radius: 5px 5px 0px 0px;
 outline: none;
 resize: none;
 overflow: auto;
-background: #fbfbfb;
+background-color: #fbfbfb;
 }
 
 input[type=text].no-label {
@@ -97,7 +97,7 @@ border-width: 1px;
 border-style: solid;
 border-color: #d3d3d3;
 border-radius: 5px;
-background: #fff;
+background-color: #fff;
 }
 
 textarea:focus, input[type=text]:focus {
@@ -124,7 +124,7 @@ text-indent: 0.01px;
 text-overflow: "";
 appearance: none;
 outline: none;
-background: url('../images/arrows.png') no-repeat right center #fbfbfb;
+background-color: url('../images/arrows.png') no-repeat right center #fbfbfb;
 }
 
 input[type=submit], input[type=reset], button, .link-button {
@@ -134,8 +134,8 @@ border-style: solid;
 border-color: #d3d3d3;
 border-radius: 5px;
 font-size: 12px;
-color: #999;
-background: #fbfbfb;
+color: #666;
+background-color: #fbfbfb;
 cursor: pointer;
 text-decoration: none;
 padding: 4px 7px;
@@ -151,7 +151,8 @@ user-select: none;
 
 input[type=submit]:hover, input[type=reset]:hover, button:hover, .link-button:hover, input[type=submit].highlighted, .link-button.highlighted {
 border-color: #999;
-background: #999;
+background-color: #696969;
+border-color: #696969;
 color: #fff;
 text-decoration: none;
 -webkit-appearance: none;
@@ -169,7 +170,7 @@ border-color: #999;
 
 
 .highlight .label-text {
-background: #999;
+background-color: #696969;
 }
 
 .highlight .label-text .label-message {
@@ -204,7 +205,7 @@ color: #fff;
 }
 
 .highlight-alert .label-text {
-background: #e33;
+background-color: #e33;
 }
 
 .form-message {
@@ -221,13 +222,13 @@ border-radius: 5px;
 /* error */
 
 .form-error {
-background: #e33;
+background-color: #e33;
 }
 
 /* success */
 
 .form-success {
-background: #3c3;
+background-color: #3c3;
 }
 
 /* clickbar */
@@ -240,7 +241,7 @@ margin: 3px 0px;
 .clickbar-content {
 display: none;
 padding: 15px;
-background: #fff;
+background-color: #fff;
 border-width: 1px;
 border-style: solid;
 border-color: #a3a3a3;
@@ -258,7 +259,7 @@ display: block;
 }
 
 .clickbar-content.clickbar-open.clickbar-parent {
-background: #ffffff;
+background-color: #ffffff;
 }
 
 .clickbar-title {
@@ -266,7 +267,7 @@ position: relative;
 display: block;
 width: 100%;
 color: #fff;
-background: #a3a3a3;
+background-color: #696969;
 border-radius: 0px 0px 5px 5px;
 text-align: center;
 margin: 0px 0px 0px 0px;
@@ -291,7 +292,7 @@ border-radius: 5px 5px 5px 5px;
 }
 
 .clickbar-closed:hover {
-background: #838383;
+background-color: #838383;
 }
 
 .disabled {
@@ -341,11 +342,11 @@ transform: translate(-50%, -50%);
 width: 14px;
 height: 14px;
 border-radius: 7px;
-color: #939393;
+color: #666;
 content: "\003f";
 font-size: 13px;
 font-weight: normal;
-background: #fff;
+background-color: #fff;
 }
 
 .tooltip-content {
@@ -354,7 +355,7 @@ display: none;
 bottom: 32px;
 right: 4px;
 width: 250px;
-background: #33c6e6; /* #8dbdd8 */
+background-color: #995A00; /* #33c6e6 */
 border-radius: 5px;
 padding: 10px;
 z-index: 100;
@@ -372,7 +373,7 @@ bottom: -10px;
 right: 10px;
 width: 0;
 height: 0;
-border-top: 10px solid #33c6e6; /* #8dbdd8 */
+border-top: 10px solid #995A00; /* #33c6e6 */
 border-left: 15px solid transparent;
 }
 
