@@ -176,7 +176,7 @@ class Media extends Component {
 		$recipe_component->dossier_for_create = $vce->generate_dossier($recipe_component->dossier);
 
 $content = <<<EOF
-<div class="clickbar-container admin-container add-container ignore-admin-toggle">
+<div class="clickbar-container media-add-component admin-container add-container ignore-admin-toggle">
 <div class="clickbar-content">
 EOF;
 
