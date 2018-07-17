@@ -987,9 +987,14 @@ class Page {
 								$previous_component = new Component((object) $each_component);
 			
 							}
+							
+							// check to see if allow_sub_components does not return false
+							if ($this_component->allow_sub_components($each_component, $vce)) {
 					
-							// call book end for recipe_components, similar to as_content_finish
-							$previous_component->add_component_finish($each_component, $vce);
+								// call book end for recipe_components, similar to as_content_finish
+								$previous_component->add_component_finish($each_component, $vce);
+								
+							}
 					
 						}
 					
@@ -1143,6 +1148,7 @@ class Page {
 	 * Note: if you want to have recipe_components / add_component work for components sent to this method, you need to send along a requested_id with the recipe
 	 * $requested_id should be the component_id from where you want the sub_recipe to allow add_content.
 	 * The recipe should include the parent component of the requested_id
+	 * Note: To display content in a layout, you should output to content beforehand: $vce->content->add('main', $content);
 	 *
 	 * @param int $components
 	 * @return true
