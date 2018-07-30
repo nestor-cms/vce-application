@@ -889,6 +889,12 @@ EOF;
 
 		if (isset($parent_url)) {
 		
+			// if a url has been passed, then reload that page
+			if (isset($input['url'])) {
+				$parent_url	= $input['url'];
+			}
+		
+			// add a message that item has been deleted
 			global $site;
 			$site->add_attributes('message',self::component_info()['name'] . " Deleted");
 

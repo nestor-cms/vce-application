@@ -124,7 +124,7 @@ text-indent: 0.01px;
 text-overflow: "";
 appearance: none;
 outline: none;
-background-color: url('../images/arrows.png') no-repeat right center #fbfbfb;
+background: url('../images/arrows.png') no-repeat right center #fbfbfb;
 }
 
 input[type=submit], input[type=reset], button, .link-button {
