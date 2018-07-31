@@ -638,7 +638,7 @@ EOF;
     }
 
     /**
-     * delete a component
+     * add configuration data for component to site_meta table
      */
     protected function configure($input) {
 

@@ -1238,6 +1238,11 @@ class Page {
 			return true;
 		}
 		
+		// prevent_editing is set in component
+		if (isset($each_component->prevent_editing) && $each_component->prevent_editing === true ) {
+			return false;
+		}
+		
 		// user created this component
 		if (isset($each_component->created_by) && $each_component->created_by == $vce->user->user_id) {
 			return true;
