@@ -305,9 +305,6 @@ EOF;
 		} else {
 			$file_size_limit = $vce->convert_to_bytes('4G');
 		}
-		
-		// path to image
-		// $path = $page->site->path_to_url(dirname(__FILE__));
 
 $content_media = <<<EOF
 <div class="uploader-container">

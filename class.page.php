@@ -304,19 +304,17 @@ class Page {
 		// check that access is allowed for sub components
 		} else {
 		
+			// to check find_sub_components returned value, get end component
+			$end_component = end($components);
+		
 			// check that this component has been activated
-			if (isset($activated_components[$requested_component->type])) {
-		
-				require_once(BASEPATH . $activated_components[$requested_component->type]);
-		
+			if (isset($activated_components[$end_component->type])) {
+				require_once(BASEPATH . $activated_components[$end_component->type]);
 				// create a new instance of the component
-				$check = new $requested_component->type();
-		
+				$check = new $end_component->type();
 			} else {
-		
 				// if deactivated use the parent class
 				$check = new Component();
-		
 			}
 		
 			// get returned value from component for find_sub_components method

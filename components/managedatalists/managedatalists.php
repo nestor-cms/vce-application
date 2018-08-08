@@ -335,14 +335,14 @@ EOF;
 	 */
 	protected function edit($input) {
 
-		global $site;
+		global $vce;
 		
 		// add key value to page object on next load
-		$site->add_attributes('datalist_id',$input['datalist_id']);
+		$vce->site->add_attributes('datalist_id',$input['datalist_id']);
 		
 		if (isset($input['item_id'])) {
 			// add key value to page object on next load
-			$site->add_attributes('item_id',$input['item_id']);
+			$vce->add_attributes('item_id',$input['item_id']);
 		}
 		
 		echo json_encode(array('response' => 'success','procedure' => 'edit','action' => 'reload','delay' => '0', 'message' => 'session data saved'));
@@ -356,12 +356,12 @@ EOF;
 	 */
 	protected function add($input) {
 
-		global $site;
+		global $vce;
 		
 		// add key value to page object on next load
-		$site->add_attributes('datalist_id',$input['datalist_id']);
+		$vce->site->add_attributes('datalist_id',$input['datalist_id']);
 		
-		$site->add_datalist_item($input);
+		$vce->add_datalist_item($input);
 
 		echo json_encode(array('response' => 'success','procedure' => 'create','action' => 'reload','message' => 'Added'));
 		return;
@@ -373,10 +373,10 @@ EOF;
 	 */
 	protected function update($input) {
 	
-		global $site;
+		global $vce;
 		
 		// add key value to page object on next load
-		$site->add_attributes('datalist_id',$input['datalist_id']);
+		$vce->site->add_attributes('datalist_id',$input['datalist_id']);
 		
 		$attributes = array (
 		'item_id' => $input['item_id'],
@@ -385,7 +385,7 @@ EOF;
 		);	
 		
 		// update item
-		$site->update_datalist_item($attributes);
+		$vce->update_datalist_item($attributes);
 				
 		echo json_encode(array('response' => 'success','procedure' => 'update','action' => 'reload','message' => 'Updated'));
 		return;
@@ -398,12 +398,12 @@ EOF;
 	 */
 	protected function delete($input) {
 	
-		global $site;
+		global $vce;
 		
 		// if item_id is set to delete all, then don't add attribute for reload
 		if ($input['item_id'] != "all") {
 			// add key value to page object on next load
-			$site->add_attributes('datalist_id',$input['datalist_id']);
+			$vce->site->add_attributes('datalist_id',$input['datalist_id']);
 		}
 		
 		$attributes = array (
@@ -412,7 +412,7 @@ EOF;
 		);
 		
 		// send to remove_datalist function
-		$site->remove_datalist($attributes);
+		$vce->remove_datalist($attributes);
 
 		echo json_encode(array('response' => 'success','procedure' => 'delete','action' => 'reload','message' => 'Deleted'));
 		return;
