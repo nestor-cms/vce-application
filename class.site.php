@@ -104,6 +104,34 @@ class Site {
 			$this->$key = $value;
 		}
 
+        // ignore database field and set site_url from $_SERVER
+        if (defined('DYNAMIC_SITE_URL') && DYNAMIC_SITE_URL == true) {
+
+            $ssl = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on');
+            $sp = strtolower($_SERVER['SERVER_PROTOCOL']);
+            $protocol = substr($sp, 0, strpos($sp, '/')) . (($ssl) ? 's' : '');
+            $port = $_SERVER['SERVER_PORT'];
+            $port = ((!$ssl && $port == '80') || ($ssl && $port == '443')) ? '' : ':' . $port;
+            $host = (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : null);
+            $host = isset($host) ? $host : $_SERVER['SERVER_NAME'] . $port;
+
+			// account for possible added dir in url
+            $root = $_SERVER['CONTEXT_DOCUMENT_ROOT'];
+            $script = $_SERVER['SCRIPT_FILENAME'];
+
+			$dir = '';
+			if ($root && $script) {
+				$root = explode('/', $root);
+				$script = explode('/', $script);
+				if (count($root) != count($script)) {
+					$dir = '/' . $script[count($script) - 2];
+				}
+			}
+
+            $this->site_url = $protocol . '://' . $host . $dir;
+
+        }
+
 		// load Component class
 		require_once('class.component.php');
 		
