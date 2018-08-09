@@ -746,6 +746,10 @@ class User {
 
 		// add values to users array
 		foreach ($meta_data as $meta_item) {
+			// skip persistant_login
+			if ($meta_item->meta_key == 'persistant_login') {
+				continue;
+			}
 			$users[$meta_item->user_id][$meta_item->meta_key] = user::decryption($meta_item->meta_value, $users_vector[$meta_item->user_id]);
 		}
 		
