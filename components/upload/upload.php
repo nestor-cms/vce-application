@@ -19,7 +19,7 @@ class Upload extends Component {
 	public function preload_component() {
 		
 		$content_hook = array (
-		'page_requested_url' => 'Upload::page_requested_url'
+		'page_requested_url' => 'Upload::file_upload_method'
 		);
 
 		return $content_hook;
@@ -27,14 +27,22 @@ class Upload extends Component {
 	}
 
 	/**
-	 * method of page_requested_url hook
+	 * method of page_requested_url hook to upload file
 	 */
-	public static function page_requested_url($requested_url, $vce) {
+	public static function file_upload_method($requested_url, $vce) {
 
 		// add the path to upload
 		$vce->media_upload_path = defined('MEDIA_UPLOAD_PATH') ? $vce->site->site_url . '/' . MEDIA_UPLOAD_PATH : $vce->site->site_url . '/upload';
 
 		if ((!defined('MEDIA_UPLOAD_PATH') && strpos($requested_url, 'upload') !== false && strlen($requested_url) == 6) || (defined('MEDIA_UPLOAD_PATH') && strpos($requested_url, MEDIA_UPLOAD_PATH) !== false) && strlen($requested_url) == strlen(MEDIA_UPLOAD_PATH)) {
+
+			// hook that can be used to hijack this method
+			// upload_file_upload_method
+			if (isset($vce->site->hooks['upload_file_upload_method'])) {
+				foreach($vce->site->hooks['upload_file_upload_method'] as $hook) {
+					call_user_func($hook, $requested_url, $vce);
+				}
+			}
 
 			// php script for jQuery-File-Upload
 
