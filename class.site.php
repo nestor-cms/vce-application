@@ -116,7 +116,7 @@ class Site {
             $host = isset($host) ? $host : $_SERVER['SERVER_NAME'] . $port;
 
 			// account for possible added dir in url
-            $root = $_SERVER['CONTEXT_DOCUMENT_ROOT'];
+            $root = $_SERVER['DOCUMENT_ROOT'];
             $script = $_SERVER['SCRIPT_FILENAME'];
 
 			$dir = '';
