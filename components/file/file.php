@@ -125,8 +125,14 @@ class File extends Component {
 									header("Content-Disposition: inline; filename=\"" . $file_name . "\"");
 								}
 						
-								readfile($file_path);
-						
+								if (isset($vce->site->hooks['file_readfile_method'])) {
+									foreach($vce->site->hooks['file_readfile_method'] as $hook) {
+										call_user_func($hook, $requested_url, $file_path, $vce);
+									}
+								} else {
+									readfile($file_path);
+								}
+
 								exit();
 
 							}
