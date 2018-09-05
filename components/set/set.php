@@ -122,7 +122,7 @@ EOF;
 $content .= <<<EOF
 </select>
 <div class="label-text">
-<div class="label-message">User Acesss</div>
+<div class="label-message">User Access</div>
 <div class="label-error">Enter Users</div>
 </div>
 </label>

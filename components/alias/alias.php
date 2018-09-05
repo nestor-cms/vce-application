@@ -53,14 +53,6 @@ class Alias extends Component {
 	}
 
 	
-	/**
-	 * check if get_sub_components method should be called.
-	 * this occures before components structure is added to the page object
-	 * and is checked in both get_components and get_sub_components, which is why both variables are available
-	 * @param object $requested_component
-	 * @param object $page
-	 * @return bool
-	 */
 	public function find_sub_components($requested_component, $vce, $components, $sub_components) {
 	
 		// prevent errors
@@ -100,7 +92,7 @@ $content = <<<EOF
 <div>This alias points to a component that cannot be found.</div>
 EOF;
 
-							if ($page->can_delete($component_value)) {
+							if ($vce->page->can_delete($component_value)) {
 				
 								// the instructions to pass through the form
 								$dossier = array(

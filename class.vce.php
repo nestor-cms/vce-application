@@ -77,12 +77,14 @@ class VCE {
 	public function mail($attributes) { 
 	
 		if (!defined('SITE_MAIL') || SITE_MAIL == true) {
+		
+			global $vce;
 	
 			// load hooks
 			// site_mail_transport
-			if (isset($this->hooks['site_mail_transport'])) {
-				foreach($this->hooks['site_mail_transport'] as $hook) {
-					$status = call_user_func($hook, $this, $attributes);
+			if (isset($vce->site->hooks['site_mail_transport'])) {
+				foreach($vce->site->hooks['site_mail_transport'] as $hook) {
+					$status = call_user_func($hook, $vce, $attributes);
 				}
 			} else {
 		
@@ -112,11 +114,12 @@ class VCE {
 						$mail->$key = trim($value);
 					}
 				}
-			
+				
 				if (isset($attributes['html'])) {
 					// To send HTML mail, the Content-type header must be set
 					$headers[] = 'MIME-Version: 1.0';
 					$headers[] = 'Content-type: text/html; charset=iso-8859-1';
+					$mail->message = html_entity_decode(stripcslashes($mail->message));
 				}
 
 				// array to translate methods from vce to mail function
@@ -127,14 +130,14 @@ class VCE {
 				'cc' => 'Cc',
 				'bcc' => 'Bcc'
 				);
-			
+
 				// create header
 				foreach ($translate as $input=>$output) {
-					if (isset($mail->$input)) {
+					if (isset($mail->$input) && $input != 'to') {
 						$headers[] = $output . ': ' . trim($mail->$input,",");
 					}
 				}
-			
+
 				// PHP mail function
 				mail(trim($mail->to,","), $mail->subject, $mail->message, implode("\r\n", $headers));
 

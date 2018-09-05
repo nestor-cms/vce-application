@@ -17,7 +17,7 @@ class ManageSite extends Component {
 	 * display content for ManageStie
 	 */
 	public function as_content($each_component, $vce) {
-	
+
 		// done for ease
  		$site = $vce->site;
 		
@@ -226,8 +226,13 @@ EOF;
 
 		$user_attributes = json_decode($vce->site->user_attributes, true);
 
-		foreach ($user_attributes as $user_attribute_key=>$user_attribute_value) {
+		// adding to allow sorting
+		$attributes_count = count($user_attributes);
+		$place_counter = 0;
 
+		foreach ($user_attributes as $user_attribute_key=>$user_attribute_value) {
+		
+			$place_counter++;
 
 			// create the dossier
 			$dossier_for_attribute_update = $vce->generate_dossier(array('type' => 'ManageSite','procedure' => 'update_attribute'));
@@ -239,6 +244,31 @@ $content .= <<<EOF
 <form id="$user_attribute_key" class="asynchronous-form" method="post" action="$vce->input_path" autocomplete="off">
 <input type="hidden" name="dossier" value="$dossier_for_attribute_update">
 <input type="hidden" name="attribute" value="$user_attribute_key">
+EOF;
+
+
+
+$content .= <<<EOF
+<label>
+<select name="order">
+EOF;
+
+		// create options
+		for ($x = 1;$x <= $attributes_count;$x++) {
+			// $role_hierarchy
+			$content .= '<option value="' . $x . '"';
+			if ($x == $place_counter) {
+				$content .= ' selected';
+			}
+			$content .= '>' . $x . '</option>';
+		}
+
+$content .= <<<EOF
+</select>
+<div class="label-text">
+<div class="label-message">Order</div>
+</div>
+</label>
 EOF;
 
 
@@ -289,7 +319,6 @@ EOF;
 
 /* end types */
 
-
 /* start datalist */
 
 			$checked = isset($user_attribute_value['datalist']) ? ' checked' : null;
@@ -297,7 +326,14 @@ EOF;
 $content .= <<<EOF
 <label>
 <div class="input-padding">
-<input type="checkbox" name="datalist" value="1" disabled $checked> Datalist
+<input type="checkbox" name="datalist_checkbox" value="1" disabled $checked> Datalist
+EOF;
+
+			if ($checked) {
+				$content .= '<input type="hidden" name="datalist" value="' . $user_attribute_value['datalist']['datalist'] . '">';
+			}
+
+$content .= <<<EOF
 </div>
 <div class="label-text">
 <div class="label-message">Datalist</div>
@@ -483,20 +519,8 @@ EOF;
 	 */
 	protected function create_attribute($input) {
 	
+		global $db;
 		global $vce;
-		
-		// check that user_attributes exists in site_meta table
-		if (!isset($vce->site->user_attributes)) {
-
-			$records[] = array(
-			'meta_key' => 'user_attributes', 
-			'meta_value' => '',
-			'minutia' => null
-			);
-
-			$vce->db->insert('site_meta', $records);
-
-		}
 		
 		// set the type to the attribute_type
 		$input['type'] = $input['attribute_type'];
@@ -505,6 +529,7 @@ EOF;
 		$user_attributes = json_decode($vce->site->user_attributes, true);
 		
 		$attribute = strtolower(preg_replace('/\s+/', '_', $input['title']));
+		
 		
 		// this is a place to add a hook so that datalists can be moved into a utility component
 		if (isset($input['datalist'])) {
@@ -527,7 +552,7 @@ EOF;
 		
 		$update = array('meta_value' => json_encode($user_attributes));
 		$update_where = array('meta_key' => 'user_attributes');
-		$vce->db->update('site_meta', $update, $update_where);
+		$db->update('site_meta', $update, $update_where);
 		
 	
 		echo json_encode(array('response' => 'success','procedure' =>'create','action' => 'reload','message' => json_encode($user_attributes)));
@@ -540,26 +565,61 @@ EOF;
 	 * update attribute
 	 */
 	protected function update_attribute($input) {
-	
+
 		global $db;
 		global $site;
+		global $vce;
 		
 		// set the type to the attribute_type
 		$input['type'] = $input['attribute_type'];
 		$attribute = $input['attribute'];
-		unset($input['attribute'],$input['attribute_type']);
+		$order = $input['order'];
+		unset($input['attribute'],$input['attribute_type'],$input['order']);
 		
 		$user_attributes = json_decode($site->user_attributes, true);
 		
-		$updated_attributes = array();
+		// rekey
+		$position = 1;
 		foreach ($user_attributes as $key=>$value) {
 			if ($key == $attribute) {
-				foreach ($input as $input_key=>$input_value) {
-					$updated_attributes[$attribute][$input_key] = $input_value;
+				// place before
+				if ($order < $position) {
+					$attributes[(($order * 2) - 1)][$key] = $value;
+					continue;
 				}
-			} else {
-				$updated_attributes[$key] = $value;
+				// place after
+				if ($order > $position) {
+					$attributes[(($order * 2) + 1)][$key] = $value;
+					continue;	
+				}
 			}
+			// standard place
+			$attributes[($position * 2)][$key] = $value;
+			// add 
+			$position++;
+		}
+		
+		ksort($attributes);
+		
+		$updated_attributes = array();
+		
+		foreach ($attributes as $user_attributes) {
+		
+			foreach ($user_attributes as $key=>$value) {
+				if ($key == $attribute) {
+					foreach ($input as $input_key=>$input_value) {
+						// don't update datalist
+						if ($input_key != "datalist") {
+							$updated_attributes[$attribute][$input_key] = $input_value;
+						} else {
+							$updated_attributes[$attribute]['datalist'] = $user_attributes[$attribute]['datalist'];
+						}
+					}
+				} else {
+					$updated_attributes[$key] = $value;
+				}
+			}
+		
 		}
 		
 		$update = array('meta_value' => json_encode($updated_attributes));

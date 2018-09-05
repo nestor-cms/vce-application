@@ -39,8 +39,6 @@ class User {
 			// sometimes $_COOKIE['_pl'] returns "deleted" when using Safari
 			if (defined('PERSISTENT_LOGIN') && PERSISTENT_LOGIN && isset($_COOKIE['_pl']) && strlen($_COOKIE['_pl']) > 10) {
 			
-				global $site;
-			
 				// get cookie data
 				$cookie_value = hex2bin($_COOKIE['_pl']);
 				
@@ -57,12 +55,9 @@ class User {
 				// save cookie hash to object so it can be deleted when new one is set
 				$this->time_hash = $time_hash;
 				
-				global $db;
-				global $site;
-								
 				// search for persistent_login value that matches cookie value
 				$query = "SELECT * FROM " . TABLE_PREFIX . "users_meta WHERE meta_key='persistent_login' AND meta_value LIKE '%" . $time_hash . "%'";
-				$persistent_login = $db->get_data_object($query);
+				$persistent_login = $vce->db->get_data_object($query);
 
 				// value has been found
 				if (isset($persistent_login[0]->meta_value)) {
@@ -78,8 +73,9 @@ class User {
 							self::make_user_object($persistent_login[0]->user_id);
 							
 							// load login hook
-							if (isset($site->hooks['at_user_login'])) {
-								foreach($site->hooks['at_user_login'] as $hook) {
+							// at_user_login
+							if (isset($vce->site->hooks['user_at_login'])) {
+								foreach($vce->site->hooks['user_at_login'] as $hook) {
 									call_user_func($hook, $persistent_login[0]->user_id);
 								}
 							}
@@ -103,17 +99,14 @@ class User {
 			
 			/* alternative login */
 			
-			global $site;
-			
 			// load login hook
-			if (isset($site->hooks['alternative_user_login'])) {
-				foreach($site->hooks['alternative_user_login'] as $hook) {
+			if (isset($vce->site->hooks['user_alternative_login'])) {
+				foreach($vce->site->hooks['user_alternative_login'] as $hook) {
 					call_user_func($hook, $this);
 				}
 			}
 			
 			/* end alternative login */
-			
 
 		}
 		
@@ -194,11 +187,12 @@ class User {
 		
 		// user is logged in
 		if (isset($this->user_id)) {
+			
+			global $vce;
 		
-		// global $db;
-		// global $site;
-		
-		global $vce;
+			// save it for later, your legs give way, you hit the ground
+			// fyi, $this = $vce->user
+			$user_id = $this->user_id;
 		
 			// check if persistent login cookie exists
 			if (defined('PERSISTENT_LOGIN') && PERSISTENT_LOGIN && isset($_COOKIE['_pl'])) {
@@ -271,18 +265,25 @@ class User {
 		
 			}
 		
-			// clear user object properties and delete user session info
+			// clear user object properties and
+			foreach ($this as $key=>$value) {
+				unset($this->$key);
+			}
+
+			// delete user session
 			unset($_SESSION['user']);
 			
+			// Destroy all data registered to session
+			session_destroy();
+			
 			// load logout hook
-			if (isset($vce->site->hooks['at_user_logout'])) {
-				foreach($vce->site->hooks['at_user_logout'] as $hook) {
-					call_user_func($hook, $this->user_id);
+			if (isset($vce->site->hooks['user_logout_complete'])) {
+				foreach($vce->site->hooks['user_logout_complete'] as $hook) {
+					call_user_func($hook, $user_id);
 				}
 			}
-		
 		}
-	
+		
 	}
 	
 	/**
@@ -291,6 +292,10 @@ class User {
 	 * @global object $site
 	 * @param string $user_id
 	 * @return call to self::store_session()
+	 *
+	 * note: if the previous value of $vce->user is needed, then it should be a clone of the object
+	 * $user = clone $vce->user
+	 *
 	 */
 	public function make_user_object($user_id) {
 
@@ -299,12 +304,12 @@ class User {
 		// create array to contain values
 		$user_object = array();
 		
-		// set all user session values to null for $user_object
-		// this is for masquerade and is to prevent key=>values from carrying over
-		if (isset($_SESSION['user'])) {
-			foreach ($_SESSION['user'] as $key=>$value) {
-				$user_object[$key] = null;
-			}
+		// clear user session
+		unset($_SESSION['user']);
+		
+		// clear user object properties
+		foreach ($this as $key=>$value) {
+			unset($this->$key);
 		}
 		
 		// get user_id,role_id, and vector
@@ -800,7 +805,15 @@ class User {
 		$mef = function($previous, $counter = 0, $additional = 0, $total = 0, $cipher = array()) use (&$mef, $range) {
 
 			// modulo is set to prime number
-			$current = ($previous * 4) % 101;
+			$modulo = 101;
+	
+			// calculate the value of current
+			$current = ($previous * 4) % $modulo;
+	
+			// if the value of current equals zero due to the tabulated_key value, reduce modulo by one and try again
+			while ($current == 0) {
+				$current = ($previous * 4) % $modulo--;
+			}
 
 			// get bracket that each range item can be
 			$bracket = (99 / count($range)) + $additional;
@@ -1072,5 +1085,6 @@ class User {
 	public function __get($var) {
 		return false;
 	}
+	
 	
 }

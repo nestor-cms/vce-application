@@ -104,8 +104,8 @@ class Site {
 			$this->$key = $value;
 		}
 
-        // ignore database field and set site_url from $_SERVER
-        if (defined('DYNAMIC_SITE_URL') && DYNAMIC_SITE_URL == true) {
+        // ignore database field and set site_url from $_SERVER Server and execution environment information
+        if (defined('DYNAMIC_SITE_URL') && DYNAMIC_SITE_URL === true) {
 
             $ssl = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on');
             $sp = strtolower($_SERVER['SERVER_PROTOCOL']);
@@ -115,20 +115,15 @@ class Site {
             $host = (isset($_SERVER['HTTP_X_FORWARDED_HOST'])) ? $_SERVER['HTTP_X_FORWARDED_HOST'] : (isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : null);
             $host = isset($host) ? $host : $_SERVER['SERVER_NAME'] . $port;
 
-			// account for possible added dir in url
-            $root = $_SERVER['DOCUMENT_ROOT'];
-            $script = $_SERVER['SCRIPT_FILENAME'];
-
-			$dir = '';
-			if ($root && $script) {
-				$root = explode('/', $root);
-				$script = explode('/', $script);
-				if (count($root) != count($script)) {
-					$dir = '/' . $script[count($script) - 2];
-				}
-			}
-
-            $this->site_url = $protocol . '://' . $host . $dir;
+			// are we installed in a sub-directory?
+            $directory = null;
+            if (!empty($_SERVER['DOCUMENT_ROOT']) && !empty($_SERVER['SCRIPT_FILENAME'])) {
+            	// directory is the difference
+            	$directory = str_replace($_SERVER['DOCUMENT_ROOT'], '', str_replace('/index.php', '', $_SERVER['SCRIPT_FILENAME'])) ;
+            }
+			
+			// set site_url to dynamic version
+            $this->site_url = $protocol . '://' . $host . $directory;
 
         }
 
