@@ -94,18 +94,18 @@ class File extends Component {
                         // check if access time has expired
                         if ($fileinfo['expires'] > time() && isset($fileinfo['path'])) {
 
-                            if (isset($vce->site->hooks['file_readfile_method'])) {
-                                foreach ($vce->site->hooks['file_readfile_method'] as $hook) {
-                                    $file_info = call_user_func($hook, $requested_url, $fileinfo, $vce);
-                                }
-                            }
-
                             // for file extention
                             $path_parts = pathinfo($fileinfo['path']);
 
                             // full path to file
                             $file_path = defined('PATH_TO_UPLOADS') ? PATH_TO_UPLOADS . '/' . $fileinfo['path'] : BASEPATH . PATH_TO_UPLOADS . '/' . $fileinfo['path'];
 
+							if (isset($vce->site->hooks['file_file_path_method'])) {
+                                foreach ($vce->site->hooks['file_file_path_method'] as $hook) {
+                                    $file_path = call_user_func($hook, $requested_url, $file_path, $vce);
+                                }
+							}
+							
                             // check that file exists
                             if (file_exists($file_path)) {
 
