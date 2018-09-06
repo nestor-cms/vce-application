@@ -518,8 +518,8 @@ class User {
 		global $vce;
 
         // hook that can be used to create a session handler
-        if (isset($vce->site->hooks['sys_session_method'])) {
-            foreach ($vce->site->hooks['sys_session_method'] as $hook) {
+        if (isset($vce->site->hooks['user_sys_session_method'])) {
+            foreach ($vce->site->hooks['user_sys_session_method'] as $hook) {
                 call_user_func($hook, $vce);
             }
 		}
