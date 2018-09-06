@@ -515,6 +515,15 @@ class User {
 
         // SESSION HIJACKING PREVENTION
 
+		global $vce;
+
+        // hook that can be used to create a session handler
+        if (isset($vce->site->hooks['sys_session_method'])) {
+            foreach ($vce->site->hooks['sys_session_method'] as $hook) {
+                call_user_func($hook, $vce);
+            }
+		}
+		
         // set hash algorithm
         ini_set('session.hash_function', 'sha512');
 
@@ -566,13 +575,6 @@ class User {
 
         // set the cache expire to 30 minutes
         session_cache_expire(30);
-
-        // hook that can be used to create a session handler
-        if (isset($vce->site->hooks['user_sys_session_method'])) {
-            foreach ($vce->site->hooks['user_sys_session_method'] as $hook) {
-                call_user_func($hook, $vce);
-            }
-        }
 
         // start the session
         session_start();
