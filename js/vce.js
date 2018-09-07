@@ -15,7 +15,7 @@ $(document).ready(function() {
 		}
 	});
 	
-	$(document).on('click', 'input[type=checkbox]', function() {
+	$(document).on('click', 'input[type=checkbox]:not(.ignore)', function() {
 		$(this).closest('label').removeClass('highlight-alert').addClass('highlight');
 	});
 
@@ -174,7 +174,7 @@ $(document).ready(function() {
 
 
 	// click-bar
-	$('.clickbar-title').on('click touchend', function(e) {
+	$('.clickbar-title').on('click', function(e) {
 		if ($(this).hasClass('disabled') !== true) {
 			$(this).toggleClass('clickbar-closed');
 			$(this).parent('.clickbar-container').children('.clickbar-content').slideToggle();
@@ -182,7 +182,7 @@ $(document).ready(function() {
 	});
 	
 	
-	$('.clickbar-group').on('click touchend', function(e) {
+	$('.clickbar-group').on('click', function(e) {
 		if ($(this).hasClass('clickbar-closed')) {
 			$('.clickbar-group').not($(this)).show();
 		} else {
@@ -191,7 +191,7 @@ $(document).ready(function() {
 	});
 
 
-	$('.clickbar-group-close').on('click touchend', function(e) {
+	$('.clickbar-group-close').on('click', function(e) {
 		$(this).closest('.clickbar-container').find('.clickbar-group').click();
 	});
 
@@ -233,7 +233,7 @@ $(document).ready(function() {
 		}
 	}
 	
-	$('.cancel-button').on('click touchend', function(e) {
+	$('.cancel-button').on('click', function(e) {
 		e.preventDefault();
 		e.stopPropagation();
 		window.location.reload(true);
