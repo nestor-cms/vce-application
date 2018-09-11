@@ -196,7 +196,7 @@ class Site {
 						// check that a response was returned
 						if (!empty($response)) {
 							// send the returned array from the class::method called to within the cron_task
-							self::manage_cron_task($response);
+							$vce->manage_cron_task($response);
 						} elseif (defined('VCE_DEBUG') && VCE_DEBUG == true) {
 							// die with an error message
 							die('cron_task error: nothing returned to class.site.php when calling to ' . $cron_info['component'] . '::' . $cron_info['method'] . '(' . print_r($each_cron_task, true) . ')');
@@ -210,7 +210,7 @@ class Site {
 							die('cron_task error: component does not exist for ' . $cron_info['component'] . '::' . $cron_info['method'] . '(' . print_r($each_cron_task, true) . ')');
 						} else {
 							// delete this cron_task
-							self::manage_cron_task(array('action' => 'delete', 'id' => $each_cron_task['id']));
+							$vce->manage_cron_task(array('action' => 'delete', 'id' => $each_cron_task['id']));
 						}
 					
 					}
@@ -224,7 +224,7 @@ class Site {
 							die('cron_task error: component has not been activated for ' . $cron_info['component'] . '::' . $cron_info['method'] . '(' . print_r($each_cron_task, true) . ')');
 						} else {
 							// delete this cron_task
-							self::manage_cron_task(array('action' => 'delete', 'id' => $each_cron_task['id']));
+							$vce->manage_cron_task(array('action' => 'delete', 'id' => $each_cron_task['id']));
 						}
 				
 				}
