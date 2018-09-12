@@ -30,7 +30,9 @@ class Image extends MediaType {
     	'path' => $each_component->created_by . '/' . $each_component->path
     	);
         		
-    	$vce->content->add('main','<img class="vce-image" src="' . $vce->site->media_link($fileinfo) . '">');
+    	$alt_tag = !empty($each_component->title) ? htmlentities($each_component->title) : null;
+        		
+    	$vce->content->add('main','<img class="vce-image" src="' . $vce->site->media_link($fileinfo) . '" alt="' . $alt_tag  . '">');
 
     }
     
