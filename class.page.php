@@ -200,8 +200,8 @@ class Page {
 			$requested_component = $vce->db->get_data_object($query)[0];
 			
 			// load hooks
-			if (isset($this->site->hooks['page_requested_components'])) {
-				foreach($this->site->hooks['page_requested_components'] as $hook) {
+			if (isset($vce->site->hooks['page_requested_components'])) {
+				foreach($vce->site->hooks['page_requested_components'] as $hook) {
 					$requested_component = call_user_func($hook, $requested_component, func_get_args());
 				}
 			}
@@ -359,8 +359,8 @@ class Page {
 		$requested_components = $vce->db->get_data_object($query);
 	
 		// load hooks
-		if (isset($this->site->hooks['requested_sub_components'])) {
-			foreach($this->site->hooks['requested_sub_components'] as $hook) {
+		if (isset($vce->site->hooks['requested_sub_components'])) {
+			foreach($vce->site->hooks['requested_sub_components'] as $hook) {
 				$requested_components = call_user_func($hook, $requested_components, func_get_args());
 			}
 		}
