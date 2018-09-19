@@ -184,6 +184,13 @@ class VCE {
 					} else {
 						return strtotime($a_sort) > strtotime($b_sort) ? -1 : 1;
 					}
+				} else if ($type == 'integer') {
+					// sort as time
+					if ($order == "asc") {
+						return (integer)$a_sort > (integer)$b_sort ? 1 : -1;
+					} else {
+						return (integer)$a_sort > (integer)$b_sort ? -1 : 1;
+					}
 				} else {
 					return 1;
 				}

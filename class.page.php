@@ -939,8 +939,8 @@ class Page {
 
 					// load hooks
 					// page_build_content_callback
-					if (isset($this->site->hooks['page_build_content_callback'])) {
-						foreach($this->site->hooks['page_build_content_callback'] as $hook) {
+					if (isset($vce->site->hooks['page_build_content_callback'])) {
+						foreach($vce->site->hooks['page_build_content_callback'] as $hook) {
 							$sub_components = call_user_func($hook, $sub_components, $each_component, $vce);
 						}
 					}
