@@ -167,8 +167,16 @@ class VCE {
 	
 		usort($data, function($a, $b) use ($key, $order, $type) {
 			// check if this is an object or an array
-			$a_sort = is_object($a) ? $a->$key : $a[$key];
-			$b_sort = is_object($b) ? $b->$key : $b[$key];
+			if (is_object($a)) {
+				$a_sort = isset($a->$key) ? $a->$key : null;
+			} else {
+				$a_sort = isset($a[$key]) ? $a[$key] : null;
+			}
+			if (is_object($b)) {
+				$b_sort = isset($b->$key) ? $b->$key : null;
+			} else {
+				$b_sort = isset($b[$key]) ? $b[$key] : null;
+			}
 			if (isset($a_sort) && isset($b_sort)) {
 				// sort as string
 				if ($type == 'string') {
