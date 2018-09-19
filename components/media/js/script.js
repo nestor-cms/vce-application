@@ -178,7 +178,7 @@ $(document).ready(function() {
 			return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
 		};
 
-		$(document).on('click touchend','.cancel-button', function(e) {
+		$(document).on('click','.cancel-button', function(e) {
 			window.location.reload(true);
 		});
 	
@@ -189,7 +189,7 @@ $(document).ready(function() {
 	});
 	
 	
-	$(document).on('click touchend','.fileupload', function(e) {
+	$(document).on('click','.fileupload', function(e) {
 		$(this).parent('label').addClass('highlight');
 	});
 	

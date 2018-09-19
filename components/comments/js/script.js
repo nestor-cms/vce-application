@@ -13,7 +13,7 @@ $(document).ready(function() {
 		$(this).height(0).height(this.scrollHeight);
 	}).change();
 
-	$('.comments-clickbar').on('click touchend', function(e) {
+	$('.comments-clickbar').on('click', function(e) {
 
 		if ($(this).hasClass('clickbar-closed')) {
 			if (typeof videoPlayer === 'object') {	
@@ -34,7 +34,7 @@ $(document).ready(function() {
 		
 	});
 
-	$(document).on('click touchend','.comment-timestamp', function(e) {
+	$(document).on('click','.comment-timestamp', function(e) {
 		var timestamp = $(this).attr('timestamp');
 		if (typeof videoPlayer === 'object') {
 			var vidbox = findplayer($(this));
@@ -188,7 +188,7 @@ $(document).ready(function() {
 		$(this).closest('.comment-row-content').find('.comment-text').show();
 	});
 	
-	$(document).on('click touchend','.comment-reload', function(e) {
+	$(document).on('click','.comment-reload', function(e) {
 		window.location.reload(true);
 	});
 

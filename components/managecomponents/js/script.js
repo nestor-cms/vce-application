@@ -1,6 +1,6 @@
 $(document).ready(function() {
 
-	$('.switch').on('click touchend', function(e) {
+	$('.switch').on('click', function(e) {
 
 		$(this).closest('.each-component-switch').children('.switch').toggleClass('highlight');
 
