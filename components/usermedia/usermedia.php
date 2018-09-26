@@ -15,8 +15,34 @@ class UserMedia extends Component {
 	
 	
 	/**
-	 *
+	 * Prevent sub-components from being retrieved
 	 */
+	public function find_sub_components($requested_component, $vce, $components, $sub_components) {
+		return false;
+	}
+
+	/**
+	 * Display this component
+	 */
+	public function check_access($each_component, $vce) {
+		return true;
+	}
+
+	/**
+	 * Prevent sub-components from being displayed
+	 */
+	public function build_sub_components($each_component, $vce) {
+		return false;
+	}
+
+	/**
+	 * Allow sub-components to be created
+	 */
+	public function allow_sub_components($each_component, $vce) {
+		return true;
+	}
+
+
 	public function as_content($each_component, $vce) {
 
 		$content = "";

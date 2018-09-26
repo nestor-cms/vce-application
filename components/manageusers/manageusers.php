@@ -402,7 +402,7 @@ EOF;
 				foreach ($roles_each as $key => $value) {
 					if ($value['role_hierarchy'] >= $roles[$vce->user->role_id]['role_hierarchy']) {
 						$content .= '<option value="' . $key . '"';
-						if ($value['role_name'] == $user->role_id) {
+						if ($key == $user->role_id) {
 							$content .= ' selected';
 						}
 						$content .= '>' . $value['role_name'] . '</option>';
