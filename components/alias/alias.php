@@ -107,7 +107,7 @@ EOF;
 
 
 $content .= <<<EOF
-<form id="delete_$each_component->component_id" class="delete-form asynchronous-form" method="post" action="$vce->input_path">
+<form id="delete_$component_value->component_id" class="delete-form asynchronous-form" method="post" action="$vce->input_path">
 <input type="hidden" name="dossier" value="$dossier_for_delete">
 <input type="submit" value="Delete">
 </form>

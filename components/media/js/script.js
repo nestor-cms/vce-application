@@ -105,7 +105,12 @@ $(document).ready(function() {
 			},
 			fail: function (e, data) {
 				eachUploader.find('.progressbar-container').hide();
-				eachUploader.find('.progressbar-error').html('File Uploader Error: ' +  data.errorThrown.message + ' <div class="link-button cancel-button" href="">Try Again</div>').show();
+				if (typeof data.errorThrown.message != 'undefined') {
+					var message = data.errorThrown.message;
+				} else {
+					var message = 'Unsupported file type';
+				}
+				eachUploader.find('.progressbar-error').html('File Uploader Error: ' +  message + ' <div class="link-button cancel-button" href="">Try Again</div>').show();
 				return;
 			},
 			chunksend: function (e, data) {
