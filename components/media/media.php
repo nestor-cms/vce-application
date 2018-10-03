@@ -262,8 +262,11 @@ $content .= <<<EOF
 <div class="clickbar-title clickbar-closed"><span>$clickbar_title</span></div>
 </div>
 EOF;
+
+		$content_location = isset($recipe_component->content_location) ? $recipe_component->content_location : 'main';
+		
 		// add to content object
-		$vce->content->add('main',$content);
+		$vce->content->add($content_location,$content);
 		
 		// clear file_uploader
 		unset($vce->file_uploader);
@@ -480,6 +483,7 @@ EOF;
 		$title = isset($recipe['title']) ? $recipe['title'] : self::component_info()['name'];
 		$description = isset($recipe['description']) ? $recipe['description'] : null;
 		$media_types = isset($recipe['media_types']) ? $recipe['media_types'] : null;
+		$content_location = isset($recipe['content_location']) ? $recipe['content_location'] : null;
 
 		
 $elements = <<<EOF
@@ -494,7 +498,14 @@ $elements = <<<EOF
 <input type="text" name="description" value="$description"  autocomplete="off">
 <div class="label-text">
 <div class="label-message">Clickbar Description</div>
-<div class="label-error">Enter a Description</div>
+<div class="label-error"></div>
+</div>
+</label>
+<label>
+<input type="text" name="content_location" value="$content_location"  autocomplete="off">
+<div class="label-text">
+<div class="label-message">Content Location For Layout</div>
+<div class="label-error"></div>
 </div>
 </label>
 <label for="">
