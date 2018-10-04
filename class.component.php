@@ -133,7 +133,7 @@ class Component {
 	 * @param bool $auto_create
 	 * @return calls other methods
 	 */
-	public function recipe_components($each_component, $vce, $auto_create_reverse = null) {
+	public static function recipe_components($each_component, $vce, $auto_create_reverse = null) {
 	
 		// check that recipe_components exists
 		if (isset($each_component->sub_recipe)) {
@@ -488,7 +488,7 @@ EOF;
 	 * @param array $input
 	 * @return calls component's procedure or echos an error message
 	 */
-	protected function create_component($input) {
+	protected static function create_component($input) {
 	
 		global $db;
 		global $site;
@@ -801,7 +801,7 @@ EOF;
 	 * @param array $input
 	 * @return calls component's procedure or echos an error message
 	 */
-	protected function update_component($input) {
+	protected static function update_component($input) {
 
 		global $db;
 		global $user;
@@ -913,7 +913,7 @@ EOF;
 	 * @param array $input
 	 * @return calls component's procedure or echos an error message
 	 */
-	protected function delete_component($input) {
+	protected static function delete_component($input) {
 	
 		global $db;
 		global $site;
@@ -975,7 +975,7 @@ EOF;
 	 * This is a recursive function.
 	 * @param int $component_id
 	 */
-	protected function extirpate_component($component_id) {
+	protected static function extirpate_component($component_id) {
 	
 		global $db;
 		global $site;

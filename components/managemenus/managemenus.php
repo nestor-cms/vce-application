@@ -107,7 +107,7 @@ EOF;
 				$query = "SELECT meta_value AS title FROM " . TABLE_PREFIX . "components_meta WHERE component_id='" . $each_url->component_id . "' AND meta_key='title'";
 				$title = $vce->db->get_data_object($query);
 
-				$each_url->title = $title[0]->title;
+				$each_url->title = isset($title[0]->title) ? $title[0]->title : null;
 			
 				// Anonymous function to get role access
 				$get_role_access = function($id) use (&$get_role_access) {
