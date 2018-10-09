@@ -147,7 +147,11 @@ $(document).ready(function() {
 				
 				}
 
-			}, "json");
+			}, "json")
+			.fail(function(response) {
+				console.log('Error: Response was not a json object');
+				$(formsubmitted).prepend('<div class="form-message form-error">' + response.responseText + '</div>');
+			});
 		}
 
 	});

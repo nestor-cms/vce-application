@@ -200,10 +200,18 @@ class VCE {
 						return (integer)$a_sort > (integer)$b_sort ? -1 : 1;
 					}
 				} else {
-					return 1;
+					if ($order == "asc") {
+						return -1;
+					} else {
+						return 1;
+					}
 				}
 			} else {
-				return 1;
+				if ($order == "asc") {
+					return -1;
+				} else {
+					return 1;
+				}		
 			}
 		});
 		// return the sorted object/array
