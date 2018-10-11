@@ -149,8 +149,12 @@ class Media extends Component {
 			// generate dossier
 			$each_component->dossier_for_delete = $vce->generate_dossier($dossier);
 			
-			// call to edit() in MediaType
-			$add_content = $this_type->edit($each_component, $vce);
+			$add_content = null;
+			
+			if (empty($each_component->prevent_editing)) {
+				// call to edit() in MediaType
+				$add_content = $this_type->edit($each_component, $vce);
+			}
 
 			// add edit form
 			$vce->content->add('main',$add_content);

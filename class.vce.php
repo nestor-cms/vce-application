@@ -39,8 +39,6 @@ class VCE {
 	 * @return bool
 	 */
 	public function check_permissions($permission_name, $component_name = null) {
-	
-		global $vce;
 
 		// find the calling class by using debug_backtrace
 		if (!$component_name) {
@@ -49,12 +47,47 @@ class VCE {
 		}
 		// add permissions onto the component name
 		$component_permissions = $component_name . '_permissions';
-		if (in_array($permission_name, explode(',', $vce->user->$component_permissions))) {
+		if (in_array($permission_name, explode(',', $this->user->$component_permissions))) {
 			return true;
 		}
 		return false;
 	}
 
+
+
+	/**
+	 * A method to check component specific configurations
+	 *
+	 * @param string $permission_name
+	 * @param string $component_name
+	 * @return bool
+	 */
+	public function check_configuration($configuration_name, $component_name = null) {
+
+		// find the calling class by using debug_backtrace
+		if (!$component_name) {
+			$backtrace = debug_backtrace(false, 2);
+			$component_name = $backtrace[1]['class'];
+		}
+		
+		if (isset($this->site->$component_name) && !is_array($this->site->$component_name)) {
+			$value = $this->site->$component_name;
+			$minutia = $component_name . '_minutia';
+			$vector = $this->site->$minutia;
+			$config = json_decode($this->site->decryption($value,$vector), true);
+			$this->site->$component_name = $config;
+		} else {
+			$config = $this->site->$component_name;
+		}
+		
+		if (isset($config[$configuration_name])) {
+			return $config[$configuration_name];
+		}
+		
+		return false;
+		
+	}
+		
 
 	/**
 	 * Sends mail using PHP mail function or transport agent
