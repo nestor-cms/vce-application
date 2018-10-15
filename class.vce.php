@@ -70,6 +70,7 @@ class VCE {
 			$component_name = $backtrace[1]['class'];
 		}
 		
+		// get the config file and save it, or check in the saved version for the configuration name
 		if (isset($this->site->$component_name) && !is_array($this->site->$component_name)) {
 			$value = $this->site->$component_name;
 			$minutia = $component_name . '_minutia';
