@@ -114,7 +114,7 @@ $(document).ready(function() {
 				return;
 			},
 			chunksend: function (e, data) {
-				eachUploader.find('.progress-chunks').html('<sup>' + chunkCount + '</sup>/<sub>' + data.chunksTotal + '</sub>').show();
+				eachUploader.find('.progress-chunks').html('<sup>' + chunkCount + '</sup>/<sub>' + data.chunksTotal + ' parts</sub>').show();
 				chunkCount++;
 			},
 			chunkfail: function (e, data) {
