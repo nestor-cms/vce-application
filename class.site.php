@@ -523,7 +523,7 @@ class Site {
 			// add as normal
 			$add_attributes[$key] = $value;
 		}
-		$_SESSION['add_attributes'] = json_encode($add_attributes);
+		$_SESSION['add_attributes'] = json_encode($add_attributes, JSON_UNESCAPED_SLASHES);
 	}
 	
 	
@@ -558,7 +558,7 @@ class Site {
 		if (isset($_SESSION['add_attributes'])) {
 			$attributes = json_decode($_SESSION['add_attributes'], true);
 			unset($attributes[$key], $attributes['persistent'][$key]);
-			$_SESSION['add_attributes'] = json_encode($attributes);
+			$_SESSION['add_attributes'] = json_encode($attributes, JSON_UNESCAPED_SLASHES);
 		}
 	}
 
