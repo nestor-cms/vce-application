@@ -170,7 +170,13 @@ $(document).ready(function() {
 					}
 				}
 				if ($(this).attr('name') && !$(this).hasClass('ignore-input')) {
-					inputs[$(this).attr('name')] = $(this).val();
+					if ($(this).is(':checkbox')) {
+						if ($(this).is(':checked')) {
+							inputs[$(this).attr('name')] = $(this).val();
+						}
+					} else {
+						inputs[$(this).attr('name')] = $(this).val();
+					}
 				}
 			});
 			data.formData = inputs;
