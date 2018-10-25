@@ -518,10 +518,10 @@ class Site {
 		}
 		if ($persistent) {
 			// add to persistent sub array
-			$add_attributes['persistent'][$key] = urlencode($value);
+			$add_attributes['persistent'][$key] = $value;
 		} else {
 			// add as normal
-			$add_attributes[$key] = urlencode($value);
+			$add_attributes[$key] = $value;
 		}
 		$_SESSION['add_attributes'] = json_encode($add_attributes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK);
 	}

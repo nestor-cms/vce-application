@@ -86,11 +86,11 @@ class Page {
 				if ($key == 'persistent') {
 					$persistent = $value;
 					foreach ($persistent as $persistent_key=>$persistent_value) {
-						$vce->$persistent_key = urldecode($persistent_value);
+						$vce->$persistent_key = $persistent_value;
 					}
 				} else {
 					// normal value
-					$vce->$key = urldecode($value);
+					$vce->$key = $value;
 				}
 			}
 			// clear it

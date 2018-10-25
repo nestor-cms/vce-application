@@ -530,9 +530,14 @@ EOF;
 	 */
 	public function recipe_fields($recipe) {
 	
+		global $site;
+		
+		$site->get_template_names();
+	
 		$title = isset($recipe['title']) ? $recipe['title'] : self::component_info()['name'];
 		$url = isset($recipe['url']) ? $recipe['url'] : null;
-	
+		$template = isset($recipe['template']) ? $recipe['template'] : null;
+
 $elements = <<<EOF
 <input type="hidden" name="auto_create" value="forward">
 <label>
@@ -547,6 +552,28 @@ $elements = <<<EOF
 <div class="label-text">
 <div class="label-message">URL (optional)</div>
 <div class="label-error">Enter a URL</div>
+</div>
+</label>
+<label>
+<select name="template">
+<option value=""></option>
+EOF;
+
+	foreach($site->get_template_names() as $key=>$value) {
+	
+		$elements .= '<option value="' . $value . '"';
+		if ($value == $template) {
+		$elements .= ' selected';
+		}
+		$elements .= '>' . $key . '</option>';
+	
+	}
+
+$elements .= <<<EOF
+</select>
+<div class="label-text">
+<div class="label-message">Template (optional)</div>
+<div class="label-error">Enter a Template</div>
 </div>
 </label>
 EOF;
