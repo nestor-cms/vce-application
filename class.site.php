@@ -143,18 +143,44 @@ class Site {
 				$preload_component = $each_component->preload_component();
 				// error prevention if nothing is returned, and allows method to be used for other things besides hooks
 				if (!empty($preload_component)) {
-					foreach ($preload_component as $hook_name=>$function_to_call) {				
+					foreach ($preload_component as $hook_name=>$instructions) {
+						$priority = -1;
+						$function = '';
+						if (!isset($hooks[$hook_name])) {
+							$hooks[$hook_name] = array();
+						} 
+
+						if (is_array($instructions)) {
+							$priority = $instructions['priority'];
+							$function = $instructions['function'];
+						} else {
+							$function = $instructions;
+						}
+					
 						// if the hook calls "at_site_hook_initiation"	
 						if ($hook_name == "site_hook_initiation") {
-							call_user_func($function_to_call, $hooks);
-						} 
-						// add to array of hooks
-						$hooks[$hook_name][] = $function_to_call;						
+							call_user_func($function, $hooks);
+						}
+
+						if ($priority > -1) {
+							while (isset($hooks[$hook_name][$priority])) {
+								$priority++;
+							}
+							$hooks[$hook_name][$priority] = $function;
+						} else {
+							array_push($hooks[$hook_name], $function);
+						}
 					}
 				}
 			}
 		}
 		
+		// sort
+		foreach ($hooks as $key=>$hook) {
+			ksort($hook);
+			$hooks[$key] = $hook;
+		}
+
 		// add hooks to site object
 		$this->hooks = $hooks;
 		
