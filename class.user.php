@@ -713,6 +713,9 @@ class User {
         $user_ids = isset($users_info['user_ids']) ? trim(str_replace('|', ',', $users_info['user_ids']), ',') : null;
         $roles = isset($users_info['roles']) ? trim(str_replace('|', ',', $users_info['roles']), ',') : null;
 
+		// sanitize in case there is an empty ,,
+		$user_ids = str_replace(',,', ',', $user_ids);
+		
         $site_users = array();
 
         if (isset($users_info['roles'])) {
