@@ -6,9 +6,29 @@ class Upload extends Component {
 	 * basic info about the component
 	 */
 	public function component_info() {
+	
+		$upload_max_filesize = ini_get("upload_max_filesize");
+		$post_max_size =ini_get("post_max_size");
+		$max_execution_time = ini_get("max_execution_time");
+		$max_input_time = ini_get("max_input_time");
+		$memory_limit = ini_get("memory_limit");
+		$max_file_uploads = ini_get("max_file_uploads");
+		
+$phpinfo = <<<EOF
+<div>
+<p>php.ini values</p>
+upload_max_filesize: $upload_max_filesize (30M is recommended)<br>
+post_max_size: $post_max_size (30M is recommended)<br>
+max_execution_time: $max_execution_time (900 is recommended)<br>
+max_input_time: $max_input_time (-1 is recommended)<br>
+memory_limit: $memory_limit (256M is recommended)<br>
+max_file_uploads: $max_file_uploads (100 is recommended)<br>
+</div>
+EOF;
+	
 		return array(
 			'name' => 'Upload',
-			'description' => 'Asynchronous upload portal',
+			'description' => 'Asynchronous upload endpoint' . $phpinfo,
 			'category' => 'admin'
 		);
 	}
@@ -46,20 +66,15 @@ class Upload extends Component {
 
 			// php script for jQuery-File-Upload
 
-			// upload_max_filesize = 30M
-			// post_max_size = 30M
-			// max_execution_time = 260
-			// max_input_time = -1
-			// memory_limit = 256M
-			// max_file_uploads = 100
+			// 15 minutes execution time
+			if (ini_get("max_execution_time") < 900) {
+				ini_set('max_execution_time', 900);
+			}
 			
-			// This is here in case you need to write out to the log.txt file for debugging purposes
-			// file_put_contents(BASEPATH . 'log.txt', 'upload_max_filesize: ' . ini_get("upload_max_filesize") . PHP_EOL, FILE_APPEND);
-			// file_put_contents(BASEPATH . 'log.txt', 'post_max_size: ' . ini_get("post_max_size") . PHP_EOL, FILE_APPEND);
-			// file_put_contents(BASEPATH . 'log.txt', 'max_execution_time: ' . ini_get("max_execution_time") . PHP_EOL, FILE_APPEND);
-			// file_put_contents(BASEPATH . 'log.txt', 'max_input_time: ' . ini_get("max_input_time") . PHP_EOL, FILE_APPEND);
-			// file_put_contents(BASEPATH . 'log.txt', 'max_file_uploads: ' . ini_get("max_file_uploads") . PHP_EOL, FILE_APPEND);
-
+			// 256M memory limit
+			if (rtrim(ini_get("memory_limit"),'M') < '256') {
+				ini_set('memory_limit','256M');
+			}
 
 			header('Vary: Accept');
 			if (isset($_SERVER['HTTP_ACCEPT']) &&
@@ -116,11 +131,6 @@ class Upload extends Component {
 				}
 	
 			}
-
-			// 15 minutes execution time
-			@set_time_limit(15 * 60);
-
-			ini_set('memory_limit','256M');
 
 			// Settings for the location where files are uploaded to
 			if (defined('INSTANCE_BASEPATH')) {
@@ -369,7 +379,6 @@ class Upload extends Component {
 		}
 		
 	}
-
 	
 	/**
 	 * hide this component from being added to a recipe
