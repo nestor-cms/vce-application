@@ -16,27 +16,21 @@ class User {
         $vce->user = $this;
 
         // start session
-        $user_session = self::start_session($vce);
+        self::start_session();
 
         // check is session for user info exists
-        // if (isset($_SESSION['user'])) {
-        if (!empty($user_session)) {
+        if (isset($_SESSION['user'])) {
 
             // get user info object
-           	// $user_object = $_SESSION['user'];
+            $user_object = $_SESSION['user'];
 
             // set user info values
-            // foreach ($user_object as $key => $value) 
-            foreach ($user_session as $key => $value) {
+            foreach ($user_object as $key => $value) {
                 $this->$key = $value;
             }
-            
-            // set session
-            // $_SESSION['user'] = $this;
-			// self::store_session($this, $vce);
 
             // a good session, return to exit this method
-            return true;
+            return;
 
             // if session doesn't exits, check if persistent login cookie exists
         } else {
@@ -118,7 +112,7 @@ class User {
         // if no session or persistent login, then create a non logged-in user session
 
         // check is session for user info exists
-        if (empty($user_session)) {
+        if (!isset($_SESSION['user'])) {
 
             // user is not logged-in, role_id is set to x, because x is fun and "I want to believe."
             $this->role_id = "x";
@@ -127,8 +121,7 @@ class User {
             $this->session_vector = self::create_vector();
 
             // set session
-            //$_SESSION['user'] = $this;
-			self::store_session($this, $vce);
+            $_SESSION['user'] = $this;
 
         }
 
@@ -144,6 +137,10 @@ class User {
 
         // is the user already logged in?
         if (!isset($this->user_id)) {
+
+            // database
+            // global $db;
+            // global $site;
 
             global $vce;
 
@@ -271,13 +268,10 @@ class User {
             }
 
             // delete user session
-            if (isset($_SESSION)) {
-            	unset($_SESSION['user']);
-            	
-            	// Destroy all data registered to session
-            	session_destroy(); 
-            }
+            unset($_SESSION['user']);
 
+            // Destroy all data registered to session
+            session_destroy();
 
             // load logout hook
             if (isset($vce->site->hooks['user_logout_complete'])) {
@@ -285,15 +279,6 @@ class User {
                     call_user_func($hook, $user_id);
                 }
             }
-            
-            // load logout hook
-            if (isset($vce->site->hooks['user_logout_override'])) {
-                foreach ($vce->site->hooks['user_logout_override'] as $hook) {
-                    call_user_func($hook, $user_id);
-                }
-            }
-            
-            
         }
 
     }
@@ -317,9 +302,7 @@ class User {
         $user_object = array();
 
         // clear user session
-        if (isset($_SESSION)) {
-    		unset($_SESSION['user']);
-        }
+        unset($_SESSION['user']);
 
         // clear user object properties
         foreach ($this as $key => $value) {
@@ -398,7 +381,7 @@ class User {
                     $this->$key = $value;
                 }
 
-                return self::store_session($this, $vce);
+                return self::store_session($this);
 
             }
 
@@ -407,13 +390,10 @@ class User {
             // user is not logged-in, role_id is set to x, because x is fun and "I want to believe."
             $this->role_id = "x";
             $this->session_vector = self::create_vector();
-            
-            return self::store_session($this, $vce);
 
         }
 
     }
-    
 
     /**
      * Starts session
@@ -421,10 +401,18 @@ class User {
      * @param object $user_object
      * @return bool true
      */
-    private function store_session($user_object, $vce) {
+    private function store_session($user_object) {
+
+        global $vce;
+
+        // generate a new session id key
+        session_regenerate_id(true);
+
+        // store session
+        $_SESSION['user'] = $user_object;
 
         // create persistent login cookie
-        if (defined('PERSISTENT_LOGIN') && PERSISTENT_LOGIN && !empty($this->user_id)) {
+        if (defined('PERSISTENT_LOGIN') && PERSISTENT_LOGIN) {
 
             // create new cookie data
 
@@ -515,49 +503,27 @@ class User {
             }
 
         }
-        
 
-
-        // generate a new session id key
-        // session_regenerate_id(true);
-        
-        // hook 
-        if (isset($vce->site->hooks['user_store_session_override'])) {
-            foreach ($vce->site->hooks['user_store_session_override'] as $hook) {
-                call_user_func($hook, $user_object, $vce);
-            }
-		}
-
-		// check if php sessions are being used
-		if (isset($_SESSION)) {
-       		// store standard php session 
-       	 	$_SESSION['user'] = $user_object;
-       	}
-        
-      	return true;
-      	
+        return true;
     }
 
     /**
      * Starts session
      * @return sets ini values
      */
-    private function start_session($vce) {
+    private function start_session() {
 
-        // hook that can be used to override sessions
-        if (isset($vce->site->hooks['user_start_session_override'])) {
-            foreach ($vce->site->hooks['user_start_session_override'] as $hook) {
-                return call_user_func($hook, $vce);
-            }
-		}
-		
+        // SESSION HIJACKING PREVENTION
+
+		global $vce;
+
         // hook that can be used to create a session handler
         if (isset($vce->site->hooks['user_sys_session_method'])) {
             foreach ($vce->site->hooks['user_sys_session_method'] as $hook) {
                 call_user_func($hook, $vce);
             }
 		}
-
+		
         // set hash algorithm
         ini_set('session.hash_function', 'sha512');
 
@@ -612,13 +578,6 @@ class User {
 
         // start the session
         session_start();
-        
-        // get the user session
-        $user_session = isset($_SESSION['user']) ? $_SESSION['user'] : false;
-        
-        // return the user session value
-        return $user_session;
-        
     }
 
     /**
@@ -754,6 +713,9 @@ class User {
         $user_ids = isset($users_info['user_ids']) ? trim(str_replace('|', ',', $users_info['user_ids']), ',') : null;
         $roles = isset($users_info['roles']) ? trim(str_replace('|', ',', $users_info['roles']), ',') : null;
 
+		// sanitize in case there is an empty ,,
+		$user_ids = str_replace(',,', ',', $user_ids);
+		
         $site_users = array();
 
         if (isset($users_info['roles'])) {

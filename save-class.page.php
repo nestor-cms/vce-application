@@ -79,7 +79,6 @@ class Page {
 			}
 		}
 
-/*
 		// check for session attributes saved previously
 		if (isset($_SESSION['add_attributes'])) {
 			foreach (json_decode($_SESSION['add_attributes'],true) as $key=>$value) {
@@ -101,8 +100,7 @@ class Page {
 				$_SESSION['add_attributes'] = json_encode(array('persistent' => $persistent));
 			}
 		}
-*/
-	
+		
 		// check to see if there is a requested url
 		if (!empty($requested_url)) {
 		

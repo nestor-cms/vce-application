@@ -143,18 +143,44 @@ class Site {
 				$preload_component = $each_component->preload_component();
 				// error prevention if nothing is returned, and allows method to be used for other things besides hooks
 				if (!empty($preload_component)) {
-					foreach ($preload_component as $hook_name=>$function_to_call) {				
+					foreach ($preload_component as $hook_name=>$instructions) {
+						$priority = -1;
+						$function = '';
+						if (!isset($hooks[$hook_name])) {
+							$hooks[$hook_name] = array();
+						} 
+
+						if (is_array($instructions)) {
+							$priority = $instructions['priority'];
+							$function = $instructions['function'];
+						} else {
+							$function = $instructions;
+						}
+					
 						// if the hook calls "at_site_hook_initiation"	
 						if ($hook_name == "site_hook_initiation") {
-							call_user_func($function_to_call, $hooks);
-						} 
-						// add to array of hooks
-						$hooks[$hook_name][] = $function_to_call;						
+							call_user_func($function, $hooks);
+						}
+
+						if ($priority > -1) {
+							while (isset($hooks[$hook_name][$priority])) {
+								$priority++;
+							}
+							$hooks[$hook_name][$priority] = $function;
+						} else {
+							array_push($hooks[$hook_name], $function);
+						}
 					}
 				}
 			}
 		}
 		
+		// sort
+		foreach ($hooks as $key=>$hook) {
+			ksort($hook);
+			$hooks[$key] = $hook;
+		}
+
 		// add hooks to site object
 		$this->hooks = $hooks;
 		
@@ -302,9 +328,6 @@ class Site {
 			// add vce stylesheet
 			$this->add_style($site_url . '/vce-application/css/vce.css?ver=' . $ver,'vce');
 		}
-		
-		// push out attributes into vce object that have been saved into session
-		$this->obtrude_attributes($vce);
 	
 	}
 	
@@ -503,45 +526,6 @@ class Site {
 		return $media_link;
 	 
 	 }
-	 
-	/**
-	 * push out attributes that have been saved into the $vce object
-	 */
-	public function obtrude_attributes($vce) {
-		
-		// site_obtrude_attributes hook
-		if (isset($vce->site->hooks['site_obtrude_attributes'])) {
-			foreach ($vce->site->hooks['site_obtrude_attributes'] as $hook) {
-				call_user_func($hook, $vce);
-			}
-		}
-		
-		if (isset($_SESSION)) {
-			// check for session attributes saved previously
-			if (isset($_SESSION['add_attributes'])) {
-				foreach (json_decode($_SESSION['add_attributes'],true) as $key=>$value) {
-					// if there is a persistent value set
-					if ($key == 'persistent') {
-						$persistent = $value;
-						foreach ($persistent as $persistent_key=>$persistent_value) {
-							$vce->$persistent_key = $persistent_value;
-						}
-					} else {
-						// normal value
-						$vce->$key = $value;
-					}
-				}
-				// clear it
-				unset($_SESSION['add_attributes']);
-				// rewrite if persistent value had been set
-				if (isset($persistent)) {
-					$_SESSION['add_attributes'] = json_encode(array('persistent' => $persistent));
-				}
-			}
-		}
-	
-	}
-	 
 
 	/**
 	 * Adds attributes that will be added to the page object on next page load.
@@ -552,32 +536,20 @@ class Site {
 	 * @return adds JSON object of attributes to add
 	 */
 	public function add_attributes($key, $value, $persistent = false) {
-	
-		global $vce;
-		
-		// site_add_attributes hook
-		if (isset($vce->site->hooks['site_add_attributes'])) {
-			foreach ($vce->site->hooks['site_add_attributes'] as $hook) {
-				call_user_func($hook, $key, $value, $persistent);
-			}
+		// get current value of 'add_attributes'
+		if (isset($_SESSION['add_attributes'])) {
+			$add_attributes = json_decode($_SESSION['add_attributes'], true);
+		} else {
+			$add_attributes = array();
 		}
-	
-		if (isset($_SESSION)) {
-			// get current value of 'add_attributes'
-			if (isset($_SESSION['add_attributes'])) {
-				$add_attributes = json_decode($_SESSION['add_attributes'], true);
-			} else {
-				$add_attributes = array();
-			}
-			if ($persistent) {
-				// add to persistent sub array
-				$add_attributes['persistent'][$key] = $value;
-			} else {
-				// add as normal
-				$add_attributes[$key] = $value;
-			}
-			$_SESSION['add_attributes'] = json_encode($add_attributes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK);
+		if ($persistent) {
+			// add to persistent sub array
+			$add_attributes['persistent'][$key] = $value;
+		} else {
+			// add as normal
+			$add_attributes[$key] = $value;
 		}
+		$_SESSION['add_attributes'] = json_encode($add_attributes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK);
 	}
 	
 	
@@ -587,31 +559,18 @@ class Site {
 	 * @return value for key
 	 */
 	public function retrieve_attributes($key) {
-	
-		global $vce;
-		
-		// site_add_attributes hook
-		if (isset($vce->site->hooks['site_retrieve_attributes'])) {
-			foreach ($vce->site->hooks['site_retrieve_attributes'] as $hook) {
-				call_user_func($hook, $key);
+		// check that add_attributes is in session
+		if (isset($_SESSION['add_attributes'])) {
+			// get array of keys
+			$attributes = json_decode($_SESSION['add_attributes'],true);
+			// if the key exists return it
+			if (isset($attributes[$key])) {
+				return $attributes[$key];
 			}
-		}
-	
-		if (isset($_SESSION)) {
-			// check that add_attributes is in session
-			if (isset($_SESSION['add_attributes'])) {
-				// get array of keys
-				$attributes = json_decode($_SESSION['add_attributes'],true);
-				// if the key exists return it
-				if (isset($attributes[$key])) {
-					return $attributes[$key];
-				}
-				// if the persistent key exists return it
-				if (isset($attributes['persistent'][$key])) {
-					return $attributes['persistent'][$key];
-				}
+			// if the persistent key exists return it
+			if (isset($attributes['persistent'][$key])) {
+				return $attributes['persistent'][$key];
 			}
-		
 		}
 		return null;
 	}
@@ -622,22 +581,10 @@ class Site {
 	 * @return JSON object of attributes
 	 */
 	public function remove_attributes($key) {
-	
-		global $vce;
-		
-		// site_add_attributes hook
-		if (isset($vce->site->hooks['site_remove_attributes'])) {
-			foreach ($vce->site->hooks['site_remove_attributes'] as $hook) {
-				call_user_func($hook, $key);
-			}
-		}
-	
-		if (isset($_SESSION)) {
-			if (isset($_SESSION['add_attributes'])) {
-				$attributes = json_decode($_SESSION['add_attributes'], true);
-				unset($attributes[$key], $attributes['persistent'][$key]);
-				$_SESSION['add_attributes'] = json_encode($attributes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK);
-			}
+		if (isset($_SESSION['add_attributes'])) {
+			$attributes = json_decode($_SESSION['add_attributes'], true);
+			unset($attributes[$key], $attributes['persistent'][$key]);
+			$_SESSION['add_attributes'] = json_encode($attributes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_NUMERIC_CHECK);
 		}
 	}
 
