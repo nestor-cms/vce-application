@@ -299,6 +299,8 @@ EOF;
 
 		// this may change to owner_id
 		$user_id = $vce->user->user_id;
+
+		$parent_id = $recipe_component->parent_id;
 	
 		if (defined('UPLOAD_SIZE_LIMIT')) {
 			$chunk_size = $vce->convert_to_bytes(UPLOAD_SIZE_LIMIT);
@@ -348,6 +350,7 @@ $content_media = <<<EOF
 <input class="action" type="hidden" value="$vce->input_path">
 <input class="dossier" type="hidden" name="dossier" value="$recipe_component->dossier_for_create">
 <input class="created_by" type="hidden" name="created_by" value="$user_id">
+<input class="parent_id" type="hidden" name="parent_id" value="$parent_id">
 <input class="mediatypes" type="hidden" name="mediatypes" value="">
 <label> 
 <input type="text" name="title" class="resource-name" tag="required" autocomplete="off">
