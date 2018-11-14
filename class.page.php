@@ -102,6 +102,9 @@ class Page {
 			}
 		}
 */
+
+		// push out attributes into vce object that have been saved into session
+		$vce->site->obtrude_attributes($vce);
 	
 		// check to see if there is a requested url
 		if (!empty($requested_url)) {

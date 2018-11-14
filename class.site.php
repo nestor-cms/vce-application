@@ -331,9 +331,6 @@ class Site {
             $this->add_style($site_url . '/vce-application/css/vce.css?ver=' . $ver, 'vce');
         }
 
-        // push out attributes into vce object that have been saved into session
-        $this->obtrude_attributes($vce);
-
     }
 
     /**
