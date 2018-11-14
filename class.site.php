@@ -603,40 +603,44 @@ class Site {
         }
     }
 
-    /**
-     * retrieve attributes by key
-     * @param string $key
-     * @return value for key
-     */
-    public function retrieve_attributes($key) {
-
-        global $vce;
-
-        // site_add_attributes hook
-        if (isset($vce->site->hooks['site_retrieve_attributes'])) {
-            foreach ($vce->site->hooks['site_retrieve_attributes'] as $hook) {
-                call_user_func($hook, $key);
-            }
-        }
-
-        if (isset($_SESSION)) {
-            // check that add_attributes is in session
-            if (isset($_SESSION['add_attributes'])) {
-                // get array of keys
-                $attributes = json_decode($_SESSION['add_attributes'], true);
-                // if the key exists return it
-                if (isset($attributes[$key])) {
-                    return $attributes[$key];
-                }
-                // if the persistent key exists return it
-                if (isset($attributes['persistent'][$key])) {
-                    return $attributes['persistent'][$key];
-                }
-            }
-
-        }
-        return null;
-    }
+	/**
+	 * retrieve attributes by key
+	 * @param string $key
+	 * @return value for key
+	 */
+	public function retrieve_attributes($key) {
+	
+		global $vce;
+		
+		// set to null 
+		$attribute_value = null;
+		
+		// site_add_attributes hook
+		if (isset($vce->site->hooks['site_retrieve_attributes'])) {
+			foreach ($vce->site->hooks['site_retrieve_attributes'] as $hook) {
+				$attribute_value = call_user_func($hook, $key);
+			}
+		}
+	
+		if (isset($_SESSION)) {
+			// check that add_attributes is in session
+			if (isset($_SESSION['add_attributes'])) {
+				// get array of keys
+				$attributes = json_decode($_SESSION['add_attributes'],true);
+				// if the key exists return it
+				if (isset($attributes[$key])) {
+					$attribute_value = $attributes[$key];
+				}
+				// if the persistent key exists return it
+				if (isset($attributes['persistent'][$key])) {
+					$attribute_value = $attributes['persistent'][$key];
+				}
+			}
+		
+		}
+		
+		return $attribute_value;
+	}
 
     /**
      * removes attributes from next page load.
