@@ -145,11 +145,7 @@ class Site {
 					foreach ($preload_component as $hook_name=>$instructions) {
 					
 						// check for and add value of the function
-						if (isset($instructions['function'])) {
-							$function_to_call = $instructions['function'];
-						} else {
-							$function_to_call = $instructions;
-						}
+						$function_to_call = (isset($instructions['function'])) ? $instructions['function'] : $instructions;
 								
 						// if the hook calls "at_site_hook_initiation"	
 						if ($hook_name == "site_hook_initiation") {
