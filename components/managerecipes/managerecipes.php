@@ -521,7 +521,7 @@ EOF;
                 foreach (json_decode($vce->site->activated_components, true) as $key => $value) {
 
                     // load component class to get name
-                    require_once BASEPATH . '/' . $value;
+                    require_once BASEPATH . DIRECTORY_SEPARATOR . $value;
 
                     // instance
                     $each_component = new $key;
