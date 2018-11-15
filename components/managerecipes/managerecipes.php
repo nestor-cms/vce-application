@@ -434,7 +434,7 @@ EOF;
             if (isset($activated_components[$each_item['type']])) {
 
                 // load component class
-                require_once BASEPATH . '/' . $activated_components[$each_item['type']];
+                require_once BASEPATH . DIRECTORY_SEPARATOR . $activated_components[$each_item['type']];
 
                 $access = new $each_item['type'];
 
