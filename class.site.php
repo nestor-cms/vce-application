@@ -126,66 +126,73 @@ class Site {
 
         }
 
-        // load Component class
-        require_once 'class.component.php';
+		// load Component class
+		require_once('class.component.php');
+		
+		// declare array for hooks
+		$hooks = array();
+		
+		// preload components listed in $site->preload_components that have some sort of effect on layout et cetera
+		foreach (json_decode($this->preloaded_components, true) as $type=>$path) {
+			// check that this component hasn't been disabled
+			if (isset(json_decode($this->activated_components, true)[$type])) {
+				require_once(BASEPATH . $path);
+				$each_component = new $type();
+				// call to preload function and cycle through returned array to add hooks to variable
+				$preload_component = $each_component->preload_component();
+				// error prevention if nothing is returned, and allows method to be used for other things besides hooks
+				if (!empty($preload_component)) {
+					foreach ($preload_component as $hook_name=>$instructions) {
+					
+						// check for and add value of the function
+						if (isset($instructions['function'])) {
+							$function_to_call = $instructions['function'];
+						} else {
+							$function_to_call = $instructions;
+						}
+								
+						// if the hook calls "at_site_hook_initiation"	
+						if ($hook_name == "site_hook_initiation") {
+						 	$return_hooks = call_user_func($function_to_call, $hooks);
+						 	// if a value is returned then make hooks that value. You can use this to add more hooks from a component.
+						 	if (isset($return_hooks)) {
+						 		$hooks = $return_hooks;
+						 	}
+						}
+						
+						// check if a priority has been set, otherwise make position a positive increment by setting 0
+                    	$position = (isset($instructions['priority'])) ? $instructions['priority'] : 0;
+                    	
+						// perform the check only if a key already exists
+                    	if (isset($hooks[$hook_name][$position])) {
+                    		// check until an empty array key has been found
+							while (isset($hooks[$hook_name][$position])) {
+								if ($position < 0) {
+									$position--;
+								} else {
+									$position++;
+								}
+							}
+						}
+						
+                    	// add to hooks at postion
+                   		$hooks[$hook_name][$position] = $function_to_call;
 
-        // declare array for hooks
-        $hooks = array();
+					}
+				}
+			}
+		}
 
-        // preload components listed in $site->preload_components that have some sort of effect on layout et cetera
-        foreach (json_decode($this->preloaded_components, true) as $type => $path) {
-            // check that this component hasn't been disabled
-            if (isset(json_decode($this->activated_components, true)[$type])) {
-                require_once BASEPATH . $path;
-                $each_component = new $type();
-                // call to preload function and cycle through returned array to add hooks to variable
-                $preload_component = $each_component->preload_component();
+		// rekey hooks to correct array order so that are fired off in the intended order
+		foreach ($hooks as $key=>$value) {
+			// sort keys of value
+			ksort($value);
+			// save the newly sorted value back into the array position
+			$hooks[$key] = $value;
+		}
 
-                // error prevention if nothing is returned, and allows method to be used for other things besides hooks
-                if (!empty($preload_component)) {
-                    foreach ($preload_component as $hook_name => $instructions) {
-                        $priority = -1;
-                        $function = '';
-                        if (!isset($hooks[$hook_name])) {
-                            $hooks[$hook_name] = array();
-                        }
-
-                        if (is_array($instructions)) {
-                            $priority = $instructions['priority'];
-                            $function = $instructions['function'];
-                        } else {
-                            $function = $instructions;
-                        }
-
-                        // if the hook calls "at_site_hook_initiation"
-                        if ($hook_name == "site_hook_initiation") {
-                            call_user_func($function, $hooks);
-                        }
-
-                        if ($priority > -1) {
-                            while (isset($hooks[$hook_name][$priority])) {
-                                $priority++;
-                            }
-                            $hooks[$hook_name][$priority] = $function;
-                        } else {
-                            array_push($hooks[$hook_name], $function);
-                        }
-
-                        // add to array of hooks
-                        $hooks[$hook_name][] = $function;
-                    }
-                }
-            }
-        }
-
-        // sort
-        foreach ($hooks as $key => $hook) {
-            ksort($hook);
-            $hooks[$key] = $hook;
-        }
-
-        // add hooks to site object
-        $this->hooks = $hooks;
+		// add hooks to site object
+		$this->hooks = $hooks;
 
         // process cron_tasks
         if (!empty($cron_task)) {
