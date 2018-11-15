@@ -163,11 +163,8 @@ class Site {
                     	if (isset($hooks[$hook_name][$position])) {
                     		// check until an empty array key has been found
 							while (isset($hooks[$hook_name][$position])) {
-								if ($position < 0) {
-									$position--;
-								} else {
-									$position++;
-								}
+								// if position is negative the deduct one, otherwide add one
+								$position = ($position < 0) ? $position - 1 : $position + 1;
 							}
 						}
 						
