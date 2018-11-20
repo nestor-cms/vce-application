@@ -378,6 +378,9 @@ EOF;
 
 		}
 		
+		// attempting to fix the UPLOAD_ERR_PARTIAL issue
+		header ("Connection: close");
+
 	}
 	
 	/**
