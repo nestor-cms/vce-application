@@ -115,8 +115,10 @@ class Content {
 				$link .= ' class="current-menu-item"';
 			}
 			// check if the current page contains part of the url from another menu item, making it a parent of the item
-			if ($menu->url != "" && strpos($vce->requested_url,$menu->url . '/') !== false) {
-				$link .= ' class="current-menu-ancestor"';
+			if ($menu->url != "") {
+				if (preg_match('/\/' . $menu->url . '\//', '/' . $vce->requested_url)) {
+					$link .= ' class="current-menu-ancestor"';
+				}
 			}
 			$link .= '>';
 			if ($menu->url != "") {
