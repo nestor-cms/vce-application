@@ -18,7 +18,7 @@ class Access extends Component {
 	 * check if get_sub_components should be called.
 	 * @return bool
 	 */
-	public function find_sub_components($requested_component, $vce) {
+	public function find_sub_components($requested_component, $vce, $components, $sub_components) {
 	
 		// if user role is in role_access, return tue
 		if (in_array($vce->user->role_id,explode('|',$requested_component->role_access))) {

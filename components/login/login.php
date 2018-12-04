@@ -17,7 +17,7 @@ class Login extends Component {
 	 * check if get_sub_components should be called.
 	 * @return bool
 	 */
-	public function find_sub_components($requested_component, $vce) {
+	public function find_sub_components($requested_component, $vce, $components, $sub_components) {
 	
 		// if user has not logged in, return false
 		if (!isset($vce->user->user_id)) {
