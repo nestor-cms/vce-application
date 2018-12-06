@@ -342,7 +342,7 @@ EOF;
 		
 		if (isset($input['item_id'])) {
 			// add key value to page object on next load
-			$vce->add_attributes('item_id',$input['item_id']);
+			$vce->site->add_attributes('item_id',$input['item_id']);
 		}
 		
 		echo json_encode(array('response' => 'success','procedure' => 'edit','action' => 'reload','delay' => '0', 'message' => 'session data saved'));
