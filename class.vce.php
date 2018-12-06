@@ -199,37 +199,41 @@ class VCE {
 	 */
 	public static function sorter($data, $key='title', $order='asc', $type='string') {
 	
-		usort($data, function($a, $b) use ($key, $order, $type) {
-			// check if this is an object or an array
-			if (is_object($a)) {
-				$a_sort = isset($a->$key) ? $a->$key : null;
-			} else {
-				$a_sort = isset($a[$key]) ? $a[$key] : null;
-			}
-			if (is_object($b)) {
-				$b_sort = isset($b->$key) ? $b->$key : null;
-			} else {
-				$b_sort = isset($b[$key]) ? $b[$key] : null;
-			}
-			if (isset($a_sort) && isset($b_sort)) {
-				// sort as string
-				if ($type == 'string') {
-					if ($order == "asc") {
-						return (strcmp($a_sort, $b_sort) > 0) ? 1 : -1;
-					} else {
-						return (strcmp($a_sort, $b_sort) > 0) ? -1 : 1;
-					}
-				} elseif ($type == 'time') {
-					// sort as time
-					if ($order == "asc") {
-						return strtotime($a_sort) > strtotime($b_sort) ? 1 : -1;
-					} else {
-						return strtotime($a_sort) > strtotime($b_sort) ? -1 : 1;
-					}
-				} elseif ($type == 'integer') {
-					// sort as time
-					if ($order == "asc") {
-						return (integer)$a_sort > (integer)$b_sort ? 1 : -1;
+		if (is_array($data)) {
+			usort($data, function($a, $b) use ($key, $order, $type) {
+				// check if this is an object or an array
+				if (is_object($a)) {
+					$a_sort = isset($a->$key) ? $a->$key : null;
+				} else {
+					$a_sort = isset($a[$key]) ? $a[$key] : null;
+				}
+				if (is_object($b)) {
+					$b_sort = isset($b->$key) ? $b->$key : null;
+				} else {
+					$b_sort = isset($b[$key]) ? $b[$key] : null;
+				}
+				if (isset($a_sort) && isset($b_sort)) {
+					// sort as string
+					if ($type == 'string') {
+						if ($order == "asc") {
+							return (strcmp($a_sort, $b_sort) > 0) ? 1 : -1;
+						} else {
+							return (strcmp($a_sort, $b_sort) > 0) ? -1 : 1;
+						}
+					} elseif ($type == 'time') {
+						// sort as time
+						if ($order == "asc") {
+							return strtotime($a_sort) > strtotime($b_sort) ? 1 : -1;
+						} else {
+							return strtotime($a_sort) > strtotime($b_sort) ? -1 : 1;
+						}
+					} elseif ($type == 'integer') {
+						// sort as time
+						if ($order == "asc") {
+							return (integer)$a_sort > (integer)$b_sort ? 1 : -1;
+						} else {
+							return (integer)$a_sort > (integer)$b_sort ? -1 : 1;
+						}
 					} else {
 						return (integer)$a_sort > (integer)$b_sort ? -1 : 1;
 					}
@@ -240,16 +244,20 @@ class VCE {
 						return 1;
 					}
 				}
-			} else {
-				if ($order == "asc") {
-					return -1;
 				} else {
-					return 1;
-				}		
-			}
-		});
-		// return the sorted object/array
-		return $data;
+					if ($order == "asc") {
+						return -1;
+					} else {
+						return 1;
+					}		
+				}
+			});
+			// return the sorted object/array
+			return $data;
+		}
+		// return a null value by default
+		return null;	
+
 	}
 
 
