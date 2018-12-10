@@ -19,7 +19,9 @@ $(document).ready(function() {
 			if (typeof videoPlayer === 'object') {	
 				var player = findplayer($(this)).attr('player');
 				if (typeof videoPlayer[player] !== 'undefined') {
-					videoPlayer[player].startVideoPlayer();
+					if (typeof videoPlayer[player].startVideoPlayer === 'function') {
+						videoPlayer[player].startVideoPlayer();
+					}
 				}
 				
 			}
@@ -27,7 +29,9 @@ $(document).ready(function() {
 			if (typeof videoPlayer === 'object') {
 				var player = findplayer($(this)).attr('player');
 				if (typeof videoPlayer[player] !== 'undefined') {
-					videoPlayer[player].pauseVideoPlayer();
+					if (typeof videoPlayer[player].pauseVideoPlayer === 'function') {
+						videoPlayer[player].pauseVideoPlayer();
+					}
 				}
 			}
 		}
@@ -77,11 +81,13 @@ $(document).ready(function() {
 			if (typeof videoPlayer === 'object') {
 				var player = findplayer($(this)).attr('player');
 				if (typeof videoPlayer[player] !== 'undefined') {
-					var timestamp = videoPlayer[player].getVideoPlayerTimestamp();
-					if (timestamp > 0) {
-						postdata.push(
-							{name: 'timestamp', value: timestamp}
-						);
+					if (typeof videoPlayer[player].getVideoPlayerTimestamp !== 'undefined') {
+						var timestamp = videoPlayer[player].getVideoPlayerTimestamp();
+						if (timestamp > 0) {
+							postdata.push(
+								{name: 'timestamp', value: timestamp}
+							);
+						}
 					}
 				}
 			}
@@ -106,12 +112,13 @@ $(document).ready(function() {
 					asynchronousContent = asynchronousContent.replace("{created-at}", created_at);
 
 					if (typeof videoPlayer === 'object') {
+						var timestamp = 0;
+						var nicetimestamp = '0:00:00';
 						if (typeof videoPlayer[player] !== 'undefined') {
-							var timestamp = videoPlayer[player].getVideoPlayerTimestamp();
-							var nicetimestamp = videoPlayer[player].getVideoPlayerNiceTime();
-						} else {
-							var timestamp = 0;
-							var nicetimestamp = '0:00:00';
+							if (typeof videoPlayer[player].getVideoPlayerTimestamp !== 'undefined') {
+								var timestamp = videoPlayer[player].getVideoPlayerTimestamp();
+								var nicetimestamp = videoPlayer[player].getVideoPlayerNiceTime();
+							}
 						}
 					
 						asynchronousContent = asynchronousContent.replace("{timestamp}", timestamp);
@@ -129,7 +136,9 @@ $(document).ready(function() {
 					if (typeof videoPlayer === 'object') {
 						$(formsubmitted).closest('.vidbox-content').fadeOut('slow');
 						if (typeof videoPlayer[player] !== 'undefined') {
-							videoPlayer[player].startVideoPlayer();
+							if (typeof videoPlayer[player].startVideoPlayer !== 'undefined') {
+								videoPlayer[player].startVideoPlayer();
+							}
 						}
 					
 					}
@@ -143,14 +152,14 @@ $(document).ready(function() {
 				
 				} else {
 				
-					alert('Error: Your comment did not save. Please contact corvin@uw.edu and report this error.');
+					alert('Error: Your comment did not save. Please contact support and report this error: ' + JSON.stringify(data));
 				
 				}
 
 			}, "json")
 			.fail(function(response) {
 				console.log('Error: Response was not a json object');
-				$(formsubmitted).prepend('<div class="form-message form-error">' + response.responseText + '</div>');
+				$(formsubmitted).prepend('<div class="form-message form-error">Error: Your comment did not save. Please contact corvin@uw.edu and report this error: Not a json object.</div>');
 			});
 		}
 
