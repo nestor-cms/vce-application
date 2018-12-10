@@ -23,7 +23,6 @@ $(document).ready(function() {
 						videoPlayer[player].startVideoPlayer();
 					}
 				}
-				
 			}
 		} else {
 			if (typeof videoPlayer === 'object') {
