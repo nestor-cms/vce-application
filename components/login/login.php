@@ -9,7 +9,7 @@ class Login extends Component {
 		return array(
 			'name' => 'Login',
 			'description' => 'Simple login form using email and password. A User must login to view anything contained with this component.',
-			'category' => 'site'
+			'category' => 'login'
 		);
 	}
 
@@ -36,6 +36,14 @@ class Login extends Component {
 	public function check_access($each_component, $vce) {
 
 		if (!isset($vce->user->user_id)) {
+		
+			// hook that can be used to extend this method
+			// login_check_access_false
+			if (isset($vce->site->hooks['login_check_access_false'])) {
+				foreach($vce->site->hooks['login_check_access_false'] as $hook) {
+					call_user_func($hook, $each_component, $vce);
+				}
+			}
 			
 			//add javascript
 			$vce->site->add_script(dirname(__FILE__) . '/js/script.js', 'jquery');
@@ -100,8 +108,10 @@ EOF;
 	 * Instead of going all the way through form_input in class.component.php, we just do everything here in the child.
 	 */
 	public function form_input($input) {
+	
 		global $user;
 		global $site;
+		
 		$input['email'] = filter_var($input['email'], FILTER_SANITIZE_EMAIL);
 		if (!filter_var($input['email'], FILTER_VALIDATE_EMAIL)) {
 			echo json_encode(array('response' => 'error','message' => 'Not a valid email address','action' => 'clear'));
@@ -115,6 +125,7 @@ EOF;
 			echo json_encode(array('response' => 'success','message' => 'Welcome Back!','action' => 'reload','url' => $site->site_url . '/' . $input['requested_url']));
 			return;
 		}
+		
 		// return error
 		echo json_encode(array('response' => 'error','message' => 'Invalid Username/Password','action' => 'clear'));
 		return;
