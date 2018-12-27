@@ -285,7 +285,7 @@ class VCE {
 	 * 'hierarchy' => array ('value', 'value'),
 	 * 'items' => array ('key' => 'value', 'key' => 'value')
 	 * );
-	 * $site->create_datalist($attributes);
+	 * $vce->create_datalist($attributes);
 	 * @param array $attributes
 	 * @global object $db
 	 * @return int $datalist_id
@@ -365,7 +365,7 @@ class VCE {
 	 * 'items' => array ( array ('key' => 'value', 'key' => 'value' ) )
 	 * );
 	 * 
-	 * $site->insert_datalist_items($attributes);
+	 * $vce->insert_datalist_items($attributes);
 	 * @param array $attributes
 	 * @return inserts items into datalist
 	 */
@@ -535,7 +535,7 @@ class VCE {
 	 * 'meta_data' => array ( 'key' => 'value','key' => 'value' )
 	 * );
 	 *
-	 * $site->update_datalist($attributes);
+	 * $vce->update_datalist($attributes);
 	 *
 	 * @global object $db
 	 * @return updates the datalist
@@ -594,7 +594,7 @@ class VCE {
 	 * 'meta_data' => array ( 'key' => 'value','key' => 'value' )
 	 * );
 	 *
-	 * $site->update_datalist_list($attributes);
+	 * $vce->update_datalist_list($attributes);
 	 *
 	 * @global object $db
 	 * @return updates the datalist
@@ -863,7 +863,7 @@ class VCE {
 	 * 'datalist_id' => *datalist_id*
 	 * );
 	 *
-	 * $site->get_datalist_items($attributes)
+	 * $vce->get_datalist_items($attributes)
 	 *
 	 * @param array $attributes
 	 * @global object $db
