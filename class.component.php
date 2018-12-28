@@ -398,6 +398,16 @@ class Component {
 	 */
 	public function edit_component($each_component, $vce) {
 	}
+
+
+	/**
+	 * Get configuration fields for component and add to $vce object
+	 *
+	 *
+	 */
+    public function get_component_configuration() {
+    }
+
 	
 	/**
 	 * Configuration fields for a component used in ManageComponents

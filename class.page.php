@@ -14,8 +14,7 @@ class Page {
 	 */
 	function __construct($vce) {
 	
-		// okay we're going to try this out
-		// global $vce;
+		// add to global vce object
 		$vce->page = $this;
 
 		// check that http_host and PHP_URL_HOST match
@@ -79,30 +78,6 @@ class Page {
 			}
 		}
 
-/*
-		// check for session attributes saved previously
-		if (isset($_SESSION['add_attributes'])) {
-			foreach (json_decode($_SESSION['add_attributes'],true) as $key=>$value) {
-				// if there is a persistent value set
-				if ($key == 'persistent') {
-					$persistent = $value;
-					foreach ($persistent as $persistent_key=>$persistent_value) {
-						$vce->$persistent_key = $persistent_value;
-					}
-				} else {
-					// normal value
-					$vce->$key = $value;
-				}
-			}
-			// clear it
-			unset($_SESSION['add_attributes']);
-			// rewrite if persistent value had been set
-			if (isset($persistent)) {
-				$_SESSION['add_attributes'] = json_encode(array('persistent' => $persistent));
-			}
-		}
-*/
-
 		// push out attributes into vce object that have been saved into session
 		$vce->site->obtrude_attributes($vce);
 	
@@ -116,7 +91,6 @@ class Page {
 				
 				// fetch requested component by component_id
 				$query = "SELECT " . TABLE_PREFIX . "components.*, " . TABLE_PREFIX . "components_meta.meta_value AS 'type' FROM " . TABLE_PREFIX . "components INNER JOIN " . TABLE_PREFIX . "components_meta ON " . TABLE_PREFIX . "components.component_id =  " . TABLE_PREFIX . "components_meta.component_id  WHERE " . TABLE_PREFIX . "components.component_id='" . $requested_id[1] . "' AND " . TABLE_PREFIX . "components_meta.meta_key='Type' LIMIT 1";
-
 
 			// otherwise fetch by url
 			} else {
@@ -321,6 +295,8 @@ class Page {
 				// if deactivated use the parent class
 				$check = new Component();
 			}
+			
+			$vce->dump($end_component);
 		
 			// get returned value from component for find_sub_components method
 			// by default returns true from method in components.class
