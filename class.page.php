@@ -295,8 +295,6 @@ class Page {
 				// if deactivated use the parent class
 				$check = new Component();
 			}
-			
-			$vce->dump($end_component);
 		
 			// get returned value from component for find_sub_components method
 			// by default returns true from method in components.class
