@@ -116,24 +116,22 @@ class Content {
 			}
 			// check if the current page contains part of the url from another menu item, making it a parent of the item
 			if ($menu->url != "") {
-				if (preg_match('/\/' . $menu->url . '\//', '/' . $vce->requested_url)) {
+				if (preg_match('#\/' . $menu->url . '\/#', '/' . $vce->requested_url)) {
 					$link .= ' class="current-menu-ancestor"';
 				}
 			}
 			$link .= '>';
 			if ($menu->url != "") {
-			
-				if (strtolower(substr($menu->url,0,4)) != "http") {
+				if (preg_match("/^(http|mailto)/i", $menu->url)) {
+					$url = $menu->url;
+				} else {
 					// if the url is / then this is the homepage
 					if ($menu->url == "/" || !isset($menu->url)) {
 						$url = $vce->site->site_url;
 					} else {
 						$url = $vce->site->site_url . '/' . $menu->url;
 					}
-				} else {
-					$url = $menu->url;
-				}
-			
+				} 
 				$link .= '<a href="' . $url . '"';
 				// open in new window
 				if (isset($menu->target))  {
