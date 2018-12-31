@@ -397,6 +397,13 @@ class User {
                 foreach ($user_object as $key => $value) {
                     $this->$key = $value;
                 }
+                
+				// hook 
+				if (isset($vce->site->hooks['user_make_user_object'])) {
+					foreach ($vce->site->hooks['user_make_user_object'] as $hook) {
+						call_user_func($hook, $this, $vce);
+					}
+				}
 
                 return self::store_session($this, $vce);
 
