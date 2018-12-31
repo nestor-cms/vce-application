@@ -99,6 +99,15 @@ EOF;
 		// $activated_components = json_decode($site->activated_components, true);
 
 		foreach ($urls as $each_url) {
+		
+			// FIX: needed to hack this now and limit to only two / /  in order to prevent huge load time.	
+			
+			// get the url depth
+			$url_depth = ($each_url->url != "/") ? substr_count($each_url->url,'/') : 0;
+				
+			if ($url_depth > 2) {
+				continue;
+			}
 			
 			// was component created on recipe save? If so, then show in Pages
 			if (isset($each_url->url)) {
