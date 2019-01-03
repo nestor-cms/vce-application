@@ -43,7 +43,7 @@ class Component {
 	}
 	
 	/**
-	 * This method to be used to access application hooks.
+	 * This method can be used to access application hooks.
 	 *
 	 * $content_hook = array(
 	 * 	'*vce_hook_name*' => '*component_class_name*::*component_method_name*'
