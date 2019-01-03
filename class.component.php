@@ -43,7 +43,20 @@ class Component {
 	}
 	
 	/**
-	 * Prevents an error when a component has been disabled.
+	 * This method to be used to access application hooks.
+	 *
+	 * $content_hook = array(
+	 * 	'*vce_hook_name*' => '*component_class_name*::*component_method_name*'
+	 * );
+	 * return $content_hook;
+	 *
+	 * You can also control the order in which hook events are fired off by using a priority value. A lower or negative priority value goes first, with positive numbers after.
+	 *
+	 * $content_hook = array(
+	 * 	'*vce_hook_name*' => ['function' => '*component_class_name*::*component_method_name*', 'priority' => -100]
+	 * );
+	 * return $content_hook;
+	 *
 	 * @return bool
 	 */
 	public function preload_component() {
