@@ -52,7 +52,7 @@ class MediaType {
 	
 		if (!isset(json_decode($vce->site->enabled_mediatype, true)[$each_component->media_type])) {
 	
-			$vce->content->add('main','<div class="warning">' . $each_component->media_type . ' media player has been disabled</div>');
+			$vce->content->add('main','<div class="warning">' . $each_component->media_type . ' This unsupported file type cannot be displayed</div>');
 
 		}
 		
