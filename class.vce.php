@@ -1110,27 +1110,57 @@ class VCE {
 	}
 
 	/**
-	 * Allows for calling object properties from template pages in theme and then return or print them.
+	 * Allows components to add functions to the $vce object dynamically.
+	 * 
 	 * @param string $name
 	 * @param array $args
 	 */
 	public function __call($name, $args) {
+
 		if (isset($this->$name)) {
 			if ($args) {
-				// return object property
-				return $this->$name;
+				return call_user_func_array($this->$name, $args);
 			} else {
-				// print object property
-				echo $this->$name;
-			}
-		} else {
-			if (!VCE_DEBUG) {
-				return false;
-			} else {
-				// print name of none existant component
-				echo 'Call to non-existant property ' . '$' . strtolower(get_class()) . '->' . $name . '()'  . ' in ' . debug_backtrace()[0]['file'] . ' on line ' . debug_backtrace()[0]['line'];
+				return call_user_func($this->$name);
 			}
 		}
+
+		// function or property not found, so load utility components and try function call again.
+		if (isset($this->site->hooks['vce_call_add_functions'])) {
+			foreach($this->site->hooks['vce_call_add_functions'] as $hook) {
+				call_user_func($hook, $this);
+			}
+
+			// Try function call again
+			if (isset($this->$name)) {
+				if ($args) {
+					return call_user_func_array($this->$name, $args);
+				} else {
+					return call_user_func($this->$name);
+				}
+			}
+		}
+
+		// Still not found, so error out.
+		if (!VCE_DEBUG) {
+			return false;
+		} else {
+			// print name of none existant component
+			echo 'Call to non-existant property ' . '$' . strtolower(get_class()) . '->' . $name . '()'  . ' in ' . debug_backtrace()[0]['file'] . ' on line ' . debug_backtrace()[0]['line'];
+		}
+	}
+
+	/**
+	 * Magic function to convert static function calls to non-static and use __call functionality above
+	 *
+	 * @param [type] $name
+	 * @param [type] $args
+	 * @return void
+	 */
+	public static function __callStatic($name, $args) {
+
+		global $vce;
+		return $vce->__call($name, $args);
 	}
 
 	/**
