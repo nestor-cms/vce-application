@@ -126,9 +126,6 @@ class Site {
 
         }
 
-		// load Component class
-		require_once('class.component.php');
-		
 		// declare array for hooks
 		$hooks = array();
 		

@@ -16,38 +16,82 @@ if (file_exists(BASEPATH . 'vce-config.php')) {
 	exit();
 }
 
+/* autoloaders **/
+
+/**
+ * Auto load a registered component
+ *
+ * @param [string] $className
+ * @return void
+ */
+function autoloadComponents($className) {
+
+	global $vce;
+
+	if ($vce && $vce->site) {
+		$activated_components = json_decode($vce->site->activated_components, true);
+		if (isset($activated_components[$className])) {
+			require_once BASEPATH . $activated_components[$className];
+		}
+	}
+}
+
+/**
+ * Auto load a vce-application class with name like class.foo.php
+ *
+ * @param [string] $className
+ * @return void
+ */
+function autoloadClasses($className) {
+
+	$file = BASEPATH . 'vce-application/class.' . strtolower($className) . '.php';
+	if (file_exists($file))
+		require_once $file;
+}
+
+/**
+ * Auto load a trait
+ *
+ * @param [string] $className
+ * @return void
+ */
+function autoloadTraits($className) {
+
+	$file = BASEPATH . 'vce-application/traits/' . $className . '.php';
+	if (file_exists($file))
+		require_once $file;
+}
+
+spl_autoload_register("autoloadComponents");
+spl_autoload_register("autoloadClasses");
+spl_autoload_register("autoloadTraits");
+
 // error reporting
 if (defined('VCE_DEBUG') && VCE_DEBUG === false) {
 	ini_set('error_reporting', 0);
 }
 
 // require vce
-require_once(BASEPATH . 'vce-application/class.vce.php');
 $vce = new VCE();
 
 // require database class
-require_once(BASEPATH . 'vce-application/class.db.php');
 $db = new DB($vce);
 
 // create contents object
-require_once(BASEPATH . 'vce-application/class.content.php');
 $content = new Content($vce);
 
 // class.component.php loaded with __construct method of class.site.php
 
 // create site object
-require_once(BASEPATH . 'vce-application/class.site.php');
 $site = new Site($vce);
 
 // add theme.php
 $site->add_theme_functions();
 
 // create user object
-require_once(BASEPATH . 'vce-application/class.user.php');
 $user = new User($vce);
 
 // create page object
-require_once(BASEPATH . 'vce-application/class.page.php');
 $page = new Page($vce);
 
 // unset($page->site,$page->user,$page->content);
