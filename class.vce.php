@@ -21,7 +21,7 @@ class VCE {
 	
 		// clean-up nulls and any empty array
 		foreach ($dossier_elements as $dossier_name=>$dossier_value) {
-			if (is_null($dossier_value) || count($dossier_value) < 1) {
+			if (empty($dossier_value) || is_null($dossier_value)) {
 				unset($dossier_elements[$dossier_name]);
 			}
 		}
