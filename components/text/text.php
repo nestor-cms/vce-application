@@ -36,13 +36,7 @@ $content_mediatype = <<<EOF
 <form id="create_media" class="asynchronous-form" method="post" action="$vce->input_path" autocomplete="off">
 <input type="hidden" name="dossier" value="$recipe_component->dossier_for_create">
 <input type="hidden" name="media_type" value="Text">
-<label> 
-<input type="text" name="title" value="Text Block" class="" tag="required" autocomplete="off">
-<div class="label-text">
-<div class="label-message">Text Block Title</div>
-<div class="label-error">Enter Text Block Title</div>
-</div>
-</label>
+<input type="hidden" name="title" value="Text Block">
 <label>
 <textarea name="text" class="textarea-input" tag="required"></textarea>
 <div class="label-text">
@@ -75,13 +69,7 @@ $content_mediatype = <<<EOF
 <div class="media-edit-form">
 <form id="update_$each_component->component_id" class="asynchronous-form" method="post" action="$vce->input_path" autocomplete="off">
 <input type="hidden" name="dossier" value="$each_component->dossier_for_edit">
-<label>
-<input type="text" name="title" value="$each_component->title" tag="required">
-<div class="label-text">
-<div class="label-message">Text Block Title</div>
-<div class="label-error">Enter Text Block Title</div>
-</div>
-</label>
+<input type="hidden" name="title" value="$each_component->title">
 <label>
 <textarea name="text" class="textarea-input" tag="required">$each_component->text</textarea>
 <div class="label-text">
