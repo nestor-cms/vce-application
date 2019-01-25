@@ -19,7 +19,7 @@ class CronTask extends Component {
     public function preload_component() {
 
         $content_hook = array(
-            'vce_call_add_functions' => 'VCEUtilities::vce_call_add_functions',
+            'vce_call_add_functions' => 'CronTask::vce_call_add_functions',
         );
 
         return $content_hook;

@@ -19,7 +19,7 @@ class Datalist extends Component {
     public function preload_component() {
 
         $content_hook = array(
-            'vce_call_add_functions' => 'VCEUtilities::vce_call_add_functions',
+            'vce_call_add_functions' => 'Datalist::vce_call_add_functions',
         );
 
         return $content_hook;
@@ -54,6 +54,8 @@ class Datalist extends Component {
          */
         $vce->create_datalist = function ($attributes) {
 
+            global $vce;
+
             // todo: add a flag that would be checked to make sure we don't create a duplicate
 
             // create a record in datalist
@@ -71,7 +73,7 @@ class Datalist extends Component {
                 'sequence' => 0,
             );
 
-            $new_datalist_id = $this->db->insert('datalists', $records);
+            $new_datalist_id = $vce->db->insert('datalists', $records);
 
             // create aspects array if it doen't already exist
             $aspects = isset($attributes['aspects']) ? $attributes['aspects'] : array();
@@ -105,7 +107,7 @@ class Datalist extends Component {
                 );
             }
 
-            $this->db->insert('datalists_meta', $aspects_records);
+            $vce->db->insert('datalists_meta', $aspects_records);
 
             // if items need to be created
             if (isset($attributes['items'])) {
@@ -130,7 +132,7 @@ class Datalist extends Component {
          * @return inserts items into datalist
          */
         $vce->insert_datalist_items = function ($attributes) {
-
+            
             foreach ($attributes['items'] as $sequence => $each_item) {
 
                 $input = array();
@@ -180,9 +182,11 @@ class Datalist extends Component {
          */
         $vce->add_datalist_item = function ($input) {
 
+            global $vce;
+
             // get meta_data associated with datalist_id
             $query = "SELECT meta_key, meta_value FROM " . TABLE_PREFIX . "datalists_meta WHERE datalist_id='" . $input['datalist_id'] . "'";
-            $meta_data = $this->db->get_data_object($query);
+            $meta_data = $vce->db->get_data_object($query);
 
             // rekey datalist meta_data into object
             $datalist = new StdClass();
@@ -205,7 +209,7 @@ class Datalist extends Component {
                 'sequence' => $sequence,
             );
 
-            $item_id = $this->db->insert('datalists_items', $records);
+            $item_id = $vce->db->insert('datalists_items', $records);
 
             // add key value pairs
             foreach ($input as $key => $value) {
@@ -219,7 +223,7 @@ class Datalist extends Component {
 
             }
 
-            $this->db->insert('datalists_items_meta', $add_items_meta);
+            $vce->db->insert('datalists_items_meta', $add_items_meta);
 
             // hierarchy is set, so there are children
             if (isset($datalist->hierarchy)) {
@@ -245,7 +249,7 @@ class Datalist extends Component {
                 );
 
                 // get the id of the insert
-                $new_datalist_id = $this->db->insert('datalists', $add_lists)[0];
+                $new_datalist_id = $vce->db->insert('datalists', $add_lists)[0];
 
                 unset($add_meta, $datalist->datalist, $datalist->hierarchy);
 
@@ -269,7 +273,7 @@ class Datalist extends Component {
                     );
                 }
 
-                $this->db->insert('datalists_meta', $add_meta);
+                $vce->db->insert('datalists_meta', $add_meta);
 
             }
 
@@ -298,6 +302,8 @@ class Datalist extends Component {
          */
         $vce->update_datalist = function ($attributes) {
 
+            global $vce;
+
             // update meta_data for datalist
             if (isset($attributes['datalist_id'])) {
                 $where_key = 'datalist_id';
@@ -319,14 +325,14 @@ class Datalist extends Component {
             if (isset($update_associations)) {
                 $update = $update_associations;
                 $update_where = array($where_key => $where_value);
-                $this->db->update('datalists', $update, $update_where);
+                $vce->db->update('datalists', $update, $update_where);
             }
 
             if (isset($attributes['meta_data'])) {
                 foreach ($attributes['meta_data'] as $key => $value) {
                     $update = array('meta_value' => $value);
                     $update_where = array($where_key => $where_value, 'meta_key' => $key);
-                    $this->db->update('datalists_meta', $update, $update_where);
+                    $vce->db->update('datalists_meta', $update, $update_where);
                 }
             }
 
@@ -353,6 +359,8 @@ class Datalist extends Component {
          */
         $vce->update_datalist_item = function ($attributes) {
 
+            global $vce;
+
             if (!isset($attributes['item_id'])) {
                 // no identifier found
                 return false;
@@ -367,14 +375,14 @@ class Datalist extends Component {
             if (isset($update_associations)) {
                 $update = $update_associations;
                 $update_where = array('item_id' => $attributes['item_id']);
-                $this->db->update('datalists_items', $update, $update_where);
+                $vce->db->update('datalists_items', $update, $update_where);
             }
 
             if (isset($attributes['meta_data'])) {
                 foreach ($attributes['meta_data'] as $key => $value) {
                     $update = array('meta_value' => $value);
                     $update_where = array('item_id' => $attributes['item_id'], 'meta_key' => $key);
-                    $this->db->update('datalists_items_meta', $update, $update_where);
+                    $vce->db->update('datalists_items_meta', $update, $update_where);
                 }
             }
 
@@ -391,12 +399,14 @@ class Datalist extends Component {
          */
         $vce->remove_datalist = function ($attributes) {
 
+            global $vce;
+
             // datalist is named, delete everything associated with that datalist including meta and items
             if (isset($attributes['datalist']) && !isset($attributes['datalist_id'])) {
 
                 // get all datalist_id associated with the datalist
                 $query = "SELECT datalist_id FROM " . TABLE_PREFIX . "datalists_meta WHERE meta_key='datalist' AND meta_value='" . $attributes['datalist'] . "'";
-                $datalist_ids = $this->db->get_data_object($query);
+                $datalist_ids = $vce->db->get_data_object($query);
 
                 // cycle through results
                 foreach ($datalist_ids as $each_datalist_id) {
@@ -437,13 +447,15 @@ class Datalist extends Component {
          */
         $vce->extirpate_datalist = function ($item_id, $datalist_id) {
 
+            global $vce;
+
             // search for all item_id in datalist_items
 
             if ($item_id == "all") {
 
                 // search for datalist associated with this item
                 $query = "SELECT item_id FROM " . TABLE_PREFIX . "datalists_items WHERE datalist_id='" . $datalist_id . "'";
-                $items = $this->db->get_data_object($query);
+                $items = $vce->db->get_data_object($query);
 
                 foreach ($items as $each_item) {
                     // recursive call for children
@@ -452,24 +464,24 @@ class Datalist extends Component {
 
                 // delete from datalists where datalist_id = $datalist_id
                 $where = array('datalist_id' => $datalist_id);
-                $this->db->delete('datalists', $where);
+                $vce->db->delete('datalists', $where);
 
                 // delete rows from datalists_meta where datalist_id =  $datalist_id
                 $where = array('datalist_id' => $datalist_id);
-                $this->db->delete('datalists_meta', $where);
+                $vce->db->delete('datalists_meta', $where);
 
             } else {
 
                 // search for datalist associated with this item
                 $query = "SELECT datalist_id FROM " . TABLE_PREFIX . "datalists WHERE item_id='" . $item_id . "'";
-                $children = $this->db->get_data_object($query);
+                $children = $vce->db->get_data_object($query);
 
                 // if there is a datalist, then we have children
                 if (isset($children[0]->datalist_id)) {
 
                     // search for datalist associated with this item
                     $query = "SELECT item_id FROM " . TABLE_PREFIX . "datalists_items WHERE datalist_id='" . $children[0]->datalist_id . "'";
-                    $items = $this->db->get_data_object($query);
+                    $items = $vce->db->get_data_object($query);
 
                     foreach ($items as $each_item) {
                         // recursive call for children
@@ -478,25 +490,25 @@ class Datalist extends Component {
 
                     // delete from datalists where item_id = $item_id
                     $where = array('item_id' => $item_id);
-                    $this->db->delete('datalists', $where);
+                    $vce->db->delete('datalists', $where);
 
                     // delete rows from datalists where datalist_id = $children->datalist_id
                     $where = array('datalist_id' => $children[0]->datalist_id);
-                    $this->db->delete('datalists', $where);
+                    $vce->db->delete('datalists', $where);
 
                     // delete rows from datalists_meta where datalist_id = $children->datalist_id
                     $where = array('datalist_id' => $children[0]->datalist_id);
-                    $this->db->delete('datalists_meta', $where);
+                    $vce->db->delete('datalists_meta', $where);
 
                 }
 
                 // delete from datalists_items where item_id = $item_id
                 $where = array('item_id' => $item_id);
-                $this->db->delete('datalists_items', $where);
+                $vce->db->delete('datalists_items', $where);
 
                 // delete from datalists_items_meta where item_id = $item_id
                 $where = array('item_id' => $item_id);
-                $this->db->delete('datalists_items_meta', $where);
+                $vce->db->delete('datalists_items_meta', $where);
 
             }
 
@@ -519,6 +531,8 @@ class Datalist extends Component {
          * @return array $our_datalists
          */
         $vce->get_datalist = function ($attributes) {
+
+            global $vce;
 
             $component_id = isset($attributes['component_id']) ? $attributes['component_id'] : null;
             $user_id = isset($attributes['user_id']) ? $attributes['user_id'] : null;
@@ -553,7 +567,7 @@ class Datalist extends Component {
             $query .= " ORDER BY " . TABLE_PREFIX . "datalists.sequence ASC";
 
             // call to database
-            $all_datalists = $this->db->get_data_object($query);
+            $all_datalists = $vce->db->get_data_object($query);
 
             $our_datalists = array();
             $not_requested = array();
@@ -611,6 +625,8 @@ class Datalist extends Component {
          */
         $vce->get_datalist_items = function ($attributes) {
 
+            global $vce;
+
             // options to search by
             if (isset($attributes['datalist_id'])) {
                 $query = "SELECT * FROM " . TABLE_PREFIX . "datalists WHERE datalist_id='" . $attributes['datalist_id'] . "'";
@@ -631,7 +647,7 @@ class Datalist extends Component {
             // a query has been set
             if (isset($query)) {
                 // database call
-                $datalist_results = $this->db->get_data_object($query);
+                $datalist_results = $vce->db->get_data_object($query);
 
                 if (!empty($datalist_results)) {
                     $datalist_info = $datalist_results[0];
@@ -662,7 +678,7 @@ class Datalist extends Component {
 
             if (isset($query)) {
                 //make database call
-                $meta_data = $this->db->get_data_object($query);
+                $meta_data = $vce->db->get_data_object($query);
 
                 if (!empty($meta_data)) {
                     // add each key => value pair
