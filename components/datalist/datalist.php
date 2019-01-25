@@ -52,9 +52,7 @@ class Datalist extends Component {
          * @global object $db
          * @return int $datalist_id
          */
-        $vce->create_datalist = function ($attributes) {
-
-            global $vce;
+        $vce->create_datalist = function ($attributes) use ($vce) {
 
             // todo: add a flag that would be checked to make sure we don't create a duplicate
 
@@ -131,7 +129,7 @@ class Datalist extends Component {
          * @param array $attributes
          * @return inserts items into datalist
          */
-        $vce->insert_datalist_items = function ($attributes) {
+        $vce->insert_datalist_items = function ($attributes) use ($vce) {
             
             foreach ($attributes['items'] as $sequence => $each_item) {
 
@@ -180,9 +178,7 @@ class Datalist extends Component {
          * @global object $db
          * @return int $new_datalist_id
          */
-        $vce->add_datalist_item = function ($input) {
-
-            global $vce;
+        $vce->add_datalist_item = function ($input) use ($vce) {
 
             // get meta_data associated with datalist_id
             $query = "SELECT meta_key, meta_value FROM " . TABLE_PREFIX . "datalists_meta WHERE datalist_id='" . $input['datalist_id'] . "'";
@@ -300,9 +296,7 @@ class Datalist extends Component {
          * @global object $db
          * @return updates the datalist
          */
-        $vce->update_datalist = function ($attributes) {
-
-            global $vce;
+        $vce->update_datalist = function ($attributes) use ($vce) {
 
             // update meta_data for datalist
             if (isset($attributes['datalist_id'])) {
@@ -357,9 +351,7 @@ class Datalist extends Component {
          * @global object $db
          * @return updates the datalist
          */
-        $vce->update_datalist_item = function ($attributes) {
-
-            global $vce;
+        $vce->update_datalist_item = function ($attributes) use ($vce) {
 
             if (!isset($attributes['item_id'])) {
                 // no identifier found
@@ -397,9 +389,7 @@ class Datalist extends Component {
          * @global object $db
          * @return removes datalist
          */
-        $vce->remove_datalist = function ($attributes) {
-
-            global $vce;
+        $vce->remove_datalist = function ($attributes) use ($vce) {
 
             // datalist is named, delete everything associated with that datalist including meta and items
             if (isset($attributes['datalist']) && !isset($attributes['datalist_id'])) {
@@ -445,9 +435,7 @@ class Datalist extends Component {
          * @global object $db
          * @return removes datalists
          */
-        $vce->extirpate_datalist = function ($item_id, $datalist_id) {
-
-            global $vce;
+        $vce->extirpate_datalist = function ($item_id, $datalist_id) use ($vce) {
 
             // search for all item_id in datalist_items
 
@@ -530,7 +518,7 @@ class Datalist extends Component {
          * @global object $db
          * @return array $our_datalists
          */
-        $vce->get_datalist = function ($attributes) {
+        $vce->get_datalist = function ($attributes) use ($vce) {
 
             global $vce;
 
@@ -623,9 +611,7 @@ class Datalist extends Component {
          * @global object $db
          * @return array $options
          */
-        $vce->get_datalist_items = function ($attributes) {
-
-            global $vce;
+        $vce->get_datalist_items = function ($attributes) use ($vce) {
 
             // options to search by
             if (isset($attributes['datalist_id'])) {
