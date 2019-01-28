@@ -33,11 +33,6 @@ class VCEUtilities extends Component {
      */
     public static function vce_call_add_functions($vce) {
 
-        // A test function
-        $vce->foo = function ($bar) {
-            return $bar;
-        };
-
         /**
          * returns an ilkyo id, a 14 digit number, for any string
          * like a pheonix from the ashes, ilkyo returns. Viva la ilkyo and special thanks to Mike Min.

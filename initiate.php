@@ -49,22 +49,9 @@ function autoloadClasses($className) {
 		require_once $file;
 }
 
-/**
- * Auto load a trait
- *
- * @param [string] $className
- * @return void
- */
-function autoloadTraits($className) {
-
-	$file = BASEPATH . 'vce-application/traits/' . $className . '.php';
-	if (file_exists($file))
-		require_once $file;
-}
 
 spl_autoload_register("autoloadComponents");
 spl_autoload_register("autoloadClasses");
-spl_autoload_register("autoloadTraits");
 
 // error reporting
 if (defined('VCE_DEBUG') && VCE_DEBUG === false) {
