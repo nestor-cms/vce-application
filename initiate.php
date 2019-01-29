@@ -37,7 +37,6 @@ spl_autoload_register(function($class_name) use ($vce) {
 	$file = BASEPATH . 'vce-application/class.' . strtolower($class_name) . '.php';
 	if (file_exists($file)) {
 		require_once($file);
-		return;
 	}
 
 	// activated components
@@ -45,13 +44,9 @@ spl_autoload_register(function($class_name) use ($vce) {
 		$activated_components = json_decode($vce->site->activated_components, true);
 		if (isset($activated_components[$class_name])) {
 			require_once(BASEPATH . $activated_components[$class_name]);
-			return;
 		}
 	}
 	
-	// die and display error if component is not found
-	die($class_name . ' is not been activated');
-
 });
 
 // require database class
