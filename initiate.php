@@ -19,39 +19,38 @@ if (file_exists(BASEPATH . 'vce-config.php')) {
 /* autoloaders **/
 
 /**
- * Auto load a registered component
+ * auto load an activated component
  *
  * @param [string] $className
  * @return void
  */
-function autoloadComponents($className) {
+function autoload_components($class_name) {
 
 	global $vce;
 
-	if ($vce && $vce->site) {
+	if (isset($vce) && isset($vce->site)) {
 		$activated_components = json_decode($vce->site->activated_components, true);
-		if (isset($activated_components[$className])) {
-			require_once BASEPATH . $activated_components[$className];
+		if (isset($activated_components[$class_name])) {
+			require_once BASEPATH . $activated_components[$class_name];
 		}
 	}
 }
 
 /**
- * Auto load a vce-application class with name like class.foo.php
+ * auto load a vce-application class with name like class.foo.php
  *
  * @param [string] $className
  * @return void
  */
-function autoloadClasses($className) {
+function autoload_classes($class_name) {
 
-	$file = BASEPATH . 'vce-application/class.' . strtolower($className) . '.php';
+	$file = BASEPATH . 'vce-application/class.' . strtolower($class_name) . '.php';
 	if (file_exists($file))
 		require_once $file;
 }
 
-
-spl_autoload_register("autoloadComponents");
-spl_autoload_register("autoloadClasses");
+// register autoload functions
+spl_autoload_register(array('autoload_components','autoload_classes'));
 
 // error reporting
 if (defined('VCE_DEBUG') && VCE_DEBUG === false) {
@@ -66,8 +65,6 @@ $db = new DB($vce);
 
 // create contents object
 $content = new Content($vce);
-
-// class.component.php loaded with __construct method of class.site.php
 
 // create site object
 $site = new Site($vce);
