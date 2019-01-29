@@ -16,51 +16,43 @@ if (file_exists(BASEPATH . 'vce-config.php')) {
 	exit();
 }
 
-/* autoloaders **/
-
-/**
- * auto load an activated component
- *
- * @param [string] $className
- * @return void
- */
-function autoload_components($class_name) {
-
-	global $vce;
-
-	if (isset($vce) && isset($vce->site)) {
-		$activated_components = json_decode($vce->site->activated_components, true);
-		if (isset($activated_components[$class_name])) {
-			require_once BASEPATH . $activated_components[$class_name];
-		}
-	}
-}
-
-/**
- * auto load a vce-application class with name like class.foo.php
- *
- * @param [string] $className
- * @return void
- */
-function autoload_classes($class_name) {
-
-	$file = BASEPATH . 'vce-application/class.' . strtolower($class_name) . '.php';
-	if (file_exists($file))
-		require_once $file;
-}
-
-
-// register autoload functions
-spl_autoload_register('autoload_components');
-spl_autoload_register('autoload_classes');
-
 // error reporting
 if (defined('VCE_DEBUG') && VCE_DEBUG === false) {
 	ini_set('error_reporting', 0);
 }
 
 // require vce
+require_once(BASEPATH . 'vce-application/class.vce.php');
 $vce = new VCE();
+
+/**
+ * auto load vce-application class with name like class.foo.php or activated components
+ *
+ * @param [string] $className
+ * @return void
+ */
+spl_autoload_register(function($class_name) use ($vce) {
+
+	// vce-application classes
+	$file = BASEPATH . 'vce-application/class.' . strtolower($class_name) . '.php';
+	if (file_exists($file)) {
+		require_once($file);
+		return;
+	}
+
+	// activated components
+	if (isset($vce) && isset($vce->site)) {
+		$activated_components = json_decode($vce->site->activated_components, true);
+		if (isset($activated_components[$class_name])) {
+			require_once(BASEPATH . $activated_components[$class_name]);
+			return;
+		}
+	}
+	
+	// die and display error if component is not found
+	die($class_name . ' is not been activated');
+
+});
 
 // require database class
 $db = new DB($vce);
