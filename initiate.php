@@ -49,8 +49,10 @@ function autoload_classes($class_name) {
 		require_once $file;
 }
 
+
 // register autoload functions
-spl_autoload_register(array('autoload_components','autoload_classes'));
+spl_autoload_register('autoload_components');
+spl_autoload_register('autoload_classes');
 
 // error reporting
 if (defined('VCE_DEBUG') && VCE_DEBUG === false) {
