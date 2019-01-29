@@ -19,7 +19,7 @@ class Site {
         $vce->site = $this;
 
         // check that memory_limit is at least set to 40M
-        if (vce::convert_to_bytes(ini_get('memory_limit')) < 41943040) {
+        if ($vce->convert_to_bytes(ini_get('memory_limit')) < 41943040) {
             @ini_set('memory_limit', '40M');
         }
 
