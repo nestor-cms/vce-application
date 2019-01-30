@@ -53,7 +53,7 @@ class Input extends Component {
 
 			// check that component type is a property of $dossier, json object test
 			if (!isset($dossier['type']) || !isset($dossier['procedure'])) {
-				echo json_encode(array('response' => 'error','message' => 'Dossier is not valid','action' => ''));
+				echo json_encode(array('response' => 'error','message' => 'Session has expired. <a class="link-button" href="">Reload Page</a>','action' => ''));
 				exit();
 			}
 

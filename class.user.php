@@ -614,7 +614,7 @@ class User {
         // chage session name
         session_name('_s');
 
-        // set the cache expire to 30 minutes
+        // set the cache expire to 30 minutes / HTTP cache expiration time
         session_cache_expire(30);
 
         // start the session
