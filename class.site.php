@@ -328,20 +328,8 @@ class Site {
             $this->add_style($site_url . '/vce-application/css/vce.css?ver=' . $ver, 'vce');
         }
 
-    }
-
-    /**
-     * Adds theme.php for selected theme.
-     * @return include
-     */
-    public function add_theme_functions() {
-
-        // allow for user site objects to be referenced
-        // global $user;
-        // global $site;
-
         // load theme functions
-        include_once BASEPATH . 'vce-content/themes/' . $this->site_theme . '/theme.php';
+        include_once(BASEPATH . 'vce-content/themes/' . $this->site_theme . '/theme.php');
 
     }
 

@@ -25,46 +25,28 @@ if (defined('VCE_DEBUG') && VCE_DEBUG === false) {
 require_once(BASEPATH . 'vce-application/class.vce.php');
 $vce = new VCE();
 
-/**
- * auto load vce-application class with name like class.foo.php or activated components
- *
- * @param [string] $className
- * @return void
- */
-spl_autoload_register(function($class_name) use ($vce) {
-
-	// vce-application classes
-	$file = BASEPATH . 'vce-application/class.' . strtolower($class_name) . '.php';
-	if (file_exists($file)) {
-		require_once($file);
-	}
-
-	// activated components
-	if (isset($vce) && isset($vce->site)) {
-		$activated_components = json_decode($vce->site->activated_components, true);
-		if (isset($activated_components[$class_name])) {
-			require_once(BASEPATH . $activated_components[$class_name]);
-		}
-	}
-	
-});
-
 // require database class
+require_once(BASEPATH . 'vce-application/class.db.php');
 $db = new DB($vce);
 
 // create contents object
+require_once(BASEPATH . 'vce-application/class.content.php');
 $content = new Content($vce);
 
+// load component class
+require_once(BASEPATH . 'vce-application/class.component.php');
+// this class does not get instantiated
+
 // create site object
+require_once(BASEPATH . 'vce-application/class.site.php');
 $site = new Site($vce);
 
-// add theme.php
-$site->add_theme_functions();
-
 // create user object
+require_once(BASEPATH . 'vce-application/class.user.php');
 $user = new User($vce);
 
 // create page object
+require_once(BASEPATH . 'vce-application/class.page.php');
 $page = new Page($vce);
 
 // unset($page->site,$page->user,$page->content);
