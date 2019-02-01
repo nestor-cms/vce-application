@@ -334,75 +334,55 @@ class Page {
 		global $vce;
 
 		// get children of current_id
-		$query = "SELECT * FROM  " . TABLE_PREFIX . "components WHERE parent_id='" . $current_id . "' ORDER BY sequence ASC";
+		$query = "SELECT * FROM  " . TABLE_PREFIX . "components INNER JOIN " . TABLE_PREFIX . "components_meta ON " . TABLE_PREFIX . "components.component_id = " . TABLE_PREFIX . "components_meta.component_id WHERE " . TABLE_PREFIX . "components.parent_id='" . $current_id . "' ORDER BY sequence ASC";
 		$requested_components = $vce->db->get_data_object($query);
-	
+		
 		// load hooks
 		if (isset($vce->site->hooks['requested_sub_components'])) {
 			foreach($vce->site->hooks['requested_sub_components'] as $hook) {
 				$requested_components = call_user_func($hook, $requested_components, func_get_args());
 			}
 		}
-
+			
 		if (!empty($requested_components)) {
 
-			// get meta data for each component and add it to object
-			foreach ($requested_components as $each_key=>$each_component) {
-			
-				// found a url so make sub_url = true
-				if (!empty($each_component->url)) {
-					$sub_url = true;
-				} else {
-					// otherwise, unset url
-					unset($each_component->url);
-				}
-			
-				// add array element keyed by component_id
-				$requested[$each_component->component_id] = $each_component;
-			
-			}
-			
-			// get meta data for component
-			$query = "SELECT component_id, meta_key, meta_value, minutia FROM  " . TABLE_PREFIX . "components_meta WHERE component_id IN (" . implode(',',array_keys($requested)) . ") ORDER BY meta_key";
-			$components_meta = $vce->db->get_data_object($query);
-			
-			// rekey the meta data
-			foreach ($components_meta as $each_meta) {
+			$requested = array();
+			foreach ($requested_components as $meta_data) {
+		
+				if (!isset($requested[$meta_data->component_id])) {
+					// create object and add component table data
+					$requested[$meta_data->component_id] = new stdClass();
+					$requested[$meta_data->component_id]->component_id = $meta_data->component_id;
+					$requested[$meta_data->component_id]->parent_id = $meta_data->parent_id;
+					$requested[$meta_data->component_id]->sequence = $meta_data->sequence;
+					// $requested[$meta_data->component_id]->url = $meta_data->url;
 
-					// this is not currently used
-					if ($each_meta->meta_key == "recipe") {
-			
-						// decode json object of recipe
-						$recipe = json_decode($each_meta->meta_value, true)['recipe'];
-				
-						// load hooks
-						if (isset($vce->site->hooks['page_add_recipe'])) {
-							foreach($vce->site->hooks['page_add_recipe'] as $hook) {
-								$recipe = call_user_func($hook, $this->recipe, $recipe);
-							}
-						}
-				
-						// set recipe property of page object
-						$this->recipe = $recipe;
-						continue;
-			
-					}
-
-					// create a var from meta_key
-					$key = $each_meta->meta_key;
-	
-					$requested[$each_meta->component_id]->$key = $vce->db->clean($each_meta->meta_value);
-
-					// adding minutia if it exists within database table
-					if (!empty($each_meta->minutia)) {
-						$key .= "_minutia";
-						$requested[$each_meta->component_id]->$key = $each_meta->minutia;
+					// found a url so make sub_url = true
+					if (!empty($meta_data->url)) {
+						$sub_url = true;
+						$requested[$meta_data->component_id]->url = $meta_data->url;
 					}
 					
-			}
+				}
 			
+				// create a var from meta_key
+				$key = $meta_data->meta_key;
+		
+				// add meta_value
+				$requested[$meta_data->component_id]->$key = $vce->db->clean($meta_data->meta_value);
+
+				// adding minutia if it exists within database table
+				if (!empty($meta_data->minutia)) {
+					$key .= "_minutia";
+					$requested[$meta_data->component_id]->$key = $meta_data->minutia;
+				}
+		
+			}
+		
+		
 			// rekey requested
 			$requested_components = array_values($requested);
+			
 
 			// load hooks
 			// page_get_sub_components
