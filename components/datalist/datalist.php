@@ -110,7 +110,7 @@ class Datalist extends Component {
             // if items need to be created
             if (isset($attributes['items'])) {
                 // pass datalist_id that was created and items
-                self::insert_datalist_items(array('datalist_id' => $new_datalist_id, 'items' => $attributes['items']));
+                $vce->insert_datalist_items(array('datalist_id' => $new_datalist_id, 'items' => $attributes['items']));
             }
 
             // return the id for the datalist
@@ -152,7 +152,7 @@ class Datalist extends Component {
                 }
 
                 // call to function to add the datalist item
-                $new_datalist_id = self::add_datalist_item($input);
+                $new_datalist_id = $vce->add_datalist_item($input);
 
                 if (isset($each_item['items'])) {
 
@@ -161,7 +161,7 @@ class Datalist extends Component {
                     $this_attributes['datalist_id'] = $new_datalist_id;
                     $this_attributes['items'] = $each_item['items'];
 
-                    self::insert_datalist_items($this_attributes);
+                    $vce->insert_datalist_items($this_attributes);
 
                 }
             }
@@ -401,7 +401,7 @@ class Datalist extends Component {
                 // cycle through results
                 foreach ($datalist_ids as $each_datalist_id) {
                     // send each datalist_id to search_and_destroy with 'all' items to be deleted
-                    self::extirpate_datalist('all', $each_datalist_id->datalist_id);
+                    $vce->extirpate_datalist('all', $each_datalist_id->datalist_id);
                 }
 
             }
@@ -412,7 +412,7 @@ class Datalist extends Component {
                 // if no item_id, then delete all items associated with this datalist_id
                 $item_id = isset($attributes['item_id']) ? $attributes['item_id'] : 'all';
 
-                self::extirpate_datalist($item_id, $attributes['datalist_id']);
+                $vce->extirpate_datalist($item_id, $attributes['datalist_id']);
 
             }
 
@@ -421,7 +421,7 @@ class Datalist extends Component {
 
                 $datalist_id = isset($attributes['datalist_id']) ? $attributes['datalist_id'] : null;
 
-                self::extirpate_datalist($attributes['item_id'], $datalist_id);
+                $vce->extirpate_datalist($attributes['item_id'], $datalist_id);
 
             }
 
@@ -447,7 +447,7 @@ class Datalist extends Component {
 
                 foreach ($items as $each_item) {
                     // recursive call for children
-                    self::extirpate_datalist($each_item->item_id, $datalist_id);
+                    $vce->extirpate_datalist($each_item->item_id, $datalist_id);
                 }
 
                 // delete from datalists where datalist_id = $datalist_id
@@ -473,7 +473,7 @@ class Datalist extends Component {
 
                     foreach ($items as $each_item) {
                         // recursive call for children
-                        self::extirpate_datalist($each_item->item_id, $item_id);
+                        $vce->extirpate_datalist($each_item->item_id, $item_id);
                     }
 
                     // delete from datalists where item_id = $item_id
