@@ -349,6 +349,7 @@ class Page {
 			$requested = array();
 			foreach ($requested_components as $meta_data) {
 		
+		
 				if (!isset($requested[$meta_data->component_id])) {
 					// create object and add component table data
 					$requested[$meta_data->component_id] = new stdClass();
@@ -359,7 +360,7 @@ class Page {
 
 					// found a url so make sub_url = true
 					if (!empty($meta_data->url)) {
-						$sub_url = true;
+						$sub_url[$meta_data->component_id] = true;
 						$requested[$meta_data->component_id]->url = $meta_data->url;
 					}
 					
@@ -383,7 +384,6 @@ class Page {
 			// rekey requested
 			$requested_components = array_values($requested);
 			
-
 			// load hooks
 			// page_get_sub_components
 			if (isset($vce->site->hooks['page_get_sub_components'])) {
@@ -462,104 +462,24 @@ class Page {
 								
 				// if $recursive is true then recursive call back to get_sub_components for next component
 				$recursive = false;
-					
-				// anonymous function for checking if there are nested components with the same type.
-				$nested = function($sub_components, $type, $history = array(), $level = 0, $tracker = array()) use (&$nested) {
-					
-					if (isset($sub_components)) {
-					
-						// cycle through current sub_component looking for a type match
-						foreach ($sub_components as $counter=>$each_component) {
-								
-							// types match so return true
-							if ($each_component->type == $type) {
-								return true;
-							}
-							
-							// check if a url has been set, if so add to $tracker so we can skip it
-							if (isset($each_component->url)) {
-							
-								// create a reference for this position within sub_components
-								$position = $level . 'x' . $counter;
-							
-								// add position info to tracker
-								$tracker[$position] = true;
-							
-							}
-									
-						}
-					
-						
-						// going up a level if nothing was found on this one
-						foreach ($sub_components as $counter=>$each_component) {
-							
-							// create a reference for this position within sub_components
-							$position = $level . 'x' . $counter;
-							
-							// check that components exist for this level and that a reference wasn't already created for this position.
-							if (isset($each_component->components) && !array_key_exists($position,$tracker)) {
-								
-								// record this current level so we can come back
-								$history[] = $sub_components;
-								
-								// next level 
-								$level++;
-								
-								// add position info to tracker
-								$tracker[$position] = true;
-								
-								// recursive call for next level
-								return $nested($each_component->components, $type, $history, $level, $tracker);
-
-							}
-	
-						}
-						
-						// made it though the foreach without a recursive send, so check for history and recursively
-							
-						if (isset($history[(count($history)-1)])) {
-							
-							// get previous value
-							$previous_sub_component = $history[(count($history)-1)];
-							// then unset previous value
-							unset($history[(count($history)-1)]);
-							// then delete one from $level
-							$level--;
-							
-							// recursive call
-							return $nested($previous_sub_component, $type, $history, $level, $tracker);
-							
-						}
-						
-					}
-						
-				};
 				
 				// check that component allows sub_components to be built in page object
 				$recursive = $access->find_sub_components($each_component, $vce, $components, $sub_components);
 
 				// if find_sub_components returned true for current component, then check for the following
 				if ($recursive) {
-
-					// full object option has been checked, build entire page object
-					if ($full_object) {
-						$recursive = true;
-					} elseif (isset($this->recipe[0]['full_object'])) {
-						$recursive = true;
-					// check for nested components with the same type
+					// check for sub_url
 					// the purpose of this is if you have several branches of differnet depths
 					// where sub_url (the next url) might be at a deeper level
-					} elseif ($sub_url && !$nested($sub_components,$each_component->type)) {
+					if (isset($sub_url[$each_component->parent_id])) {
 						$recursive = false;
 					}
-				
 				}
 				
 				// if full_object is true, then overide recursive value and call back to get_sub_components
-				if ($full_object) {
+				if ($full_object || isset($this->recipe[0]['full_object'])) {
 					$recursive = true;
 				}
-	
 	
 				// send call back to this function
 				if ($recursive) {
