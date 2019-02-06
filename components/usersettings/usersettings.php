@@ -347,7 +347,27 @@ EOF;
 	
 		global $db;
 		global $user;
-	
+
+		if (strlen($input['password']) < 6) {
+			echo json_encode(array('response' => 'error','message' => 'Passwords must be least 6 characters in length','action' => ''));
+			exit();
+		}
+			
+		if (!preg_match("#[0-9]+#", $input['password'])) {
+			echo json_encode(array('response' => 'error','message' => 'Password must include at least one number','action' => ''));
+			exit();
+		}
+
+		if (!preg_match("#[a-z]+#", $input['password'])) {
+			echo json_encode(array('response' => 'error','message' => 'Password must include at least one letter','action' => ''));
+			exit();
+		}
+
+		if (!preg_match("#\W+#", $input['password'])) {
+			echo json_encode(array('response' => 'error','message' => 'Password must include at least one symbol','action' => ''));
+			exit();
+		}	
+
 		if ($input['password'] != $input['password2']) {
 			echo json_encode(array('response' => 'error','message' => 'Passwords do not match','action' => ''));
 			return;
