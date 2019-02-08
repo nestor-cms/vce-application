@@ -72,13 +72,14 @@ $content = <<<EOF
 </div>
 </label>
 <label>
-<input type="password" name="password" tag="required" placeholder="Enter Your Password">
+<input class="password-input" type="password" name="password" tag="required" placeholder="Enter Your Password">
 <div class="label-text">
 <div class="label-message">Password</div>
 <div class="label-error">Enter your Password</div>
 </div>
 </label>
 <input type="submit" value="Click here to Login">
+<label class="ignore" style="color:#666;"><input class="show-password-input" type="checkbox" name="show-password"> Show Password</label>
 </form>
 </div>
 <div class="clickbar-title disabled"><span>Login</span></div>

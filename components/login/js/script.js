@@ -16,3 +16,15 @@ function onformsuccess(formsubmitted,data) {
 		window.location.reload();
 	}
 }
+
+$(document).ready(function() {
+	$('.show-password-input').change(function() {
+		if ($(this).is(':checked')) {
+
+			$('.password-input').attr('type', 'text');
+		} else {
+
+			$('.password-input').attr('type', 'password');
+		}
+	});
+});
