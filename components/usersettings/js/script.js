@@ -19,20 +19,24 @@ function onformsuccess(formsubmitted,data) {
 $(document).ready(function() {
 
 	$("input[type='text'][name='email']").on('keydown', function(e) {
-	
 		if ($(this).val() !== $(this).attr('current')) {
-	
-			$('#password-input').attr('tag','required');
+			$('#password-required-input').attr('tag','required');
 			$('#password-required').slideDown();
-	
 		} else {
-		
-			$('#password-input').val('');
-			$('#password-input').removeAttr('tag');
+			$('#password-required-input').val('');
+			$('#password-required-input').removeAttr('tag');
 			$('#password-required').slideUp();
-	
 		}
-	
+	});
+
+	$('.show-password-input').change(function() {
+		if ($(this).is(':checked')) {
+
+			$('.password-input').attr('type', 'text');
+		} else {
+
+			$('.password-input').attr('type', 'password');
+		}
 	});
 
 });

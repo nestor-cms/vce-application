@@ -51,20 +51,21 @@ $content .= <<<EOF
 <form id="password" class="asynchronous-form" method="post" action="$vce->input_path" autocomplete="off">
 <input type="hidden" name="dossier" value="$dossier_for_password">
 <label>
-<input type="password" name="password" value="" tag="required">
+<input class="password-input" type="password" name="password" value="" tag="required">
 <div class="label-text">
 <div class="label-message">Enter New Password</div>
 <div class="label-error">Enter Password</div>
 </div>
 </label>
 <label>
-<input type="password" name="password2" value="" tag="required">
+<input class="password-input" type="password" name="password2" value="" tag="required">
 <div class="label-text">
 <div class="label-message">Repeat New Password</div>
 <div class="label-error">Repeat Password</div>
 </div>
 </label>
 <input type="submit" value="Update">
+<label class="ignore" style="color:#666;"><input class="show-password-input" type="checkbox" name="show-password"> Show Password</label>
 </form>
 </div>
 <div class="clickbar-title clickbar-closed"><span>Update Password</span></div>
@@ -95,7 +96,7 @@ $content .= <<<EOF
 </div>
 </label>
 <label id="password-required" style="display:none;">
-<input id="password-input" type="text" name="password">
+<input id="password-required-input" type="password" name="password">
 <div class="label-text">
 <div class="label-message">Enter Current Password</div>
 <div class="label-error">Enter your Current Password</div>
