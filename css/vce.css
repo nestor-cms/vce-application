@@ -381,7 +381,7 @@ border-left: 15px solid transparent;
 
 .inline-form {
 display: inline-block;
-virtical-align: top;
+vertical-align: top;
 }
 
 .float-right-form {
