@@ -157,13 +157,30 @@ class Component {
 			foreach ($each_component->sub_recipe as $key=>$each_recipe_component) {
 			
 				$auto_create = null;
-				
-				$this_component = Page::instantiate_component($each_recipe_component, $vce);
 
-				$component_type = $this_component->type;
+				// call to recipe_manifestation method of component that is in the recipe but has not been created
+				if (class_exists($each_recipe_component['type']) === true) {
+					// call to class
+					$component_type = $each_recipe_component['type'];
+				} else {
+					// class has not been loaded, so do it now!
+					// get list of components
+					$activated_components = json_decode($vce->site->activated_components, true);
+					// check that component has been activated
+					if (isset($activated_components[$each_recipe_component['type']])) {
+						// load component
+						require_once(BASEPATH . $activated_components[$each_recipe_component['type']]);	
+						// call to class
+						$component_type = $each_recipe_component['type'];
+					} else {
+						// component has been disabled, use parent class
+						$component_type = 'Component';
+					}
+				}
 				
+				// instantiate component
+				$this_component = new $component_type();
 				$this_component->recipe_manifestation((object) $each_recipe_component, $vce);
-				
 				$recipe_manifestation = $component_type;
 
 				// auto_create == reverse
@@ -298,9 +315,6 @@ class Component {
 					// when it has the back->forward, it's a double, so prevent it
 					if (!isset($vce->recipe_manifestation_finish)) {
 						$vce->recipe_manifestation_finish = true;
-						
-						/*
-						
 						$activated_components = json_decode($vce->site->activated_components, true);
 						// if the count is grater than 1, then fire off the previous component
 						
@@ -312,11 +326,6 @@ class Component {
 						}
 						
 						$previous_component = new $component_type();
-						
-						*/
-						
-						$previous_component = Page::instantiate_component($auto_create[0], $vce);
-						
 						$previous_component->recipe_manifestation_finish((object) $each_recipe_component, $vce);
 						
 					}

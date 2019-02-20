@@ -13,12 +13,12 @@ if (file_exists(BASEPATH . 'vce-config.php')) {
 	} else {
 		echo "vce-installer.php not found";
 	}
-	exit;
+	exit();
 }
 
 // error reporting
-if (defined('VCE_DEBUG')) {
-	ini_set('error_reporting', (VCE_DEBUG === false) ? 0 : -1);
+if (defined('VCE_DEBUG') && VCE_DEBUG === false) {
+	ini_set('error_reporting', 0);
 }
 
 // require vce
@@ -35,7 +35,7 @@ $content = new Content($vce);
 
 // load component class
 require_once(BASEPATH . 'vce-application/class.component.php');
-// this class does not get instantiated here
+// this class does not get instantiated
 
 // create site object
 require_once(BASEPATH . 'vce-application/class.site.php');
@@ -52,10 +52,9 @@ $page = new Page($vce);
 // unset($page->site,$page->user,$page->content);
 // $vce->dump($vce->user, 'efefef');
 
-// output vce errors before theme page outputs
-if (isset($vce->errors)) {
-	$vce->display_errors($vce);
+// output theme page
+if (file_exists(BASEPATH .'vce-content/themes/' . $site->site_theme . '/' . $page->template)) {
+	require_once(BASEPATH .'vce-content/themes/' . $site->site_theme . '/' . $page->template);
+} else {
+	echo "template file not found: " . $site->site_theme . '/' . $page->template;
 }
-
-// output page using theme template
-require_once($vce->template_file_path);

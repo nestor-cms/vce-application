@@ -304,33 +304,6 @@ class VCE {
 
         return $nice_size;
     }
-    
-    /**
-     * a function to gather vce error messages
-     * @param string $error
-     * @param object $vce
-     */
-    public function add_errors($error, $vce) {
-    	if (!isset($vce->errors)) {
-    		$vce->errors = array();
-    	}
-    	// add values to errors array
-    	$vce->errors[] = $error;
-    }
-    
-    /**
-     * a function to output vce error messages
-     * @param object $vce
-     */    
-     public function display_errors($vce) {
-		// check that errors exist
-    	if (isset($vce->errors)) {
-    		foreach ($vce->errors as $error) {
-       			echo '<div class="vce-error-message">' . $error . '</div>';
-    		}
-    	}
-    }
-
 
     /**
      * Allows components to add functions to the $vce object dynamically.

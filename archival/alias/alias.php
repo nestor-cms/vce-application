@@ -54,82 +54,91 @@ class Alias extends Component {
 
 	
 	public function find_sub_components($requested_component, $vce, $components, $sub_components) {
+	
+		// prevent errors
+		if (!empty($sub_components)) {
+
+			$find_aliases = function($components) use (&$find_aliases,$vce) {
 		
-		// check that an alias_id has been set.
-		if (!isset($requested_component->alias_id)) {
-			$error_message = "Error: An alias component does not contain an alias_id";
-		} else {
+				foreach ($components as $component_key=>$component_value) {
+			
+					if ($component_value->type == "Alias" && isset($component_value->alias_id)) {
+
+						// get alias components meta data
+						$query = "SELECT * FROM  " . TABLE_PREFIX . "components_meta WHERE component_id='" . $component_value->alias_id . "' ORDER BY meta_key";
+						$component_meta = $vce->db->get_data_object($query);
 		
-			// get alias components meta data
-			$query = "SELECT * FROM  " . TABLE_PREFIX . "components_meta WHERE component_id='" . $requested_component->alias_id . "' ORDER BY meta_key";
-			$component_meta = $vce->db->get_data_object($query, false);
-		
-			if (empty($component_meta)) {
-				// error if no associted component was found
-				$error_message = "Error: An alias component points to another component that cannot be found";		
-			} else {
-		
-				foreach ($component_meta as $meta_data) {
+						if (!empty($component_meta)) {
 				
-					// create a var from meta_key
-					$key = $meta_data['meta_key'];
-		
-					// prevent specific meta_data from overwriting
-					if (in_array($key, array('created_at','created_by'))) {
-						continue;
-					}
+							$ignore = array('component_id','parent_id','sequence','created_at');
+							foreach ($component_meta as $meta_values) {
+								// set component editing if current user created this alias
+								if ($meta_values->meta_key == 'created_by' && $component_value->created_by == $vce->user->user_id) {
+									// set component editing
+									$components[$component_key]->content_edit = 'roles';
+									$components[$component_key]->content_delete = 'roles';
+									$components[$component_key]->content_create = '|' . $vce->user->role_id . '|';
+								}
 
-					// add meta_value
-					$requested_component->$key = $vce->db->clean($meta_data['meta_value']);
+							 	if (!in_array($meta_values->meta_key, $ignore)) {
+									$meta_key = $meta_values->meta_key;
+									$components[$component_key]->$meta_key = $meta_values->meta_value;
+								}
+							}
 
-					//adding minutia if it exists within database table
-					if (!empty($meta_data['minutia'])) {
-						$key .= "_minutia";
-						$requested_component->$key = $meta_data['minutia'];
-					}
+						} else {
 			
-				}
+$content = <<<EOF
+<div>This alias points to a component that cannot be found.</div>
+EOF;
 
-			}
-		
-		}
+							if ($vce->page->can_delete($component_value)) {
+				
+								// the instructions to pass through the form
+								$dossier = array(
+								'type' => $component_value->type,
+								'procedure' => 'delete',
+								'component_id' => $component_value->component_id,
+								'created_at' => $component_value->created_at
+								);
 
-		// if there is an error, display message and a delete button
-		if (isset($error_message)) {
-			
-			$content = '<div class="form-message form-error">' . $error_message . '&nbsp;&nbsp;';
+								// generate dossier
+								$dossier_for_delete = $vce->generate_dossier($dossier);
 
-			if ($vce->page->can_delete($requested_component)) {
 
-				// the instructions to pass through the form
-				$dossier = array(
-				'type' => $requested_component->type,
-				'procedure' => 'delete',
-				'component_id' => $requested_component->component_id,
-				'created_at' => $requested_component->created_at
-				);
-
-				// generate dossier
-				$dossier_for_delete = $vce->generate_dossier($dossier);
-
-				$content .= <<<EOF
-<form id="delete_$requested_component->component_id" class="delete-form inline-form asynchronous-form" method="post" action="$vce->input_path">
+$content .= <<<EOF
+<form id="delete_$component_value->component_id" class="delete-form asynchronous-form" method="post" action="$vce->input_path">
 <input type="hidden" name="dossier" value="$dossier_for_delete">
 <input type="submit" value="Delete">
 </form>
 EOF;
-			
-			}
-			
-			$content .=  '</div>';
 
-			$vce->content->add('premain',$content);
+							}
+
+							$vce->content->add('postmain',$content);
 			
+						}
+
+					}
+			
+					if (isset($component_value->components)) {
+				
+						$find_aliases($component_value->components);
+				
+					}
+		
+		
+				}
+	
+			};
+		
+			$find_aliases($sub_components);
+		
 		}
 		
 		return true;
 	}
-	
+
 
 	/**
 	 * custom create component

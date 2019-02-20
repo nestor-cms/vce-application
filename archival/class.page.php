@@ -80,7 +80,7 @@ class Page {
 
 		// push out attributes into vce object that have been saved into session
 		$vce->site->obtrude_attributes($vce);
-
+	
 		// check to see if there is a requested url
 		if (!empty($requested_url)) {
 		
@@ -90,47 +90,40 @@ class Page {
 			if (preg_match('/~(\d+)/',$requested_url,$requested_id)) {
 				
 				// fetch requested component by component_id
-				//$query = "SELECT " . TABLE_PREFIX . "components.*, " . TABLE_PREFIX . "components_meta.meta_value AS 'type' FROM " . TABLE_PREFIX . "components INNER JOIN " . TABLE_PREFIX . "components_meta ON " . TABLE_PREFIX . "components.component_id =  " . TABLE_PREFIX . "components_meta.component_id  WHERE " . TABLE_PREFIX . "components.component_id='" . $requested_id[1] . "' AND " . TABLE_PREFIX . "components_meta.meta_key='Type' LIMIT 1";
-
-				// fetch requested component by component_id
-				$query = "SELECT * FROM  " . TABLE_PREFIX . "components INNER JOIN " . TABLE_PREFIX . "components_meta ON " . TABLE_PREFIX . "components.component_id = " . TABLE_PREFIX . "components_meta.component_id WHERE " . TABLE_PREFIX . "components.component_id='" . $requested_id[1] . "'";
+				$query = "SELECT " . TABLE_PREFIX . "components.*, " . TABLE_PREFIX . "components_meta.meta_value AS 'type' FROM " . TABLE_PREFIX . "components INNER JOIN " . TABLE_PREFIX . "components_meta ON " . TABLE_PREFIX . "components.component_id =  " . TABLE_PREFIX . "components_meta.component_id  WHERE " . TABLE_PREFIX . "components.component_id='" . $requested_id[1] . "' AND " . TABLE_PREFIX . "components_meta.meta_key='Type' LIMIT 1";
 
 			// otherwise fetch by url
 			} else {
 			
 				// fetch requested component by url
-				// $query = "SELECT " . TABLE_PREFIX . "components.*, " . TABLE_PREFIX . "components_meta.meta_value AS 'type', " . TABLE_PREFIX . "components_meta.minutia AS 'cache' FROM " . TABLE_PREFIX . "components INNER JOIN " . TABLE_PREFIX . "components_meta ON " . TABLE_PREFIX . "components.component_id =  " . TABLE_PREFIX . "components_meta.component_id  WHERE " . TABLE_PREFIX . "components.url='" . $requested_url . "' AND " . TABLE_PREFIX . "components_meta.meta_key='Type' LIMIT 1";
-
-				// fetch requested component by url
-				$query = "SELECT * FROM  " . TABLE_PREFIX . "components INNER JOIN " . TABLE_PREFIX . "components_meta ON " . TABLE_PREFIX . "components.component_id = " . TABLE_PREFIX . "components_meta.component_id WHERE " . TABLE_PREFIX . "components.url='" . $requested_url . "'";
-		
+				$query = "SELECT " . TABLE_PREFIX . "components.*, " . TABLE_PREFIX . "components_meta.meta_value AS 'type', " . TABLE_PREFIX . "components_meta.minutia AS 'cache' FROM " . TABLE_PREFIX . "components INNER JOIN " . TABLE_PREFIX . "components_meta ON " . TABLE_PREFIX . "components.component_id =  " . TABLE_PREFIX . "components_meta.component_id  WHERE " . TABLE_PREFIX . "components.url='" . $requested_url . "' AND " . TABLE_PREFIX . "components_meta.meta_key='Type' LIMIT 1";
+								
 			}
 
 			// call to database, grab first array item because there should only be one
-			$requested_component_data = $vce->db->get_data_object($query, false);
-					
+			$requested_location = $vce->db->get_data_object($query);
+		
 		}
 
 		// if url is not found, return / for homepage
-		if (empty($requested_component_data)) {
+		if (empty($requested_location)) {
 		
 			// get homepage
-			//$query = "SELECT " . TABLE_PREFIX . "components.*, " . TABLE_PREFIX . "components_meta.meta_value AS 'type' FROM " . TABLE_PREFIX . "components INNER JOIN " . TABLE_PREFIX . "components_meta ON " . TABLE_PREFIX . "components.component_id =  " . TABLE_PREFIX . "components_meta.component_id  WHERE " . TABLE_PREFIX . "components.url='/' AND " . TABLE_PREFIX . "components_meta.meta_key='Type' LIMIT 1";
-			
-			// get homepage
-			$query = "SELECT * FROM  " . TABLE_PREFIX . "components INNER JOIN " . TABLE_PREFIX . "components_meta ON " . TABLE_PREFIX . "components.component_id = " . TABLE_PREFIX . "components_meta.component_id WHERE " . TABLE_PREFIX . "components.url='/'";
-			$requested_component_data = $vce->db->get_data_object($query, false);
+			$query = "SELECT " . TABLE_PREFIX . "components.*, " . TABLE_PREFIX . "components_meta.meta_value AS 'type' FROM " . TABLE_PREFIX . "components INNER JOIN " . TABLE_PREFIX . "components_meta ON " . TABLE_PREFIX . "components.component_id =  " . TABLE_PREFIX . "components_meta.component_id  WHERE " . TABLE_PREFIX . "components.url='/' AND " . TABLE_PREFIX . "components_meta.meta_key='Type' LIMIT 1";
+			$requested_location = $vce->db->get_data_object($query);
 			
 			// if no homepage has been set, then direct to message
-			if (empty($requested_component_data)) {
+			if (empty($requested_location)) {
 				require_once(BASEPATH . 'vce-application/html/index.html');
 				exit();
 			}
 
 		}
 
-		$requested_component = $this->assemble_component_objects($requested_component_data, $vce)[0];
-
+		
+		// the requested component: component_id, parent_id, sequence, url
+		$requested_component = $requested_location[0];
+		
 		// load hooks
 		// page_construct_object
 		// to redirect to another component_id, set both component_id and parent_id
@@ -142,50 +135,25 @@ class Page {
 		
 		// add basics to object
 		$vce->requested_id = $requested_component->component_id;
-		$vce->requested_url = $requested_component->url;		
-		
+		$vce->requested_url = $requested_component->url;
+	
 		// start building page object components
 		// $page_id, $requested_id, array('requested_location' => $requested_component)
 		// requested_location is used to so that the recursive get_components method knows this is the first time
-		self::get_components($vce, $requested_component->component_id, $requested_component->component_id, array('requested_component' => $requested_component));
+		self::get_components($requested_component->component_id, $requested_component->component_id, array('requested_location' => $requested_component));
 		
 		// read recipe
 		$recipe = (isset($this->recipe)) ? $this->recipe : array();
-		
-		// check that template and theme exist		
-		if (isset($this->template)) {
-			// normal theme template output
-			if (file_exists(BASEPATH .'vce-content/themes/' . $vce->site->site_theme . '/' . $this->template)) {
-				$vce->template_file_path = BASEPATH .'vce-content/themes/' . $vce->site->site_theme . '/' . $this->template;
-			} elseif (file_exists(BASEPATH .'vce-content/themes/' . $vce->site->site_theme . '/index.php')) {
-				// no valid value has been set for $this->template so default to index.php
-				$vce->add_errors($this->template . ' template cannot be found in ' . $vce->site->site_theme . ' theme', $vce);
-				$vce->template_file_path = BASEPATH .'vce-content/themes/' . $vce->site->site_theme . '/index.php';
-			}
-		} else {
-			// default to index.php 
-			if (file_exists(BASEPATH .'vce-content/themes/' . $vce->site->site_theme . '/index.php')) {
-				$vce->template_file_path = BASEPATH .'vce-content/themes/' . $vce->site->site_theme . '/index.php';
-			}
+	
+		// prevent any errors if no template has been assigned
+		if (!isset($this->template)) {
+			$this->template = "index.php";
 		}
-		
-		// if theme_page has not been set, then we have theme issues
-		if (!isset($vce->template_file_path)) {
-			// check if theme exists
-			if (file_exists(BASEPATH .'vce-content/themes/' . $vce->site->site_theme)) {
-				$vce->add_errors($vce->site->site_theme . ' theme does not contain index.php', $vce);
-			} else {
-				$vce->add_errors($vce->site->site_theme . ' theme does not exist', $vce);
-			}
-			// as a last resort use defalt vce theme in vce-application
-			$vce->template_file_path = BASEPATH . 'vce-application/themes/vce/index.php';
-		}
-			
+
 		// build page content from components
-		self::build_content($vce, $this->components, $recipe, $requested_component->component_id);
+		self::build_content($this->components, $recipe, $requested_component->component_id);
 
 	}
-
 
 	
 	/**
@@ -199,70 +167,94 @@ class Page {
 	 * @param boolean $build_sub_componets
 	 * @return adds components to class-wide array of components
 	 */
-	private function get_components($vce, $page_id, $requested_id, $components) {
+	private function get_components($page_id, $requested_id, $components) {
+	
+		global $vce;
 		
 		// not first time
-		if (!isset($components['requested_component'])) {
-
-			// get children of current_id
-			$query = "SELECT * FROM  " . TABLE_PREFIX . "components INNER JOIN " . TABLE_PREFIX . "components_meta ON " . TABLE_PREFIX . "components.component_id = " . TABLE_PREFIX . "components_meta.component_id WHERE " . TABLE_PREFIX . "components.component_id='" . $page_id . "'";
-			$requested_component_data = $vce->db->get_data_object($query, false);
+		if (!isset($components['requested_location'])) {
+		
+			// get level one components
+			$query = "SELECT * FROM  " . TABLE_PREFIX . "components WHERE component_id='" . $page_id . "' LIMIT 1";
+			$requested_component = $vce->db->get_data_object($query)[0];
 			
-			// hook that can be used to alter database query results
+			// load hooks
 			if (isset($vce->site->hooks['page_requested_components'])) {
 				foreach($vce->site->hooks['page_requested_components'] as $hook) {
-					$requested_component_data = call_user_func($hook, $requested_component_data, func_get_args());
+					$requested_component = call_user_func($hook, $requested_component, func_get_args());
 				}
 			}
-			
-			$requested_component = $this->assemble_component_objects($requested_component_data, $vce)[0];
 		
-		
-		// first time so no need to get data this time around
+		// first time
 		} else {
 		
 			// add value from previous function
-			$requested_component = $components['requested_component'];
+			$requested_component = $components['requested_location'];
 			// clean-up
-			unset($components['requested_component']);
-			
-		}
+			unset($components['requested_location']);
 		
-		
-		// add title from requested id to page object base
-		if ($requested_component->component_id == $requested_id) {
-			$this->title = $requested_component->title;
 		}
 
-		// if a template has been assigned to this component, add it to object
-		// moving backwards though the componenets, if template has not been set, add it to page object
-		if (!isset($this->template)) {
-			// check that template file exists
-			if (is_file(BASEPATH .'vce-content/themes/' . $vce->site->site_theme . '/' . $requested_component->template)) {
-				$this->template = $requested_component->template;
+		// clean up the object if no url has been set
+		// if no url was returned within $requested_page, delete property in object
+		if (empty($requested_component->url)) {
+			unset($requested_component->url);
+		}
+		
+		// get level one components meta data
+		$query = "SELECT meta_key, meta_value, minutia FROM  " . TABLE_PREFIX . "components_meta WHERE component_id='" . $requested_component->component_id . "' ORDER BY meta_key";
+		$components_meta = $vce->db->get_data_object($query);
+		
+		// add meta data to page object
+		foreach ($components_meta as $each_meta) {
+		
+			// add title from requested id to page object base
+			if ($requested_component->component_id == $requested_id && $each_meta->meta_key == "title") {
+				$this->title = $each_meta->meta_value;
 			}
-		}
 
-		// get recipe and add to base of object
-		if (isset($requested_component->recipe)) {
-
-			// decode json object of recipe
-			$recipe = json_decode($requested_component->recipe, true)['recipe'];
-	
-			// load hooks
-			if (isset($vce->site->hooks['page_add_recipe'])) {
-				foreach($vce->site->hooks['page_add_recipe'] as $hook) {
-					$recipe = call_user_func($hook, $this->recipe, $recipe);
+			// if a template has been assigned to this component, add it to object
+			
+			// moving backwards though the componenets, if template has not been set, add it to page object
+			if (!isset($this->template) && $each_meta->meta_key == "template") {
+				// check that template file exists
+				if (is_file(BASEPATH .'vce-content/themes/' . $vce->site->site_theme . '/' . $each_meta->meta_value)) {
+					$this->template = $each_meta->meta_value;
 				}
 			}
-	
-			// set recipe property of page object
-			$this->recipe = $recipe;
-			
-			// clean-up
-			unset($requested_component->recipe);
 
-		}	
+			// get recipe and add to base of object
+			if ($each_meta->meta_key == "recipe") {
+			
+				// decode json object of recipe
+				$recipe = json_decode($each_meta->meta_value, true)['recipe'];
+				
+				// load hooks
+				if (isset($vce->site->hooks['page_add_recipe'])) {
+					foreach($vce->site->hooks['page_add_recipe'] as $hook) {
+						$recipe = call_user_func($hook, $this->recipe, $recipe);
+					}
+				}
+				
+				// set recipe property of page object
+				$this->recipe = $recipe;
+				continue;
+			
+			}
+			
+			// get meta keys name to add to this component
+			$key = $each_meta->meta_key;
+			
+			// create associative array with meta key and meta value
+			$requested_component->$key = $vce->db->clean($each_meta->meta_value);
+
+			// create minutia array element - this is not being used much
+			if (!empty($each_meta->minutia)) {
+				$key .= "_minutia";
+				$requested_component->$key = $each_meta->minutia;
+			}
+		
+		}
 		
 		// load hooks
 		if (isset($vce->site->hooks['page_get_components'])) {
@@ -271,48 +263,61 @@ class Page {
 			}
 		}
 		
+		// check that component has not been disabled
+		$activated_components = json_decode($vce->site->activated_components, true);
+		
+		if (!VCE_DEBUG) {
+			// prevent an error when there is an orphaned component without any meta_data
+			$requested_component->type = isset($requested_component->type) ? $requested_component->type : 'Components';
+		}
+		
 		// prepend to begining of array to make parents first
 		array_unshift($components, $requested_component);
-		
+
 		// if component has parent id, recursive call to this function
 		if (isset($requested_component->parent_id) && $requested_component->parent_id != 0) {
 
 			// recursive call
-			self::get_components($vce, $requested_component->parent_id, $requested_id, $components);
+			self::get_components($requested_component->parent_id, $requested_id, $components);
 
 		// check that access is allowed for sub components
 		} else {
 		
 			// to check find_sub_components returned value, get end component
 			$end_component = end($components);
-			
+		
+			// check that this component has been activated
+			if (isset($activated_components[$end_component->type])) {
+				require_once(BASEPATH . $activated_components[$end_component->type]);
+				// create a new instance of the component
+				$check = new $end_component->type();
+			} else {
+				// if deactivated use the parent class
+				$check = new Component();
+			}
+		
 			// get returned value from component for find_sub_components method
 			// by default returns true from method in components.class
 			// true from components continues getting sub components
-			$find_sub_components = $end_component->find_sub_components($end_component, $vce, $components, $sub_components = array());
+			$find_sub_components = $check->find_sub_components($requested_component, $vce, $components, $sub_components = array());
 
-			// if the type of the component has been changed, in either the hook or find sub components, then re-instantiate the object
-			if (get_class($end_component) != $end_component->type) {
-				$components[count($components) -1] = self::instantiate_component((array) $end_component, $vce);
-			}
-			
 			// check if find_sub_components is true
 			if ($find_sub_components) {
 				// get sub-components
-				$nested_components = self::get_sub_components($vce, $requested_id, $requested_id, $components);
+				$nested_components = self::get_sub_components($requested_id, $requested_id, $components);
 						
 				// add sub_components to components list
 				$components[(count($components)-1)]->components = $nested_components;
 			}
-	
+			
 			// add components to object
 			$this->components = $components;
 
 		}
 	
 	}
-
-
+	
+	
 	/**
 	 * Gets list of sub-components and associated meta data
 	 * Takes the id of the component being process and queries for all components ordered under it
@@ -323,23 +328,61 @@ class Page {
 	 * @param string $sub_url
 	 * @return array of subcomponents
 	 */
-	private function get_sub_components($vce, $current_id, $parent_id, $components, $sub_components = array(), $sub_url = false, $full_object = false) {
+	private function get_sub_components($current_id, $parent_id, $components, $sub_components = array(), $sub_url = false, $full_object = false) {
 	
+		// allow access to the global vce object
+		global $vce;
+
 		// get children of current_id
 		$query = "SELECT * FROM  " . TABLE_PREFIX . "components INNER JOIN " . TABLE_PREFIX . "components_meta ON " . TABLE_PREFIX . "components.component_id = " . TABLE_PREFIX . "components_meta.component_id WHERE " . TABLE_PREFIX . "components.parent_id='" . $current_id . "' ORDER BY sequence ASC";
-		$requested_component_data = $vce->db->get_data_object($query, false);
+		$requested_components = $vce->db->get_data_object($query);
 		
 		// load hooks
-		if (isset($vce->site->hooks['page_requested_sub_components'])) {
-			foreach($vce->site->hooks['page_requested_sub_components'] as $hook) {
-				$requested_component_data = call_user_func($hook, $requested_component_data, func_get_args());
+		if (isset($vce->site->hooks['requested_sub_components'])) {
+			foreach($vce->site->hooks['requested_sub_components'] as $hook) {
+				$requested_components = call_user_func($hook, $requested_components, func_get_args());
 			}
 		}
 			
-		if (!empty($requested_component_data)) {
+		if (!empty($requested_components)) {
 
-			// assemble and instantiate
-			$requested_components = $this->assemble_component_objects($requested_component_data, $vce);
+			$requested = array();
+			foreach ($requested_components as $meta_data) {
+		
+		
+				if (!isset($requested[$meta_data->component_id])) {
+					// create object and add component table data
+					$requested[$meta_data->component_id] = new stdClass();
+					$requested[$meta_data->component_id]->component_id = $meta_data->component_id;
+					$requested[$meta_data->component_id]->parent_id = $meta_data->parent_id;
+					$requested[$meta_data->component_id]->sequence = $meta_data->sequence;
+					// $requested[$meta_data->component_id]->url = $meta_data->url;
+
+					// found a url so make sub_url = true
+					if (!empty($meta_data->url)) {
+						$sub_url[$meta_data->component_id] = true;
+						$requested[$meta_data->component_id]->url = $meta_data->url;
+					}
+					
+				}
+			
+				// create a var from meta_key
+				$key = $meta_data->meta_key;
+		
+				// add meta_value
+				$requested[$meta_data->component_id]->$key = $vce->db->clean($meta_data->meta_value);
+
+				// adding minutia if it exists within database table
+				if (!empty($meta_data->minutia)) {
+					$key .= "_minutia";
+					$requested[$meta_data->component_id]->$key = $meta_data->minutia;
+				}
+		
+			}
+		
+		
+			// rekey requested
+			$requested_components = array_values($requested);
 			
 			// load hooks
 			// page_get_sub_components
@@ -348,22 +391,7 @@ class Page {
 					$requested_components = call_user_func($hook,$requested_components,$sub_components,$vce);
 				}
 			}
-			
-			$recursive_check = array();
-			
-			// check find_sub_components
-			foreach($requested_components as $key=>$each_component) {
-			
-				// check that component allows sub_components to be built in page object
-				$recursive_check[$each_component->component_id] = $each_component->find_sub_components($each_component, $vce, $components, $sub_components);
 
-				// if the type of the component has been changed, in either the hook or find sub components, then re-instantiate the object
-				if (get_class($each_component) != $each_component->type) {
-					$requested_components[$key] = self::instantiate_component((array) $each_component, $vce);
-				}
-			
-			}
-			
 			// anonymous function to place requested components into a multidimensional array of sub components
 			$build_components_tree = function($sub_components,$requested_components) use (&$build_components_tree) {
 			
@@ -404,25 +432,44 @@ class Page {
 				$sub_components = $requested_components;
 			}
 			
+
 			// check for sub components
 			foreach ($requested_components as $each_key=>$each_component) {
-			
-				if (isset($each_component->url)) {
-					$sub_url[$each_component->component_id] = true;
+						
+				// load components class
+				
+				// check that component has not been disabled
+				// global $site;
+
+				$activated_components = json_decode($vce->site->activated_components, true);
+				
+				// check that the component type has been activated
+				if (isset($each_component->type) && isset($activated_components[$each_component->type])) {
+		
+					// require the component
+					require_once(BASEPATH . $activated_components[$each_component->type]);
+		
+					// fire check_access funtion for each component
+					// this effects children of component
+					$access = new $each_component->type();
+				
+				} else {
+				
+					// fall back if component has been disabled, though why would someone do that?!
+					$access = new Component();
+				
 				}
 								
 				// if $recursive is true then recursive call back to get_sub_components for next component
 				$recursive = false;
-
+				
 				// check that component allows sub_components to be built in page object
-				if (isset($recursive_check[$each_component->component_id])) {
-					$recursive = $recursive_check[$each_component->component_id];
-				}
-		
+				$recursive = $access->find_sub_components($each_component, $vce, $components, $sub_components);
+
 				// if find_sub_components returned true for current component, then check for the following
 				if ($recursive) {
 					// check for sub_url
-					// the purpose of this is if you have several branches of different depths
+					// the purpose of this is if you have several branches of differnet depths
 					// where sub_url (the next url) might be at a deeper level
 					if (isset($sub_url[$each_component->parent_id])) {
 						$recursive = false;
@@ -437,7 +484,7 @@ class Page {
 				// send call back to this function
 				if ($recursive) {
 					// our recursive call
-					self::get_sub_components($vce, $each_component->component_id, $each_component->parent_id, $components, $sub_components, $sub_url, $full_object);
+					self::get_sub_components($each_component->component_id, $each_component->parent_id, $components, $sub_components, $sub_url, $full_object);
 				}	
 
 			}
@@ -448,7 +495,7 @@ class Page {
 		}
 		
 	}
-
+	
 	
 	/**
 	 * Builds content from components
@@ -463,176 +510,14 @@ class Page {
 	 * @param array $recipe_tracker
 	 * @return components have added their content to the $content object
 	 */
-	private function build_content($vce, $components, $recipe, $requested_id, $linked = false, $recipe_tracker = array()) {
+	private function build_content($components, $recipe, $requested_id, $linked = false, $recipe_tracker = array()) {
 
-		// anonymous function to find the piece of the recipe associated with current component
-		$find_recipe_item = function($recipe, $component, $recipe_level, $recipe_tracker, $cascade_attributes, $rewind = array(), $rewind_tracker = array()) use (&$find_recipe_item, $vce) {
+		// allow access to the global vce object
+		global $vce;
 
-			// current level counter
-			$recipe_level++;
-
-			// the list of attributes that cascade forward within recipes
-			// we can create a hook at some point if needed
-			$attributes = array('content_create','content_edit','content_delete');
-
-			// in case there are multiple components at the same recipe level
-			foreach ($recipe as $recipe_item_key=>$recipe_item) {
-
-				foreach ($attributes as $each_attribute) {
-					// check each attribute
-					if (isset($recipe_item[$each_attribute])) {
-						// set value for next time though
-						$cascade_attributes[$each_attribute] = $recipe_item[$each_attribute];
-					} else {
-						// if this level of recipe has none, set it to previous
-						if (isset($cascade_attributes[$each_attribute])) {
-							$recipe_item[$each_attribute] = $cascade_attributes[$each_attribute];
-						}
-					}
-				}
-			
-				// component type matches recipe type
-				if ($recipe_item['type'] == $component->type) {
-				
-					// set to false, make true if we have a recipe match
-					$match = false;
-					
-					// if recipe_key has been set, then check the location for a match
-					if (isset($component->recipe_key)) {
-						// recipe_key has been set, check if this is the correct recipe item
-						if ($component->recipe_key == $recipe_item_key) {
-							$match = true;
-						} else {
-							// move to next foreach item
-							continue;
-						}
-					} else {
-
-						// check that this recipe item hasn't been encounterd before and isn't contained within $recipe_tracker
-						if (!isset($recipe_tracker[$recipe_level . 'x' . $recipe_item_key])) {
-							$match = true;
-						} else {
-							// check what the current level is
-							if ($recipe_level == end($recipe_tracker)) {		
-								// there's another component on this level with the same type
-								$level_count = count($recipe) - 1;
-								if ($level_count > 0) {
-									for ($x=$level_count;$x>=0;$x--) {
-										// looking for another recipe item that is the same type
-										if ($x > $recipe_item_key && $recipe[$x]['type'] == $component->type) {
-											// break out if one is found
-											continue;
-										} elseif ($recipe[$x]['type'] == $component->type) {
-											// otherwise, if the current one is the same type, then add this recipe to the current component
-											$match = true;
-										}
-									}
-								} else {
-									// check if there is only one recipe item at this level
-									if (count($recipe) == 1) {
-										$match = true;
-									}
-								}
-							}
-						}
-					}
-
-					if ($match) {
-
-						// save the current recipe item
-						$this_recipe = $recipe_item;
-													
-						// clean it up
-						unset($this_recipe['components']);
-						
-						// there is a sub_recipe to pass
-						if (isset($recipe_item['components'])) {
-						
-							// sort though and add content_create value if it does not exist on this level
-							foreach ($recipe_item['components'] as $key=>$each_item) {
-								// cycle through attibutes to cascade
-								foreach ($attributes as $each_attribute) {
-									if (!isset($recipe_item['components'][$key][$each_attribute])) {
-										if (isset($cascade_attributes[$each_attribute])) {
-											$recipe_item['components'][$key][$each_attribute] = $cascade_attributes[$each_attribute];
-										}
-									}
-								}
-							}
-
-							// return sub recipe and location marker
-							return array('sub_recipe' => $recipe_item['components'],'recipe_level' => $recipe_level, 'location' => $recipe_item_key, 'this_recipe' => $this_recipe);
-							
-						// or when there is no sub recipe
-						} else {
-							
-							// return sub recipe and location marker as placeholder
-							return array('sub_recipe' => null,'recipe_level' => $recipe_level, 'location' => $recipe_item_key, 'this_recipe' => $this_recipe);
-						}
-						
-					}
-					
-				}
-
-			}
-
-			// add the current recipe level to rewind
-			$rewind[] = $recipe;
-
-			// run it all again to recursively call
-			foreach ($recipe as $key=>$recipe_item) {
-			
-				// add current recipe location to tracker
-				$rewind_tracker[$recipe_level . 'x' . $key] = true;
-
-				// check if we have a match with the a value within $recipe_tracker, which would have been set last time 
-				if (isset($recipe_tracker[$recipe_level . 'x' . $key]) && isset($recipe_item['components'])) {
-
-					return $find_recipe_item($recipe_item['components'], $component, $recipe_level, $recipe_tracker, $cascade_attributes, $rewind, $rewind_tracker);
-					
-				}
-				
-			}
-
-			// made it though the foreach without a recursive send, so check for rewind and recursively call back to this function
-			// nothing found in the last array element, so remove current recipe level from rewind
-			array_pop($rewind);
-
-			// check that current level of rewind is set
-			if (isset($rewind[(count($rewind)-1)])) {
-
-				// get the previous recipe from rewind
-				$previous_recipe_level = $rewind[(count($rewind)-1)];
-
-				// remove last array elements and backout recipe level for recursive call back to function
-				array_pop($rewind);
-				array_pop($rewind_tracker);
-				$recipe_level--;
-				
-				// cycle through recipe elements
-				foreach ($previous_recipe_level as $key=>$value) {
-					
-					// if this element has already been checked, continue
-					if (isset($rewind_tracker[$recipe_level . 'x' . $key])) {
-						continue;
-					}
-
-					// check for value first
-					if (isset($value['components'])) {
-						// recursive call for sub-components
-						// note: start debugging here if you cannot see a way to add a component in a recipe
-						return $find_recipe_item($value['components'], $component, $recipe_level, $recipe_tracker, $cascade_attributes, $rewind, $rewind_tracker);
-					}
-					
-				}
-
-			}
-
-		};
-		
 		// loop through components
 		foreach ($components as $each_component_key=>$each_component) {
-		
+
 			// load hooks
 			// page_build_content
 			if (isset($vce->site->hooks['page_build_content'])) {
@@ -641,8 +526,178 @@ class Page {
 				}
 			}
 
+			// anonymous function to find the piece of the recipe associated with current component
+			$find_recipe_item = function($recipe, $component, $recipe_level, $recipe_tracker, $cascade_attributes, $rewind = array(), $rewind_tracker = array()) use (&$find_recipe_item) {
+	
+				// current level counter
+				$recipe_level++;
+
+				// the list of attributes that cascade forward within recipes
+				// we can create a hook at some point if needed
+				$attributes = array('content_create','content_edit','content_delete');
+
+				// in case there are multiple components at the same recipe level
+				foreach ($recipe as $recipe_item_key=>$recipe_item) {
+
+					foreach ($attributes as $each_attribute) {
+						// check each attribute
+						if (isset($recipe_item[$each_attribute])) {
+							// set value for next time though
+							$cascade_attributes[$each_attribute] = $recipe_item[$each_attribute];
+						} else {
+							// if this level of recipe has none, set it to previous
+							if (isset($cascade_attributes[$each_attribute])) {
+								$recipe_item[$each_attribute] = $cascade_attributes[$each_attribute];
+							}
+						}
+					}
+				
+					// component type matches recipe type
+					if ($recipe_item['type'] == $component->type) {
+					
+						// set to false, make true if we have a recipe match
+						$match = false;
+						
+						// if recipe_key has been set, then check the location for a match
+						if (isset($component->recipe_key)) {
+							// recipe_key has been set, check if this is the correct recipe item
+							if ($component->recipe_key == $recipe_item_key) {
+								$match = true;
+							} else {
+								// move to next foreach item
+								continue;
+							}
+						} else {
+
+							// check that this recipe item hasn't been encounterd before and isn't contained within $recipe_tracker
+							if (!isset($recipe_tracker[$recipe_level . 'x' . $recipe_item_key])) {
+								$match = true;
+							} else {
+								// check what the current level is
+								if ($recipe_level == end($recipe_tracker)) {		
+									// there's another component on this level with the same type
+									$level_count = count($recipe) - 1;
+									if ($level_count > 0) {
+										for ($x=$level_count;$x>=0;$x--) {
+											// looking for another recipe item that is the same type
+											if ($x > $recipe_item_key && $recipe[$x]['type'] == $component->type) {
+												// break out if one is found
+												continue;
+											} elseif ($recipe[$x]['type'] == $component->type) {
+												// otherwise, if the current one is the same type, then add this recipe to the current component
+												$match = true;
+											}
+										}
+									} else {
+										// check if there is only one recipe item at this level
+										if (count($recipe) == 1) {
+											$match = true;
+										}
+									}
+								}
+							}
+						}
+
+						if ($match) {
+
+							// save the current recipe item
+							$this_recipe = $recipe_item;
+														
+							// clean it up
+							unset($this_recipe['components']);
+							
+							// there is a sub_recipe to pass
+							if (isset($recipe_item['components'])) {
+							
+								// sort though and add content_create value if it does not exist on this level
+								foreach ($recipe_item['components'] as $key=>$each_item) {
+									// cycle through attibutes to cascade
+									foreach ($attributes as $each_attribute) {
+										if (!isset($recipe_item['components'][$key][$each_attribute])) {
+											if (isset($cascade_attributes[$each_attribute])) {
+												$recipe_item['components'][$key][$each_attribute] = $cascade_attributes[$each_attribute];
+											}
+										}
+									}
+								}
+
+								// return sub recipe and location marker
+								return array('sub_recipe' => $recipe_item['components'],'recipe_level' => $recipe_level, 'location' => $recipe_item_key, 'this_recipe' => $this_recipe);
+								
+							// or when there is no sub recipe
+							} else {
+								
+								// return sub recipe and location marker as placeholder
+								return array('sub_recipe' => null,'recipe_level' => $recipe_level, 'location' => $recipe_item_key, 'this_recipe' => $this_recipe);
+							}
+							
+						}
+						
+					}
+
+				}
+
+				// add the current recipe level to rewind
+				$rewind[] = $recipe;
+
+				// run it all again to recursively call
+				foreach ($recipe as $key=>$recipe_item) {
+				
+					// add current recipe location to tracker
+					$rewind_tracker[$recipe_level . 'x' . $key] = true;
+
+					// check if we have a match with the a value within $recipe_tracker, which would have been set last time 
+					if (isset($recipe_tracker[$recipe_level . 'x' . $key]) && isset($recipe_item['components'])) {
+
+						return $find_recipe_item($recipe_item['components'], $component, $recipe_level, $recipe_tracker, $cascade_attributes, $rewind, $rewind_tracker);
+						
+					}
+					
+				}
+
+				// made it though the foreach without a recursive send, so check for rewind and recursively call back to this function
+				// nothing found in the last array element, so remove current recipe level from rewind
+				array_pop($rewind);
+
+				// check that current level of rewind is set
+				if (isset($rewind[(count($rewind)-1)])) {
+
+					// get the previous recipe from rewind
+					$previous_recipe_level = $rewind[(count($rewind)-1)];
+
+					// remove last array elements and backout recipe level for recursive call back to function
+					array_pop($rewind);
+					array_pop($rewind_tracker);
+					$recipe_level--;
+					
+					// cycle through recipe elements
+					foreach ($previous_recipe_level as $key=>$value) {
+						
+						// if this element has already been checked, continue
+						if (isset($rewind_tracker[$recipe_level . 'x' . $key])) {
+							continue;
+						}
+
+						// check for value first
+						if (isset($value['components'])) {
+							// recursive call for sub-components
+							// note: start debugging here if you cannot see a way to add a component in a recipe
+							return $find_recipe_item($value['components'], $component, $recipe_level, $recipe_tracker, $cascade_attributes, $rewind, $rewind_tracker);
+						}
+						
+					}
+
+				}
+
+			};
+
 			// safety check that recipe is there.
 			if (isset($recipe)) {
+				
+				if (!VCE_DEBUG) {
+					// prevent an error when there is an orphaned component without any meta_data
+					$each_component->type = isset($each_component->type) ? $each_component->type : 'Components';
+				}
 				
 				// if this is the requested component or the last time though was
 				if (($each_component->component_id == $requested_id) || $linked === true) {
@@ -679,6 +734,31 @@ class Page {
 			// set sub components
 			$sub_components = isset($each_component->components) ? $each_component->components : null;
 
+			// get name of component class
+			$class_name = $each_component->type;
+
+			// get list of activated components
+			$activated_components = json_decode($vce->site->activated_components, true);
+			
+			// check that this component hasn't been disabled
+			if (isset($activated_components[$class_name])) {
+				
+				// check that class has been loaded
+				if (!class_exists($class_name)) {
+					// require the component
+					require_once(BASEPATH . $activated_components[$class_name]);
+				}
+				
+				// call to the component class for Type
+				$this_component = new $class_name((object) $each_component);
+
+			} else {
+			
+				// default to base class for components
+				$this_component = new Component((object) $each_component);
+			
+			}
+			
 			// does component have a url assigned?
 			if (isset($each_component->url)) {
 			
@@ -695,7 +775,7 @@ class Page {
 				} else {
 
 					// last component was the requested id, so generate links for this component
-					$each_component->as_link($each_component, $vce);
+					$this_component->as_link($each_component, $vce);
 					continue;
 				}
 			}
@@ -703,14 +783,15 @@ class Page {
 			// check_access calls
 			// saving previous comments
 			// check_access was false within get_components(), or content_edit equals roles, so access_denied was set for this component
-			if ($each_component->check_access($each_component, $vce) || (isset($each_component->recipe['content_edit']) && $each_component->recipe['content_edit'] == 'roles')) {
+			// if ((!isset($each_component->access_denied) || (isset($each_component->recipe['content_edit']) && $each_component->recipe['content_edit'] == 'roles')) && $this_component->check_access((object) $each_component, $this)) {
+			if ($this_component->check_access($each_component, $vce) || (isset($each_component->recipe['content_edit']) && $each_component->recipe['content_edit'] == 'roles')) {
 				
 				// normal component layout
 				// as_content can be used to stop the build if false is returned by the component method
-				$as_content = $each_component->as_content($each_component, $vce);
+				$as_content = $this_component->as_content($each_component, $vce);
 				
 				// this currently does not carry forward to sub components
-				if ($each_component->allow_sub_components($each_component, $vce)) {
+				if ($this_component->allow_sub_components($each_component, $vce)) {
 				
 					// check if prevent_sub_components has been set by previous allow_sub_components call
 					if (!isset($this->prevent_sub_components)) {
@@ -718,7 +799,7 @@ class Page {
 						// user can create sub component?
 						// send sub_recipe only to recipe_components function in class.component.php
 						// which in turn sends to the add_component function in each component
-						$each_component->recipe_components($each_component, $vce);
+						$this_component->recipe_components($each_component, $vce);
 					
 					}
 					
@@ -728,7 +809,8 @@ class Page {
 				if (!isset($each_component->prevent_editing) || $each_component->prevent_editing === false) {
 					// revise_component calls to edit_component function within components.class
 					// added for consistancy, so that it matches how recipe_component behaves when it passes the dossier
-					$each_component->edit_component($each_component, $vce);
+					// $this_component->revise_component($each_component, $vce, $this_component);
+					$this_component->edit_component($each_component, $vce);
 				}
 
 				// does this component have sub components and as_content was not returned as false by the component method
@@ -743,10 +825,10 @@ class Page {
 					}
 
 					// check if build_sub_components is true
-					if ($each_component->build_sub_components($each_component, $vce)) {
+					if ($this_component->build_sub_components($each_component, $vce)) {
 	
 						// recursive call for sub component
-						self::build_content($vce, $sub_components, $recipe, $requested_id, $linked, $recipe_tracker);
+						self::build_content($sub_components, $recipe, $requested_id, $linked, $recipe_tracker);
 				
 					}
 					
@@ -757,16 +839,34 @@ class Page {
 					
 					// look for sub recipes to fire off close
 					if (isset($each_component->sub_recipe)) {
-										
+						
 						// cycle though any sub_recipes
 						foreach ($each_component->sub_recipe as $each_sub_recipe) {
 						
-							$each_sub_recipe['parent_id'] = $each_component->component_id;
+							// get name of component class
+							$class_name = $each_sub_recipe['type'];
+
+							// get list of activated components
+							$activated_components = json_decode($vce->site->activated_components, true);
 						
-							$previous_component = self::instantiate_component($each_sub_recipe, $vce);
-						
+							// check that this component hasn't been disabled
+							if (isset($activated_components[$class_name])) {
+
+								// load if it hasn't been yet
+								require_once(BASEPATH . $activated_components[$class_name]);
+
+								// call to the component class for Type
+								$previous_component = new $class_name((object) $each_component);
+
+							} else {
+				
+								// default to base class for components
+								$previous_component = new Component((object) $each_component);
+			
+							}
+							
 							// check to see if allow_sub_components does not return false
-							if ($each_component->allow_sub_components($each_component, $vce)) {
+							if ($this_component->allow_sub_components($each_component, $vce)) {
 					
 								// call book end for recipe_components, similar to as_content_finish
 								$previous_component->add_component_finish($each_component, $vce);
@@ -778,16 +878,18 @@ class Page {
 					}
 					
 					// as content finish
-					$each_component->as_content_finish($each_component, $vce);
+					$this_component->as_content_finish($each_component, $vce);
 					
 				} else {
 					// save top component values and then execute after foreach
+					$top_instance = $this_component;
 					$top_object = $each_component;
 				}
 				
 			} else {
 			
-
+				// work in progress
+			
 				// access denied, so search for a repudiated_url within components meta_data
 				for ($key = 0;$key < count($this->components);$key++) {
 					// repudiated_url found
@@ -815,154 +917,13 @@ class Page {
 		}
 	
 		// execute top component finish
-		if (!empty($top_object)) {
-			$top_object->as_content_finish($top_object, $vce);
+		if (!empty($top_instance)) {
+			$top_instance->as_content_finish((object) $top_object, $vce);
 		}
 
 	}
 	
-	/*
-	 * assembles component object from meta data
-	 * @param array $requested_component_data
-	 * @param object $vce
-	 * @return instantiated objects of component type
-	 */
-	private function assemble_component_objects($requested_component_data, $vce) {
 	
-		if (empty($requested_component_data)) {
-			return false;
-		}
-	
-		$results = array();
-		
-		foreach ($requested_component_data as $meta_data) {
-		
-			if (!isset($components[$meta_data['component_id']])) {
-				// create object and add component table data
-				$components[$meta_data['component_id']] = array();
-				$components[$meta_data['component_id']]['component_id'] = $meta_data['component_id'];
-				$components[$meta_data['component_id']]['parent_id'] = $meta_data['parent_id'];
-				$components[$meta_data['component_id']]['sequence'] = $meta_data['sequence'];
-
-				// found a url so make sub_url = true
-				if (!empty($meta_data['url'])) {
-					$components[$meta_data['component_id']]['url'] = $meta_data['url'];
-				}
-	
-			}
-
-			// create a var from meta_key
-			$key = $meta_data['meta_key'];
-
-			// add meta_value
-			$components[$meta_data['component_id']][$key] = $vce->db->clean($meta_data['meta_value']);
-
-			// adding minutia if it exists within database table
-			if (!empty($meta_data['minutia'])) {
-				$key .= "_minutia";
-				$components[$meta_data['component_id']][$key] = $meta_data['minutia'];
-			}
-
-		}
-		
-	
-		foreach ($components as $each_component) {
-		
-			// add to results array to return
-			$instantiate[] = self::instantiate_component($each_component, $vce);
-		
-		}
-		
-		// return array of components array if more than one component, otherwise just the one component array
-		return $instantiate;
-	
-	}
-
-	/*
-	 * loads component file from server and instantiate new object of component type
-	 * @param array $component
-	 * @param object $vce
-	 * @return instantiated objects of component type
-	 */
-	public static function instantiate_component($component, $vce) {
-	
-		$error = null;
-	
-		// check that type exists for this component
-		$type = isset($component['type']) ? $component['type'] : null;
-	
-		// check is this component has already been loaded
-		if (isset($type)) {
-			if (!isset($vce->site->loaded_components[$type])) {
-
-				// check that component has not been disabled
-				$activated_components = json_decode($vce->site->activated_components, true);
-	
-				if (isset($activated_components[$type])) {
-		
-					if (file_exists(BASEPATH .  $activated_components[$type])) {
-	
-						// require our component file
-						require_once(BASEPATH . $activated_components[$type]);
-			
-						// create loaded_components array if it doesn't exist yet
-						if (!isset($vce->site->loaded_components)) {
-							$vce->site->loaded_components = array();
-						}
-				
-						// add the compoennt to the list
-						$vce->site->loaded_components[$type] = true;
-				
-					} else {
-		
-						// component has not been installed or it was deleted without nestort knowing
-						$error = $type . ' component cannot be found on this server.';
-		
-					}
-	
-				} else {
-	
-					// check that component has not been disabled
-					$installed_components = json_decode($vce->site->installed_components, true);
-	
-					if (isset($installed_components[$type]) && file_exists(BASEPATH .  $installed_components[$type])) {
-	
-						$error = $type . ' component has not been activated, but is installed.';
-			
-					} elseif ($type != 'Component') {
-		
-						$error = $type . ' component cannot be found on this server.';
-
-					}
-	
-				}
-	
-			}
-			
-		} else {
-
-			$error = 'type is missing from component meta data.<br><pre>' . print_r($component,true) . '</pre>';				
-		}
-		
-		if (!empty($error)) {
-			// exit and display error message
-			$type = 'Component';
-			$vce->add_errors($error, $vce);
-		}
-
-		// return a new instance of the component
-		$instantiated_component = new $type();
-		 
-		// rekey
-		foreach ($component as $key=>$value) {
-			$instantiated_component->$key = $value;			
-		}
-		
-		// add to results array to return
-		return $instantiated_component;
-	
-	}
-
 	
 	/**
 	 * Gets parents of a component_id
@@ -1054,8 +1015,7 @@ class Page {
 	 * @return call self::get_sub_components()
 	 */
 	public function get_children($current_id, $parent_id = null, $component = array(), $sub_components = array(), $sub_url = false, $full_object = false) {
-		global $vce;
-		return self::get_sub_components($vce, $current_id, $parent_id, $component, $sub_components, $sub_url, $full_object);
+		return self::get_sub_components($current_id, $parent_id, $component, $sub_components, $sub_url, $full_object);
 	}
 	
 	
@@ -1071,11 +1031,10 @@ class Page {
 	 * @return true
 	 */
 	public function display_components($components, $recipe = null, $requested_id = null, $linked = false, $recipe_tracker = array()) {
-		global $vce;
 		// $components needs to be an array
 		$components_array = !is_array($components) ? array($components) : $components;
 		// call to build_content
-		self::build_content($vce, $components_array, $recipe, $requested_id, $linked, $recipe_tracker);
+		self::build_content($components_array, $recipe, $requested_id, $linked, $recipe_tracker);
 		return;
 	}
 	
