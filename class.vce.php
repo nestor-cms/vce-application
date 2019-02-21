@@ -342,9 +342,16 @@ class VCE {
 
         if (isset($this->$name)) {
             if ($args) {
+            	// function with arguments
                 return call_user_func_array($this->$name, $args);
             } else {
-                return call_user_func($this->$name);
+            	// check if this is a function without arguments
+            	if (function_exists($this->$name)) {
+            	    return call_user_func($this->$name);
+            	} else {
+					// print object property
+					echo $this->$name;
+				}
             }
         }
 
