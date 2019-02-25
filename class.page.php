@@ -152,7 +152,8 @@ class Page {
 		// read recipe
 		$recipe = (isset($this->recipe)) ? $this->recipe : array();
 		
-		// check that template and theme exist		
+		// check that template and theme exist	
+		// the theme file is loaded in the class.site.php at 275 and this should be updated to reflect that	
 		if (isset($this->template)) {
 			// normal theme template output
 			if (file_exists(BASEPATH .'vce-content/themes/' . $vce->site->site_theme . '/' . $this->template)) {

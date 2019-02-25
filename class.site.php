@@ -271,6 +271,9 @@ class Site {
         // add theme path for templates
         $this->theme_path = $site_url . "/vce-content/themes/" . $this->site_theme;
 
+        // load theme functions
+        include_once(BASEPATH . 'vce-content/themes/' . $this->site_theme . '/theme.php');
+
         // load hooks
         // site_object_construct
         if (isset($this->hooks['site_object_construct'])) {
@@ -301,33 +304,30 @@ class Site {
         // site_javascript_dependencies
         if (isset($this->hooks['site_javascript_dependencies'])) {
             foreach ($this->hooks['site_javascript_dependencies'] as $hook) {
-                $this->javascript_dependencies = call_user_func($hook, $vce, $this->javascript_dependencies);
+                $this->javascript_dependencies = call_user_func($hook, $this->javascript_dependencies, $vce);
             }
         }
 
         // prevent caching
-        $ver = time();
+        $ver = '?ver=' . time();
 
         // optional constant in vce-config that allows for another location to be used for javascript
         if (defined('PATH_TO_BASE_JAVASCRIPT')) {
             // add vce javascript
-            $this->add_script($site_url . '/' . PATH_TO_BASE_JAVASCRIPT . '/vce.js?ver=' . $ver, 'jquery');
+            $this->add_script($site_url . '/' . PATH_TO_BASE_JAVASCRIPT . '/vce.js' . $ver, 'jquery');
         } else {
             // add vce javascript
-            $this->add_script($site_url . '/vce-application/js/vce.js?ver=' . $ver, 'jquery');
+            $this->add_script($site_url . '/vce-application/js/vce.js' . $ver, 'jquery');
         }
 
         // optional constant in vce-config that allows for another location to be used for stylesheet
         if (defined('PATH_TO_BASE_STYLESHEET')) {
             // add vce javascript
-            $this->add_style($site_url . '/' . PATH_TO_BASE_STYLESHEET . '/vce.css?ver=' . $ver, 'vce');
+            $this->add_style($site_url . '/' . PATH_TO_BASE_STYLESHEET . '/vce.css' . $ver, 'vce');
         } else {
             // add vce stylesheet
-            $this->add_style($site_url . '/vce-application/css/vce.css?ver=' . $ver, 'vce');
+            $this->add_style($site_url . '/vce-application/css/vce.css' . $ver, 'vce');
         }
-
-        // load theme functions
-        include_once(BASEPATH . 'vce-content/themes/' . $this->site_theme . '/theme.php');
 
     }
 
