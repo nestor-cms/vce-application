@@ -164,28 +164,62 @@ class Content {
 		}
 	}
 
-
-
-	/**
-	 * Allows for calling object properties from template pages in theme and then return or print them.
-	 *
+    /**
+     * Allows components to add functions to the $content object dynamically.
+     *
 	 * @param $name
 	 * @param $args
 	 * @return string OR echo string
 	 */
 	public function __call($name, $args) {
+	
 		if (isset($this->$name)) {
-			if ($args) {
-				// return object property
-				return $this->$name;
-			} else {
-				// print object property
+			if (is_string($this->$name)) {
 				echo $this->$name;
+				return;
+			} else {
+                if ($args) {
+                    return call_user_func_array($this->$name, $args);
+                } else {
+                    return call_user_func($this->$name);
+                }
 			}
-		} else {
-			return false;
 		}
+	
+		global $vce;
+	
+        if (isset($vce->site->hooks['content_call_add_functions'])) {
+            foreach ($vce->site->hooks['content_call_add_functions'] as $hook) {
+                call_user_func($hook, $vce);
+            }
+        }
+        
+        if (isset($this->$name)) {
+			self::__call($name, $args);
+        } else {
+			if (!VCE_DEBUG) {
+				return false;
+			} else {
+				// print name of none existant component
+				echo 'Call to non-existant method/property ' . '$' . strtolower(get_class()) . '->' . $name . '()'  . ' in ' . debug_backtrace()[0]['file'] . ' on line ' . debug_backtrace()[0]['line'];
+			}
+		}
+        
 	}
+
+
+    /**
+     * Magic function to convert static function calls to non-static and use __call functionality above
+     *
+     * @param [type] $name
+     * @param [type] $args
+     * @return void
+     */
+    public static function __callStatic($name, $args) {
+
+        global $vce;
+        return $vce->__call($name, $args);
+    }
 	
 	
 	/**
