@@ -331,54 +331,52 @@ class VCE {
     	}
     }
 
-
-    /**
+   /**
      * Allows components to add functions to the $vce object dynamically.
      *
      * @param string $name
      * @param array $args
      */
-    public function __call($name, $args) {
-
-        if (isset($this->$name)) {
-            if ($args) {
-            	// function with arguments
-                return call_user_func_array($this->$name, $args);
-            } else {
-            	// check if this is a function without arguments
-            	if (function_exists($this->$name)) {
-            	    return call_user_func($this->$name);
-            	} else {
-					// print object property
-					echo $this->$name;
-				}
-            }
-        }
-
-        // function or property not found, so load utility components and try function call again.
-        if (isset($this->site->hooks['vce_call_add_functions'])) {
-            foreach ($this->site->hooks['vce_call_add_functions'] as $hook) {
-                call_user_func($hook, $this);
-            }
-
-            // Try function call again
-            if (isset($this->$name)) {
+	public function __call($name, $args) {
+		
+		// if method or propery is found
+		if (isset($this->$name)) {
+			if (is_string($this->$name)) {
+				// print the propery and return
+				echo $this->$name;
+				return;
+			} else {
+				// if method then call to it
                 if ($args) {
                     return call_user_func_array($this->$name, $args);
                 } else {
                     return call_user_func($this->$name);
                 }
+			}
+		}
+	
+		global $vce;
+	
+		// hook to add additional methods or properties
+        if (isset($vce->site->hooks['vce_call_add_functions'])) {
+            foreach ($vce->site->hooks['vce_call_add_functions'] as $hook) {
+                call_user_func($hook, $vce);
             }
         }
-
-        // Still not found, so error out.
-        if (!VCE_DEBUG) {
-            return false;
+        
+        // if the method or propery now exists after the hook has been called to, then call back
+        if (isset($this->$name)) {
+			self::__call($name, $args);
         } else {
-            // print name of none existant component
-            echo 'Call to non-existant property ' . '$' . strtolower(get_class()) . '->' . $name . '()' . ' in ' . debug_backtrace()[0]['file'] . ' on line ' . debug_backtrace()[0]['line'];
-        }
-    }
+			if (!VCE_DEBUG) {
+				return false;
+			} else {
+				// print name of none existant component
+				$vce->add_errors('Call to non-existant method/property ' . '$' . strtolower(get_class()) . '->' . $name . '()'  . ' in ' . debug_backtrace()[0]['file'] . ' on line ' . debug_backtrace()[0]['line']);
+			}
+		}
+		
+	}
 
     /**
      * Magic function to convert static function calls to non-static and use __call functionality above
