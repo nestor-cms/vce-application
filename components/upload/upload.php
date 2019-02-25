@@ -56,6 +56,10 @@ EOF;
 
 		if ((!defined('MEDIA_UPLOAD_PATH') && strpos($requested_url, 'upload') !== false && strlen($requested_url) == 6) || (defined('MEDIA_UPLOAD_PATH') && strpos($requested_url, MEDIA_UPLOAD_PATH) !== false) && strlen($requested_url) == strlen(MEDIA_UPLOAD_PATH)) {
 
+			if ($_FILES["file"]["size"] == 0) {
+ 				die(json_encode(array('status' => 'error', 'message' => 'File Uploader Error: File size is zero. <div class="link-button cancel-button">Try Again</div>')));
+			}
+
 			// hook that can be used to hijack this method
 			// upload_file_upload_method
 			if (isset($vce->site->hooks['upload_file_upload_method'])) {
