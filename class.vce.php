@@ -372,7 +372,7 @@ class VCE {
 				return false;
 			} else {
 				// print name of none existant component
-				$vce->add_errors('Call to non-existant method/property ' . '$' . strtolower(get_class()) . '->' . $name . '()'  . ' in ' . debug_backtrace()[0]['file'] . ' on line ' . debug_backtrace()[0]['line']);
+				echo '<div class="vce-error-message">Call to non-existant method/property ' . '$' . strtolower(get_class()) . '->' . $name . '()'  . ' in ' . debug_backtrace()[0]['file'] . ' on line ' . debug_backtrace()[0]['line'] .'</div>';
 			}
 		}
 		
