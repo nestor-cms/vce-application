@@ -286,16 +286,14 @@ class Site {
                 'jquery' => $site_url . '/vce-application/js/jquery/jquery.min.js',
                 'jquery-ui' => $site_url . '/vce-application/js/jquery/jquery-ui.min.js',
                 'select2' => $site_url . '/vce-application/js/jquery/select2.min.js',
-                'tablesorter' => $site_url . '/vce-application/js/jquery/jquery.tablesorter.min.js',
-                'tabletocard' => $site_url . '/vce-application/js/jquery/tabletocard.js',
+                'tablesorter' => $site_url . '/vce-application/js/jquery/jquery.tablesorter.min.js'
             ),
             // list of css associated with dependencies
             'styles' => array(
                 'jquery' => null,
                 'jquery-ui' => $site_url . '/vce-application/css/jquery/jquery-ui.min.css',
                 'select2' => $site_url . '/vce-application/css/jquery/select2.css',
-                'tablesorter' => $site_url . '/vce-application/css/jquery/tablesorter.css',
-                'tabletocard' => $site_url . '/vce-application/css/jquery/tabletocard.css',
+                'tablesorter' => $site_url . '/vce-application/css/jquery/tablesorter.css'
             ),
         );
 
@@ -303,7 +301,7 @@ class Site {
         // site_javascript_dependencies
         if (isset($this->hooks['site_javascript_dependencies'])) {
             foreach ($this->hooks['site_javascript_dependencies'] as $hook) {
-                $this->javascript_dependencies = call_user_func($hook, $this, $this->javascript_dependencies);
+                $this->javascript_dependencies = call_user_func($hook, $vce, $this->javascript_dependencies);
             }
         }
 
