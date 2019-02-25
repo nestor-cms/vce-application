@@ -388,7 +388,7 @@ class Site {
         }
 
         // prevent caching
-        $ver = time();
+        $ver = '?ver=' . time();
 
         // check if $path starts with http
         if (substr($path, 0, 4) != 'http') {
@@ -420,7 +420,7 @@ class Site {
 
                 if (isset($scripts[$each_dependent]) && strpos($vce->content->javascript, $scripts[$each_dependent]) === false) {
 
-                    $vce->content->javascript .= '<script type="text/javascript" src="' . $scripts[$each_dependent] . '?ver=' . $ver . '"></script>' . PHP_EOL;
+                    $vce->content->javascript .= '<script type="text/javascript" src="' . $scripts[$each_dependent] . $ver . '"></script>' . PHP_EOL;
 
                     if (isset($styles[$each_dependent])) {
                         self::add_style($styles[$each_dependent], $each_dependent . '-style');
@@ -435,9 +435,9 @@ class Site {
         if (strpos($vce->content->javascript, $path) === false && strpos($vce->content->javascript_footer, $path) === false) {
 
             if ($footer) {
-                $vce->content->javascript_footer .= '<script type="text/javascript" src="' . $path . '?ver=' . $ver . '"></script>' . PHP_EOL;
+                $vce->content->javascript_footer .= '<script type="text/javascript" src="' . $path . $ver . '"></script>' . PHP_EOL;
             } else {
-                $vce->content->javascript .= '<script type="text/javascript" src="' . $path . '?ver=' . $ver . '"></script>' . PHP_EOL;
+                $vce->content->javascript .= '<script type="text/javascript" src="' . $path . $ver . '"></script>' . PHP_EOL;
             }
 
         }
@@ -462,7 +462,7 @@ class Site {
         }
 
         // prevent caching
-        $ver = time();
+        $ver = '?ver=' . time();
 
         // check if $path starts with http
         if (substr($path, 0, 4) != 'http') {
@@ -480,7 +480,7 @@ class Site {
 
         // check that stylesheet for component has not already been added
         if (strpos($vce->content->stylesheet, $path) === false) {
-            $vce->content->stylesheet .= '<link rel="stylesheet" type="text/css" id="' . $name . '" href="' . $path . '?ver=' . $ver . '" type="text/css" media="' . $media . '">' . PHP_EOL;
+            $vce->content->stylesheet .= '<link rel="stylesheet" type="text/css" id="' . $name . '" href="' . $path . $ver . '" type="text/css" media="' . $media . '">' . PHP_EOL;
         }
 
     }
