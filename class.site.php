@@ -271,9 +271,6 @@ class Site {
         // add theme path for templates
         $this->theme_path = $site_url . "/vce-content/themes/" . $this->site_theme;
 
-        // load theme functions
-        include_once(BASEPATH . 'vce-content/themes/' . $this->site_theme . '/theme.php');
-
         // load hooks
         // site_object_construct
         if (isset($this->hooks['site_object_construct'])) {
@@ -328,6 +325,9 @@ class Site {
             // add vce stylesheet
             $this->add_style($site_url . '/vce-application/css/vce.css' . $ver, 'vce');
         }
+        
+        // load theme functions
+        include_once(BASEPATH . 'vce-content/themes/' . $this->site_theme . '/theme.php');
 
     }
 
