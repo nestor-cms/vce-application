@@ -165,7 +165,7 @@ class Content {
 	}
 
     /**
-     * $content object properties / methods.
+     * Allows components to add functions to the $content object dynamically.
      *
 	 * @param $name
 	 * @param $args
@@ -185,17 +185,29 @@ class Content {
                 }
 			}
 		}
-		
-		// error message
-		if (!VCE_DEBUG) {
-			return false;
-		} else {
-			// print name of none existant component
-			echo '<div class="vce-error-message">Call to non-existant method/property ' . '$' . strtolower(get_class()) . '->' . $name . '()'  . ' in ' . debug_backtrace()[0]['file'] . ' on line ' . debug_backtrace()[0]['line'] . '</div>';
-		}
-		
-	}
 	
+		global $vce;
+	
+        if (isset($vce->site->hooks['content_call_add_functions'])) {
+            foreach ($vce->site->hooks['content_call_add_functions'] as $hook) {
+                call_user_func($hook, $vce);
+            }
+        }
+        
+        if (isset($this->$name)) {
+			self::__call($name, $args);
+        } else {
+			if (!VCE_DEBUG) {
+				return false;
+			} else {
+				// print name of none existant component
+				echo '<div class="vce-error-message">Call to non-existant method/property ' . '$' . strtolower(get_class()) . '->' . $name . '()'  . ' in ' . debug_backtrace()[0]['file'] . ' on line ' . debug_backtrace()[0]['line'] .'</div>';
+			}
+		}
+        
+	}
+
+
     /**
      * Magic function to convert static function calls to non-static and use __call functionality above
      *
