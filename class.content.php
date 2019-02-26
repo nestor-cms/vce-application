@@ -179,10 +179,7 @@ class Content {
 				return;
 			} else {
                 if ($args) {
-                    $testing = call_user_func_array($this->$name, $args);
-                    echo $testing;
-					// $vce->content->add('main', $vce->content->accordion('title','content'));
-                    return $testing;
+                    return call_user_func_array($this->$name, $args);
                 } else {
                     return call_user_func($this->$name);
                 }
