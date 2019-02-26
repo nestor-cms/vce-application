@@ -195,7 +195,7 @@ class Content {
         }
         
         if (isset($this->$name)) {
-			self::__call($name, $args);
+			return self::__call($name, $args);
         } else {
 			if (!VCE_DEBUG) {
 				return false;

@@ -366,7 +366,7 @@ class VCE {
         
         // if the method or propery now exists after the hook has been called to, then call back
         if (isset($this->$name)) {
-			self::__call($name, $args);
+			return self::__call($name, $args);
         } else {
 			if (!VCE_DEBUG) {
 				return false;
