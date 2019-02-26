@@ -55,12 +55,17 @@ class ManageComponents extends Component {
 
             $directory_itor = new RecursiveDirectoryIterator(BASEPATH . $components_dir . DIRECTORY_SEPARATOR .'components' . DIRECTORY_SEPARATOR);
             $filter_itor = new RecursiveCallbackFilterIterator($directory_itor, function ($current, $key, $iterator) {
+
                 // Skip hidden files and directories.
                 if ($current->getFilename()[0] === '.') {
                     return FALSE;
                 }
-                if ($current->isDir()) {
-                    return TRUE;
+				if ($current->isDir()) {
+					// do not decend into folders that start with a ~ or are named css, js, image..., librar...
+					if (preg_match("/^(~.+|css|js|image.*|librar.*)/i",$current->getFilename())) {
+						return false;
+					}
+					return true;
                 } else {
                     // Only consume .php files that are in a directory of the same name.
                     $ok = fnmatch("*.php", $current->getFilename());
@@ -70,6 +75,7 @@ class ManageComponents extends Component {
                 }
             });
             $itor = new RecursiveIteratorIterator($filter_itor);
+
 
             foreach ($itor as $each_component) {
 
