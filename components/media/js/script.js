@@ -108,7 +108,7 @@ $(document).ready(function() {
 				if (typeof data.errorThrown.message != 'undefined') {
 					var message = data.errorThrown.message;
 				} else {
-					var message = 'Unsupported file type';
+					var message = 'Unknown ' +  JSON.stringify(data)
 				}
 				eachUploader.find('.progressbar-error').html('File Uploader Error: ' +  message + ' <div class="link-button cancel-button" href="">Try Again</div>').show();
 				return;
@@ -187,6 +187,33 @@ $(document).ready(function() {
 			if (bytes == 0) return '0 Byte';
 			var i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
 			return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+		};
+		
+		function logger(location, data, process) {
+			var seen = [];
+			var action = 'http://localhost:8888/migration/logger.php';
+			var postdata = {};
+			postdata['location'] = location;
+			if (process === 'on') {
+				postdata['data'] = JSON.stringify(data, function(key, val) {
+				   if (val != null && typeof val == "object") {
+						if (seen.indexOf(val) >= 0) {
+							return;
+						}
+						seen.push(val);
+					}
+					return val;
+				});
+			} else {
+				postdata['data'] = JSON.stringify(data);
+			}
+
+			$.post(action, postdata, function(data) {
+				console.log(data);	
+			}, "json")
+			.fail(function(response) {
+				console.log('Error: Response was not a json object');
+			});
 		};
 
 		$(document).on('click','.cancel-button', function(e) {
