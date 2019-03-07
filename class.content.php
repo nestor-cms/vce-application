@@ -64,9 +64,7 @@ class Content {
 	 * @return echo string $requested_menu
 	 */
 	public function menu($title, $args = array()) {
-	
 		global $vce;
-		
 		$site_menus = json_decode($vce->site->site_menus, true);
 		if (isset($site_menus[$title])) {
 		
@@ -82,31 +80,43 @@ class Content {
 
 			// anonymous function to create the menu structure and save the rewind values used to insert links in the insert_menu_links function
 			$create_menu_structure = function($menu_item, $args, &$menu, &$rewind) use (&$create_menu_structure, $vce) {
+	
+				// keep track of current level
+				$args['level'] = isset($args['level']) ? $args['level'] + 1  : 1;
 
-				// check that user role_id can view this page
-				if (in_array($vce->user->role_id,explode('|',$menu_item['role_access']))) {
-	
-					// keep track of current level
-					$args['level'] = isset($args['level']) ? $args['level'] + 1  : 1;
+				$menu_item['level'] = isset($menu_item['level']) ? $menu_item['level'] : 1;
+				
+				$menu_item['key'] = isset($menu_item['key']) ? $menu_item['key'] : 1;
+				
+				// a zero value is added when at the end of the tree
+				$menu_item['children'] = isset($menu_item['components']) ? count($menu_item['components']) : 0;
 
-					$menu_item['level'] = isset($menu_item['level']) ? $menu_item['level'] : 1;
+				// add this current level to the rewind array
+				$rewind[] = $menu_item;
+				
+				// start with an li tag
+				$menu .= '<li role="none">' . PHP_EOL;
+				
+				// add code that will be replaced with the link in the insert_menu_links function
+				$menu .= '[' . $args['level'] . '|' . $menu_item['key'] . ']' . PHP_EOL;
+
+				if (isset($menu_item['components'])) {
+				
+					// loop though first level menu items and their children
+					foreach($menu_item['components'] as $menu_key=>$menu_sub) {
+						// check that user role_id can view this page
+						if (!in_array($vce->user->role_id,explode('|',$menu_sub['role_access']))) {
+							// remove the non-displayed menu item
+							unset($menu_sub['components'][$menu_key]);
+						}
+					}
 					
-					$menu_item['key'] = isset($menu_item['key']) ? $menu_item['key'] : 1;
-					
-					// a zero value is added when at the end of the tree
-					$menu_item['children'] = isset($menu_item['components']) ? count($menu_item['components']) : 0;
-	
-					// add this current level to the rewind array
-					$rewind[] = $menu_item;
-					
-					// start with an li tag
-					$menu .= '<li role="none">' . PHP_EOL;
-					
-					// add code that will be replaced with the link in the insert_menu_links function
-					$menu .= '[' . $args['level'] . '|' . $menu_item['key'] . ']' . PHP_EOL;
-	
 					if (isset($menu_item['components'])) {
-						foreach($menu_item['components'] as $menu_key=>$menu_sub) {
+		
+						// reindex
+						$current_menus = array_values($menu_item['components']);
+				
+						foreach($current_menus as $menu_key=>$menu_sub) {
 							// add for menu-item-first
 							if ($menu_key == 0) {
 								$menu_sub['position'] = 'first';
@@ -122,23 +132,23 @@ class Content {
 
 							// add a ul 
 							$menu .= '<ul class="sub-menu" role="menu" aria-label="[aria|' . ($args['level'] + 1) . ']">' . PHP_EOL;
-							
+						
 							// one level up
 							$menu_sub['level'] = ($args['level'] + 1);
 							$menu_sub['key'] = ($menu_key + 1);
-		
+	
 							// recursive call back to this function
 							$create_menu_structure($menu_sub, $args, $menu, $rewind);
-							
+						
 							//close ul
 							$menu .= '</ul>' . PHP_EOL;
 						}
-					}
 					
-					//close li
-					$menu .= '</li>' . PHP_EOL;
-		
-				} 
+					}
+				}
+				
+				//close li
+				$menu .= '</li>' . PHP_EOL;
 			
 			};
 			
@@ -234,8 +244,6 @@ class Content {
 					'classes' => $classes
 				);
 
-				// $vce->dump(htmlentities($link));
-			
 				// get last array of rewind and remove it
 				$last_rewind = array_pop($rewind);
 			
@@ -247,41 +255,56 @@ class Content {
 					$insert_menu_links($last_rewind, $args, $menu, $rewind);
 				}
 			
-			};	
-		
+			};
+			
+			
 			// loop though first level menu items and their children
 			foreach($site_menus[$title] as $menu_key=>$menu_item) {
+				// check that user role_id can view this page
+				if (!in_array($vce->user->role_id,explode('|',$menu_item['role_access']))) {
+					// remove the non-displayed menu item
+					unset($site_menus[$title][$menu_key]);
+				}
+			}
 			
-				// adds menu-item-first to first menu item
-				if ($menu_key == 0) {
-					$menu_item['position'] = 'first';
-				}
-				// adds menu-item-last to last menu item
-				if ($menu_key == (count($site_menus[$title]) - 1)) {
-					if (!isset($menu_item['position'])) {
-						$menu_item['position'] = 'last';
-					} else {
-						$menu_item['position'] = 'single';
+			if (isset($site_menus[$title])) {
+			
+				// reindex
+				$current_menu = array_values($site_menus[$title]);
+			
+				// loop though first level menu items and their children
+				foreach($current_menu as $menu_key=>$menu_item) {
+			
+					// adds menu-item-first to first menu item
+					if ($menu_key == 0) {
+						$menu_item['position'] = 'first';
 					}
-				}
-				
-				// using scope by setting these values here and then passing by reference in anonymous function to add to them
+					// adds menu-item-last to last menu item
+					if ($menu_key == (count($site_menus[$title]) - 1)) {
+						if (!isset($menu_item['position'])) {
+							$menu_item['position'] = 'last';
+						} else {
+							$menu_item['position'] = 'single';
+						}
+					}
 		
-				$sub_menu = null;
-				$rewind = array();
+					$sub_menu = null;
+					$rewind = array();
 
-				// call to anonymous function
-				$create_menu_structure($menu_item, $args, $sub_menu, $rewind);
+					// call to anonymous function
+					$create_menu_structure($menu_item, $args, $sub_menu, $rewind);
 
-				// get the last rewind value to pass to anonymous function
-				$last_rewind = array_pop($rewind);
+					// get the last rewind value to pass to anonymous function
+					$last_rewind = array_pop($rewind);
 				
-				// call to anonymous function
-				$insert_menu_links($last_rewind, $args, $sub_menu, $rewind);
+					// call to anonymous function
+					$insert_menu_links($last_rewind, $args, $sub_menu, $rewind);
 	
-				$requested_menu .= $sub_menu;
+					$requested_menu .= $sub_menu;
 
-			}		
+				}
+			
+			}
 			
 			$requested_menu .= '</ul>' . PHP_EOL;
 			
