@@ -141,8 +141,8 @@ class Page {
 		}
 		
 		// add basics to object
-		$vce->requested_id = $requested_component->component_id;
-		$vce->requested_url = $requested_component->url;		
+		$vce->requested_id = $this->requested_id = $requested_component->component_id;
+		$vce->requested_url = $this->requested_url = $requested_component->url;		
 		
 		// start building page object components
 		// $page_id, $requested_id, array('requested_location' => $requested_component)
