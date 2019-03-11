@@ -61,8 +61,10 @@ class ManageComponents extends Component {
                     return FALSE;
                 }
 				if ($current->isDir()) {
-					// do not decend into folders that start with a ~ or are named css, js, image..., librar...
-					if (preg_match("/^(~.+|css|js|image.*|librar.*)/i",$current->getFilename())) {
+					// do not decend into folders that start with a ~ or librar...
+					// more could be added
+					// css|js|image.*
+					if (preg_match("/^(~.+|librar.*)/i",$current->getFilename())) {
 						return false;
 					}
 					return true;
