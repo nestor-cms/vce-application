@@ -151,7 +151,10 @@ class Page {
 		
 		// read recipe
 		$recipe = (isset($this->recipe)) ? $this->recipe : array();
-		
+			
+		// build page content from components
+		self::build_content($vce, $this->components, $recipe, $requested_component->component_id);
+
 		// check that template and theme exist	
 		// the theme file is loaded in the class.site.php at 275 and this should be updated to reflect that	
 		if (isset($this->template)) {
@@ -181,9 +184,6 @@ class Page {
 			// as a last resort use defalt vce theme in vce-application
 			$vce->template_file_path = BASEPATH . 'vce-application/themes/vce/index.php';
 		}
-			
-		// build page content from components
-		self::build_content($vce, $this->components, $recipe, $requested_component->component_id);
 
 	}
 
