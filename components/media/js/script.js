@@ -41,7 +41,7 @@ $(document).ready(function() {
 				data.chunksTotal = Math.ceil(data.files[0].size / set_chunk_size);
 				eachUploader.find('.upload-browse').hide();
 				if (data.files[0].size > file_size_limit) {
-					eachUploader.find('.progressbar-error').html('File Uploader Error: Selected file size of ' +  bytesToSize(data.files[0].size) + ' is larger than upload limit of ' + bytesToSize(file_size_limit) + ' <div class="link-button cancel-button" href="">Try Again</div>').show();
+					eachUploader.find('.progressbar-error').html('File Uploader Error (js): Selected file size of ' +  bytesToSize(data.files[0].size) + ' is larger than upload limit of ' + bytesToSize(file_size_limit) + ' <div class="link-button cancel-button" href="">Try Again</div>').show();
 					return false;
 				}
 				eachUploader.find('.upload-form').show();
@@ -110,7 +110,7 @@ $(document).ready(function() {
 				} else {
 					var message = 'Unknown ' +  JSON.stringify(data)
 				}
-				eachUploader.find('.progressbar-error').html('File Uploader Error: ' +  message + ' <div class="link-button cancel-button" href="">Try Again</div>').show();
+				eachUploader.find('.progressbar-error').html('File Uploader Error (js): ' +  message + ' <div class="link-button cancel-button" href="">Try Again</div>').show();
 				return;
 			},
 			chunksend: function (e, data) {
@@ -119,7 +119,7 @@ $(document).ready(function() {
 			},
 			chunkfail: function (e, data) {
 				eachUploader.find('.progressbar-container').hide();
-				eachUploader.find('.progressbar-error').html('File Uploader Error: Chunk failed to upload' + ' <div class="link-button cancel-button" href="">Try Again</div>').show();
+				eachUploader.find('.progressbar-error').html('File Uploader Error (js): Chunk failed to upload' + ' <div class="link-button cancel-button" href="">Try Again</div>').show();
 			},
 			submit: function (e, data) {
 				if (submittable) {

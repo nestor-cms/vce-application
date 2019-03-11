@@ -323,7 +323,7 @@ class Content {
 	 * @property object $site  Gets the site menue from the $site object
 	 * @return echo string $link
 	 */
-	public function _menu($title, $args = array()) {
+	public function archival_menu($title, $args = array()) {
 		global $vce;
 		$site_menus = json_decode($vce->site->site_menus, true);
 		if (isset($site_menus[$title])) {
@@ -356,7 +356,7 @@ class Content {
 	 * @property $user  Controls user access
 	 * @return string $link
 	 */
-	private function _create_menu_items($menu_item, $args) {
+	private function archival_create_menu_items($menu_item, $args) {
 		
 		global $vce;
 		
