@@ -296,33 +296,27 @@ class Component {
 				// check if this is an reverse auto_create
 				if (isset($auto_create_reverse)) {
 					// when it has the back->forward, it's a double, so prevent it
-					if (!isset($vce->recipe_manifestation_finish)) {
-						$vce->recipe_manifestation_finish = true;
-						
-						/*
-						
-						$activated_components = json_decode($vce->site->activated_components, true);
-						// if the count is grater than 1, then fire off the previous component
-						
-						if (isset($activated_components[$auto_create[0]['type']]) && count($each_component->sub_recipe) > 1) {
-							$component_type = $auto_create[0]['type'];
-						} else {
-							// component has been disabled, use parent class
-							$component_type = 'Component';
-						}
-						
-						$previous_component = new $component_type();
-						
-						*/
+					$recipe_manifestation_finish_type = 'recipe_manifestation_finish_' . $auto_create[0]['type'];
+					if (!isset($vce->$recipe_manifestation_finish_type)) {
+						// set to prevent the recipe_manifestation_finish method from being fired twice
+						$vce->$recipe_manifestation_finish_type = true;
 						
 						$previous_component = Page::instantiate_component($auto_create[0], $vce);
-						
+
 						$previous_component->recipe_manifestation_finish((object) $each_recipe_component, $vce);
 						
 					}
 				} elseif (isset($recipe_manifestation) && $recipe_manifestation == $component_type) {
-				
-					$this_component->recipe_manifestation_finish((object) $each_recipe_component, $vce);
+					
+					// create the specific property to look for
+					$recipe_manifestation_finish_type = 'recipe_manifestation_finish_' . $this_component->type;
+
+					// if it doesn't exist then do call to the recipe_manifestation_finish method
+					if (!isset($vce->$recipe_manifestation_finish_type)) {
+	
+						$this_component->recipe_manifestation_finish((object) $each_recipe_component, $vce);
+					
+					}
 					
 				}
 			
