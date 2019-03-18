@@ -51,9 +51,35 @@ class MediaType {
 	public function display($each_component, $vce) {
 	
 		if (!isset(json_decode($vce->site->enabled_mediatype, true)[$each_component->media_type])) {
-	
-			$vce->content->add('main','<div class="warning">' . $each_component->media_type . ' This unsupported file type cannot be displayed</div>');
+		
+			$delete_button = null;
 
+			if ($each_component->created_by == $vce->user->user_id ) {
+
+				// the instructions to pass through the form
+				$dossier = array(
+				'type' => $each_component->type,
+				'procedure' => 'delete',
+				'component_id' => $each_component->component_id,
+				'created_at' => $each_component->created_at
+				);
+
+				// generate dossier
+				$dossier_for_delete = $vce->generate_dossier($dossier);
+			
+
+			
+				$delete_button = <<<EOF
+<form id="delete_$each_component->component_id" class="delete-form inline-form asynchronous-form" method="post" action="$vce->input_path">
+<input type="hidden" name="dossier" value="$dossier_for_delete">
+<input type="submit" value="Delete File">
+</form>
+EOF;
+
+			}
+		
+			$vce->content->add('main','<div class="form-message form-error">' . $each_component->media_type . ' This unsupported file type cannot be displayed  ' . $delete_button . '</div>');
+			
 		}
 		
 	}
