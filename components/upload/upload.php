@@ -55,10 +55,53 @@ EOF;
 		$vce->media_upload_path = defined('MEDIA_UPLOAD_PATH') ? $vce->site->site_url . '/' . MEDIA_UPLOAD_PATH : $vce->site->site_url . '/upload';
 
 		if ((!defined('MEDIA_UPLOAD_PATH') && strpos($requested_url, 'upload') !== false && strlen($requested_url) == 6) || (defined('MEDIA_UPLOAD_PATH') && strpos($requested_url, MEDIA_UPLOAD_PATH) !== false) && strlen($requested_url) == strlen(MEDIA_UPLOAD_PATH)) {
-
+			
+			// check if the size of the file is empty
 			if ($_FILES["file"]["size"] == 0) {
  				die(json_encode(array('status' => 'error', 'message' => 'File Uploader Error: File size is zero. <div class="link-button cancel-button">Try Again</div>')));
 			}
+			
+			// get mimetype supplied by plupload
+			// if one is not supplied, then create a special one for verification
+			$mimetype = !empty($_REQUEST['mimetype']) ? $_REQUEST['mimetype'] : 'application/' . $_REQUEST['extention'];
+			
+			// cycle through mediatypes that were passed through from functions media_type()
+			foreach (json_decode($_REQUEST['mediatypes'], true) as $each_mediatype) {
+
+				// check for subtype wildcard
+				if (preg_match('/\.\*$/', $each_mediatype['mimetype'])) {
+
+					// match primaray type
+					if (explode('/', $each_mediatype['mimetype'])[0] == explode('/', $mimetype)[0]) {
+
+						// class name of media player
+						$mimename = $each_mediatype['mimename'];
+			
+						break;
+	
+					}
+
+				} else {
+
+					// match full
+					if ($each_mediatype['mimetype'] == $mimetype) {
+
+						$mimename = $each_mediatype['mimename'];
+			
+						break;
+	
+					}
+	
+				}
+
+			}
+			
+
+			// no mimename name match was found.
+			if (!isset($mimename)) {
+				die(json_encode(array('status' => 'error', 'message' => 'File Uploader Error: File type not allowed / Mimename not found. <div class="link-button cancel-button">Try Again</div>')));
+			}
+			
 
 			// hook that can be used to hijack this method
 			// upload_file_upload_method
@@ -269,32 +312,11 @@ EOF;
 		
 				}
 		
+				// redundant check for allowed mimetype
+				
 				// get mimetype supplied by plupload
 				// if one is not supplied, then create a special one for verification
 				$mimetype = !empty($_REQUEST['mimetype']) ? $_REQUEST['mimetype'] : 'application/' . $_REQUEST['extention'];
-
-				//	get filesize of uploaded file
-				// 	$filesize = filesize("{$file_path}.part");
-				// 	This is causing issues when the file is huge becasue of max memory limit
-				// 	verify mimeType
-				// 	$finfo = new finfo(FILEINFO_MIME_TYPE);
-				// 	$finfo_contents = file_get_contents("{$file_path}.part");
-				// 	$finfo_mimeType = $finfo->buffer($finfo_contents);
-				//  check that mimeTypes are the same, if not delete and throw error
-				// 	if ($mimetype != $finfo_mimeType) {
-				// 	
-				// 		$temporary_file_path = "{$file_path}.part";
-				// 	
-				// 		// delete the temporary file
-				// 		@unlink($temporary_file_path);
-				// 		
-				// 		// die with message
-				// 		die(json_encode(array('status' => 'error', 'message' => 'File Uploader Error: mimeType error.')));
-				// 
-				// 	}
-	
-				// default value for mimename
-				// $mimename = "MediaTypes";
 				
 				// cycle through mediatypes that were passed through from functions media_type()
 				foreach (json_decode($_REQUEST['mediatypes']) as $each_mediatype) {
