@@ -23,17 +23,17 @@ class User {
         if (!empty($user_session)) {
 
             // get user info object
-           	// $user_object = $_SESSION['user'];
+            // $user_object = $_SESSION['user'];
 
             // set user info values
-            // foreach ($user_object as $key => $value) 
+            // foreach ($user_object as $key => $value)
             foreach ($user_session as $key => $value) {
                 $this->$key = $value;
             }
-            
+
             // set session
             // $_SESSION['user'] = $this;
-			// self::store_session($this, $vce);
+            // self::store_session($this, $vce);
 
             // a good session, return to exit this method
             return true;
@@ -128,7 +128,7 @@ class User {
 
             // set session
             //$_SESSION['user'] = $this;
-			self::store_session($this, $vce);
+            self::store_session($this, $vce);
 
         }
 
@@ -272,12 +272,11 @@ class User {
 
             // delete user session
             if (isset($_SESSION)) {
-            	unset($_SESSION['user']);
-            	
-            	// Destroy all data registered to session
-            	session_destroy(); 
-            }
+                unset($_SESSION['user']);
 
+                // Destroy all data registered to session
+                session_destroy();
+            }
 
             // load logout hook
             if (isset($vce->site->hooks['user_logout_complete'])) {
@@ -285,18 +284,18 @@ class User {
                     call_user_func($hook, $user_id);
                 }
             }
-            
+
             // load logout hook
             if (isset($vce->site->hooks['user_logout_override'])) {
                 foreach ($vce->site->hooks['user_logout_override'] as $hook) {
                     call_user_func($hook, $user_id);
                 }
             }
-            
-            
+
         }
 
     }
+
 
     /**
      * Creates user object from user_id
@@ -318,7 +317,7 @@ class User {
 
         // clear user session
         if (isset($_SESSION)) {
-    		unset($_SESSION['user']);
+            unset($_SESSION['user']);
         }
 
         // clear user object properties
@@ -397,13 +396,13 @@ class User {
                 foreach ($user_object as $key => $value) {
                     $this->$key = $value;
                 }
-                
-				// hook 
-				if (isset($vce->site->hooks['user_make_user_object'])) {
-					foreach ($vce->site->hooks['user_make_user_object'] as $hook) {
-						call_user_func($hook, $this, $vce);
-					}
-				}
+
+                // hook
+                if (isset($vce->site->hooks['user_make_user_object'])) {
+                    foreach ($vce->site->hooks['user_make_user_object'] as $hook) {
+                        call_user_func($hook, $this, $vce);
+                    }
+                }
 
                 return self::store_session($this, $vce);
 
@@ -414,13 +413,12 @@ class User {
             // user is not logged-in, role_id is set to x, because x is fun and "I want to believe."
             $this->role_id = "x";
             $this->session_vector = self::create_vector();
-            
+
             return self::store_session($this, $vce);
 
         }
 
     }
-    
 
     /**
      * Starts session
@@ -522,27 +520,25 @@ class User {
             }
 
         }
-        
-
 
         // generate a new session id key
         // session_regenerate_id(true);
-        
-        // hook 
+
+        // hook
         if (isset($vce->site->hooks['user_store_session_override'])) {
             foreach ($vce->site->hooks['user_store_session_override'] as $hook) {
                 call_user_func($hook, $user_object, $vce);
             }
-		}
+        }
 
-		// check if php sessions are being used
-		if (isset($_SESSION)) {
-       		// store standard php session 
-       	 	$_SESSION['user'] = $user_object;
-       	}
-        
-      	return true;
-      	
+        // check if php sessions are being used
+        if (isset($_SESSION)) {
+            // store standard php session
+            $_SESSION['user'] = $user_object;
+        }
+
+        return true;
+
     }
 
     /**
@@ -556,14 +552,14 @@ class User {
             foreach ($vce->site->hooks['user_start_session_override'] as $hook) {
                 return call_user_func($hook, $vce);
             }
-		}
-		
+        }
+
         // hook that can be used to create a session handler
         if (isset($vce->site->hooks['user_sys_session_method'])) {
             foreach ($vce->site->hooks['user_sys_session_method'] as $hook) {
                 call_user_func($hook, $vce);
             }
-		}
+        }
 
         // set hash algorithm
         ini_set('session.hash_function', 'sha512');
@@ -619,13 +615,125 @@ class User {
 
         // start the session
         session_start();
-        
+
         // get the user session
         $user_session = isset($_SESSION['user']) ? $_SESSION['user'] : false;
-        
+
         // return the user session value
         return $user_session;
-        
+
+    }
+
+    /**
+     * Create a new user
+     *
+     * @param string $email the email.
+     * @param string $password the password. If not set a random password will be generated
+     * @param string $first_name the first name.
+     * @param string $last_name the last name.
+     * @param string $role the role.  This is a string e.g. Instructor
+     * @param VCE $vce global vce class
+     * @return integer the new user id
+     */
+    public static function create_user($email, $password, $first_name, $last_name, $role, $vce) {
+
+        // Translate role to role_id
+        $site_roles = json_decode($vce->site->roles, true);
+
+        $default = null;
+        foreach ($site_roles as $each_key => $each_value) {
+            // create as default
+            $default = $each_key;
+
+            // check against role
+            if ($each_value['role_name'] == $role) {
+                $role_id = $each_key;
+                break;
+            }
+        }
+
+        // set to lowest as a backup
+        $role_id = isset($role_id) ? $role_id : $default;
+
+        $lookup = user::lookup($email);
+
+        $vector = $vce->user->create_vector();
+
+        if (!isset($password)) {
+            // anonymous function to generate password
+            $random_password = function ($password = null) use (&$random_password) {
+                $charset = "+-*#&@!?0123456789abcdefghijklmnopqrstuxyvwzABCDEFGHIJKLMNOPQRSTUXYVWZ";
+                $newchar = substr($charset, mt_rand(0, (strlen($charset) - 1)), 1);
+                if (strlen($password) == 8) {
+                    return $password;
+                }
+                return $random_password($password . $newchar);
+            };
+
+            // get a new random password
+            $password = $random_password();
+        }
+
+        // call to user class to create_hash function
+        $hash = user::create_hash($email, $password);
+
+        $user_data = array(
+            'vector' => $vector,
+            'hash' => $hash,
+            'role_id' => $role_id,
+        );
+
+        $new_user_id = $vce->db->insert('users', $user_data);
+
+        // the argument is treated as an integer, and presented as an unsigned decimal number.
+        sscanf(crc32($email), "%u", $front);
+        sscanf(crc32(strrev($email)), "%u", $back);
+        // ilkyo id
+        $ilkyo_id = $front . substr($back, 0, (14 - strlen($front)));
+
+        $records = array();
+
+        // add a lookup
+        $records[] = array(
+            'user_id' => $new_user_id,
+            'meta_key' => 'lookup',
+            'meta_value' => $lookup,
+            'minutia' => $ilkyo_id,
+        );
+
+        $minutia = User::order_preserving_hash($email);
+
+        // add email
+        $records[] = array(
+            'user_id' => $new_user_id,
+            'meta_key' => 'email',
+            'meta_value' => $vce->user->encryption($email, $vector),
+            'minutia' => $minutia,
+        );
+
+        $minutia = User::order_preserving_hash($first_name);
+
+        // first name
+        $records[] = array(
+            'user_id' => $new_user_id,
+            'meta_key' => 'first_name',
+            'meta_value' => $vce->user->encryption($first_name, $vector),
+            'minutia' => $minutia,
+        );
+
+        $minutia = User::order_preserving_hash($last_name);
+
+        // last name
+        $records[] = array(
+            'user_id' => $new_user_id,
+            'meta_key' => 'last_name',
+            'meta_value' => $vce->user->encryption($last_name, $vector),
+            'minutia' => $minutia,
+        );
+
+        $vce->db->insert('users_meta', $records);
+
+        return $new_user_id;
     }
 
     /**
