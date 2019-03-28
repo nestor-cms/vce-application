@@ -1068,24 +1068,7 @@ EOF;
      */
     protected function create($input) {
 
-        // loop through to look for checkbox type input
-        foreach ($input as $input_key => $input_value) {
-            // for checkbox inputs
-            if (preg_match('/_\d+$/', $input_key, $matches)) {
-                // strip _1 off to find input value for checkbox
-                $new_input = str_replace($matches[0], '', $input_key);
-                // decode previous json object value for input variable
-                $new_value = isset($input[$new_input]) ? json_decode($input[$new_input], true) : array();
-                // add new value to array
-                $new_value[] = $input_value;
-                // remove the _1
-                unset($input[$input_key]);
-                // reset the input with json object
-                $input[$new_input] = json_encode($new_value);
-            }
-        }
-
-        // remove type so that it's not created for new user
+		$input = $this->strip_checkbox($input);
 
         $email = filter_var(strtolower($input['email']), FILTER_SANITIZE_EMAIL);
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -1098,15 +1081,13 @@ EOF;
             return;
         }
 
-		$password = $input['password'];
 		$role_id = $input['role_id'];
 
         unset($input['type']);
 		unset($input['procedure']);
-        unset($input['password']);
 		unset($input['role_id']);
 		
-        user::create_user($email, $password, $role_id, $input);
+        user::create_user($role_id, $input);
 
         echo json_encode(array('response' => 'success', 'message' => 'User has been created', 'form' => 'create', 'action' => ''));
         return;
@@ -1142,9 +1123,20 @@ EOF;
      */
     protected function update($input) {
 
-        global $db;
-        global $site;
+		$input = $this->strip_checkbox($input);
 
+        $user_id = $input['user_id'];
+		$role_id = empty($input['role_id']) ? '' : $input['role_id'];
+
+        unset($input['type'], $input['procedure'], $input['role_id'], $input['user_id']);
+		user::update_user($user_id, $role_id, $input);
+
+        echo json_encode(array('response' => 'success', 'message' => 'User Updated', 'form' => 'create', 'action' => ''));
+        return;
+
+    }
+
+	private function strip_checkbox($input) {
         // loop through to look for checkbox type input
         foreach ($input as $input_key => $input_value) {
             // for checkbox inputs
@@ -1160,91 +1152,10 @@ EOF;
                 // reset the input with json object
                 $input[$new_input] = json_encode($new_value);
             }
-        }
-
-        // get user attributes
-        $user_attributes = json_decode($site->user_attributes, true);
-
-        // start with default
-        $attributes = array('email' => 'text');
-
-        // assign values into attributes for order preserving hash in minutia column
-        if (isset($user_attributes)) {
-            foreach ($user_attributes as $user_attributes_key => $user_attributes_value) {
-                if (isset($user_attributes_value['sortable']) && $user_attributes_value['sortable']) {
-                    $value = isset($user_attributes_value['type']) ? $user_attributes_value['type'] : null;
-                    $attributes[$user_attributes_key] = $value;
-                }
-            }
-        }
-
-        $user_id = $input['user_id'];
-
-        $query = "SELECT role_id, vector FROM " . TABLE_PREFIX . "users WHERE user_id='" . $user_id . "'";
-        $user_info = $db->get_data_object($query);
-
-        $role_id = $user_info[0]->role_id;
-        $vector = $user_info[0]->vector;
-
-        // has role_id been updated?
-        if (isset($input['role_id']) && $input['role_id'] != $role_id) {
-
-            $update = array('role_id' => $input['role_id']);
-            $update_where = array('user_id' => $user_id);
-            $db->update('users', $update, $update_where);
-
-        }
-
-        // clean up
-        unset($input['type'], $input['procedure'], $input['role_id'], $input['user_id']);
-
-        // delete old meta data
-        foreach ($input as $key => $value) {
-
-            // delete user meta from database
-            $where = array('user_id' => $user_id, 'meta_key' => $key);
-            $db->delete('users_meta', $where);
-
-        }
-
-        // now add meta data
-
-        $records = array();
-
-        foreach ($input as $key => $value) {
-
-            // encode user data
-            $encrypted = user::encryption($value, $vector);
-
-            $minutia = null;
-
-            // if this is a sortable text attribute
-            if (isset($attributes[$key])) {
-                // check if this is a text field
-                if ($attributes[$key] == 'text') {
-                    $minutia = user::order_preserving_hash($value);
-                }
-                // other option will go here
-            }
-
-            $records[] = array(
-                'user_id' => $user_id,
-                'meta_key' => $key,
-                'meta_value' => $encrypted,
-                'minutia' => $minutia,
-            );
-
-        }
-
-        // check that $records is not empty
-        if (!empty($records)) {
-            $db->insert('users_meta', $records);
-        }
-
-        echo json_encode(array('response' => 'success', 'message' => 'User Updated', 'form' => 'create', 'action' => ''));
-        return;
-
-    }
+		}
+		
+		return $input;
+	}
 
     /**
      * Masquerade as user
@@ -1268,15 +1179,7 @@ EOF;
      */
     protected function delete($input) {
 
-        global $db;
-
-        // delete user from database
-        $where = array('user_id' => $input['user_id']);
-        $db->delete('users', $where);
-
-        // delete user from database
-        $where = array('user_id' => $input['user_id']);
-        $db->delete('users_meta', $where);
+		user::delete_user($input['user_id']);
 
         echo json_encode(array('response' => 'success', 'message' => 'User has been deleted', 'form' => 'delete', 'user_id' => $input['user_id'], 'action' => ''));
         return;

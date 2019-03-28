@@ -665,26 +665,28 @@ class User {
     /**
      * Create a new user
      *
-     * @param string $email the email.
-     * @param string $password the password. If not set a random password will be generated
-     * @param string $attributes array of attributes and values.
+     * @param string $attributes array of attributes and values.  Must include email. If no password it will be generated
      * @param string $role_id the role_id.
-     * @return integer the new user id
+     * @return integer the new user id, or 0 if an error
      */
-    public static function create_user($email, $password, $role_id, $attributes) {
+    public static function create_user($role_id, $attributes) {
+
+        if (empty($attributes['email'])) {
+            return 0;
+        }
 
         global $vce;
 
-        $lookup = user::lookup($email);
+        $lookup = user::lookup($attributes['email']);
 
         $vector = $vce->user->create_vector();
 
-        if (empty($password)) {
-            $password = user::generate_password();
+        if (empty($attributes['password'])) {
+            $attributes['password'] = user::generate_password();
         }
 
         // call to user class to create_hash function
-        $hash = user::create_hash($email, $password);
+        $hash = user::create_hash($attributes['email'], $attributes['password']);
 
         $user_data = array(
             'vector' => $vector,
@@ -694,9 +696,11 @@ class User {
 
         $new_user_id = $vce->db->insert('users', $user_data);
 
+        user::add_user_meta_data($new_user_id, $vector, $attributes);
+
         // the argument is treated as an integer, and presented as an unsigned decimal number.
-        sscanf(crc32($email), "%u", $front);
-        sscanf(crc32(strrev($email)), "%u", $back);
+        sscanf(crc32($attributes['email']), "%u", $front);
+        sscanf(crc32(strrev($attributes['email'])), "%u", $back);
         // ilkyo id
         $ilkyo_id = $front . substr($back, 0, (14 - strlen($front)));
 
@@ -710,17 +714,81 @@ class User {
             'minutia' => $ilkyo_id,
         );
 
-        $minutia = User::order_preserving_hash($email);
+        $vce->db->insert('users_meta', $records);
 
-        // add email
-        $records[] = array(
-            'user_id' => $new_user_id,
-            'meta_key' => 'email',
-            'meta_value' => $vce->user->encryption($email, $vector),
-            'minutia' => $minutia,
-        );
+        return $new_user_id;
+    }
 
-        // get user attributes
+    /**
+     * Update an existing user
+     *
+     * @param integer $user_id the user id.
+     * @param string $attributes array of attributes and values.
+     * @param string $role_id the role_id.
+     * @return null
+     */
+    public static function update_user($user_id, $role_id, $attributes) {
+
+        global $vce;
+
+        $query = "SELECT role_id, vector FROM " . TABLE_PREFIX . "users WHERE user_id='" . $user_id . "'";
+        $user_info = $vce->db->get_data_object($query);
+
+        $current_role_id = $user_info[0]->role_id;
+        $vector = $user_info[0]->vector;
+
+        // has role_id been updated?
+        if (isset($role_id) && $role_id != $current_role_id) {
+
+            $update = array('role_id' => $role_id);
+            $update_where = array('user_id' => $user_id);
+            $vce->db->update('users', $update, $update_where);
+
+        }
+
+        // delete old meta data
+        foreach ($attributes as $key => $value) {
+
+            // delete user meta from database
+            $where = array('user_id' => $user_id, 'meta_key' => $key);
+            $vce->db->delete('users_meta', $where);
+
+        }
+
+        user::add_user_meta_data($user_id, $vector, $attributes);
+    }
+
+    /**
+     * Delete a user
+     *
+     * @param integer $user_id
+     * @return void
+     */
+    public static function delete_user($user_id) {
+
+        global $vce;
+
+        // delete user from database
+        $where = array('user_id' => $user_id);
+        $vce->db->delete('users', $where);
+
+        // delete user from database
+        $where = array('user_id' => $user_id);
+        $vce->db->delete('users_meta', $where);
+    }
+
+    /**
+     * Add meta data to existing user
+     *
+     * @param integer $user_id
+     * @param string $vector
+     * @param array $attributes
+     * @return void
+     */
+    private static function add_user_meta_data($user_id, $vector, $attributes) {
+
+        global $vce;
+
         $user_attributes = json_decode($vce->site->user_attributes, true);
 
         // start with default
@@ -735,6 +803,8 @@ class User {
                 }
             }
         }
+
+        $records = array();
 
         foreach ($attributes as $key => $value) {
 
@@ -753,7 +823,7 @@ class User {
             }
 
             $records[] = array(
-                'user_id' => $new_user_id,
+                'user_id' => $user_id,
                 'meta_key' => $key,
                 'meta_value' => $encrypted,
                 'minutia' => $minutia,
@@ -761,9 +831,10 @@ class User {
 
         }
 
-        $vce->db->insert('users_meta', $records);
-
-        return $new_user_id;
+        // check that $records is not empty
+        if (!empty($records)) {
+            $vce->db->insert('users_meta', $records);
+        }
     }
 
     /**
