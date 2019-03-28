@@ -663,6 +663,47 @@ class User {
     }
 
     /**
+     * Set the current user's password
+     *
+     * @param array $input
+     * @return return error message if there is an error, otherwise null
+     */
+	public function update_user_password($input) {
+	
+		global $vce;
+
+		if (strlen($input['password']) < 6) {
+            return 'Passwords must be least 6 characters in length';
+		}
+			
+		if (!preg_match("#[0-9]+#", $input['password'])) {
+			return 'Password must include at least one number';
+		}
+
+		if (!preg_match("#[a-z]+#", $input['password'])) {
+			return 'Password must include at least one letter';
+		}
+
+		if (!preg_match("#\W+#", $input['password'])) {
+			return 'Password must include at least one symbol';
+		}	
+
+		if ($input['password'] != $input['password2']) {
+			return 'Passwords do not match';
+		}
+		
+		// call to user class to create_hash function
+		$hash = user::create_hash($vce->user->email, $input['password']);
+			
+		// update hash
+		$update = array('hash' => $hash);
+		$update_where = array( 'user_id' => $vce->user->user_id);
+		$vce->db->update('users', $update, $update_where);
+
+		return null;
+    }
+    
+    /**
      * Create a new user
      *
      * @param string $attributes array of attributes and values.  Must include email. If no password it will be generated
@@ -724,10 +765,12 @@ class User {
      *
      * @param integer $user_id the user id.
      * @param string $attributes array of attributes and values.
+     * @param email $email the existing email.
+     * @param email $new_email the new email.  If changed and not in use, email will be updated.
      * @param string $role_id the role_id.
-     * @return null
+     * @return string return error message if there is an error, null if success
      */
-    public static function update_user($user_id, $role_id, $attributes) {
+    public static function update_user($user_id, $attributes, $role_id=null, $email=null, $new_email=null) {
 
         global $vce;
 
@@ -746,6 +789,50 @@ class User {
 
         }
 
+        // check if email has been changed
+		if (isset($email) && isset($new_email) && $email != $new_email) {
+			$email = filter_var(strtolower($email), FILTER_SANITIZE_EMAIL);
+			if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+				return 'Not a valid email address';
+			}
+			
+			// create lookup
+			$lookup = user::lookup($email);
+			
+			// get user vector
+			$query = "SELECT id FROM " . TABLE_PREFIX . "users_meta WHERE meta_key='lookup' and meta_value='" . $lookup . "' LIMIT 1";
+			$lookup_check = $vce->db->get_data_object($query);
+			
+			if (!empty($lookup_check)) {
+				return 'Email is already in use';
+			}
+				
+			// call to user class to create_hash function
+			$hash = user::create_hash($email, $attributes['password']);
+			
+			$query = "SELECT user_id FROM  " . TABLE_PREFIX . "users WHERE hash='" . $hash . "' LIMIT 1";
+			$password_check = $vce->db->get_data_object($query);
+			
+			// check that password is correct
+			if (empty($password_check)) {
+				return 'Password is not correct';
+			}
+			
+			// call to user class to create_hash function
+			$hash = user::create_hash($email, $attributes['password']);
+			
+			// update hash
+			$update = array( 'hash' => $hash);
+			$update_where = array( 'user_id' => $user_id);
+			$vce->db->update( 'users', $update, $update_where );
+			
+			// update hash
+			$update = array( 'meta_value' => $lookup);
+			$update_where = array('user_id' => $user_id, 'meta_key' => 'lookup');
+			$vce->db->update( 'users_meta', $update, $update_where );
+			
+        }
+        
         // delete old meta data
         foreach ($attributes as $key => $value) {
 
@@ -756,6 +843,8 @@ class User {
         }
 
         user::add_user_meta_data($user_id, $vector, $attributes);
+
+        return null;
     }
 
     /**
@@ -788,6 +877,11 @@ class User {
     private static function add_user_meta_data($user_id, $vector, $attributes) {
 
         global $vce;
+
+        // never store password
+        if (isset($attributes['password'])) {
+            unset($attributes['password']);
+        }
 
         $user_attributes = json_decode($vce->site->user_attributes, true);
 

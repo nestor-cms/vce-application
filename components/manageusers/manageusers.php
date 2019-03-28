@@ -1125,37 +1125,16 @@ EOF;
 
 		$input = $this->strip_checkbox($input);
 
-        $user_id = $input['user_id'];
+		$user_id = $input['user_id'];
 		$role_id = empty($input['role_id']) ? '' : $input['role_id'];
 
         unset($input['type'], $input['procedure'], $input['role_id'], $input['user_id']);
-		user::update_user($user_id, $role_id, $input);
+		user::update_user($user_id, $input, $role_id);
 
         echo json_encode(array('response' => 'success', 'message' => 'User Updated', 'form' => 'create', 'action' => ''));
         return;
 
     }
-
-	private function strip_checkbox($input) {
-        // loop through to look for checkbox type input
-        foreach ($input as $input_key => $input_value) {
-            // for checkbox inputs
-            if (preg_match('/_\d+$/', $input_key, $matches)) {
-                // strip _1 off to find input value for checkbox
-                $new_input = str_replace($matches[0], '', $input_key);
-                // decode previous json object value for input variable
-                $new_value = isset($input[$new_input]) ? json_decode($input[$new_input], true) : array();
-                // add new value to array
-                $new_value[] = $input_value;
-                // remove the _1
-                unset($input[$input_key]);
-                // reset the input with json object
-                $input[$new_input] = json_encode($new_value);
-            }
-		}
-		
-		return $input;
-	}
 
     /**
      * Masquerade as user

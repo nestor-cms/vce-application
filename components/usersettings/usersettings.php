@@ -346,41 +346,14 @@ EOF;
 	 */
 	protected function password($input) {
 	
-		global $db;
-		global $user;
+		global $vce;
 
-		if (strlen($input['password']) < 6) {
-			echo json_encode(array('response' => 'error','message' => 'Passwords must be least 6 characters in length','action' => ''));
+		$msg = $vce->user->update_user_password($input);
+
+		if (!empty($msg)) {
+			echo json_encode(array('response' => 'error','message' => $msg,'action' => ''));
 			exit();
 		}
-			
-		if (!preg_match("#[0-9]+#", $input['password'])) {
-			echo json_encode(array('response' => 'error','message' => 'Password must include at least one number','action' => ''));
-			exit();
-		}
-
-		if (!preg_match("#[a-z]+#", $input['password'])) {
-			echo json_encode(array('response' => 'error','message' => 'Password must include at least one letter','action' => ''));
-			exit();
-		}
-
-		if (!preg_match("#\W+#", $input['password'])) {
-			echo json_encode(array('response' => 'error','message' => 'Password must include at least one symbol','action' => ''));
-			exit();
-		}	
-
-		if ($input['password'] != $input['password2']) {
-			echo json_encode(array('response' => 'error','message' => 'Passwords do not match','action' => ''));
-			return;
-		}
-		
-		// call to user class to create_hash function
-		$hash = user::create_hash($user->email, $input['password']);
-			
-		// update hash
-		$update = array('hash' => $hash);
-		$update_where = array( 'user_id' => $user->user_id);
-		$db->update('users', $update, $update_where);
 
 		echo json_encode(array('response' => 'success','message' => 'Password Updated','action' => ''));
 		return;
@@ -391,154 +364,26 @@ EOF;
 	 *
 	 */
 	protected function update($input) {
-	
-		/* hide for now until user management are centralized into class.user.php
-		global $user;
-		echo User::update_user($input);
-		return;
-		*/
-	
-		global $db;
-		global $site;
-		global $user;
-		
-		// loop through to look for checkbox type input
-		foreach ($input as $input_key=>$input_value) {
-			// for checkbox inputs
-			if (preg_match('/_\d+$/',$input_key,$matches)) {
-				// strip _1 off to find input value for checkbox
-				$new_input = str_replace($matches[0],'', $input_key);
-				// decode previous json object value for input variable
-				$new_value = isset($input[$new_input]) ? json_decode($input[$new_input], true) : array();
-				// add new value to array
-				$new_value[] = $input_value;
-				// remove the _1
-				unset($input[$input_key]);
-				// reset the input with json object
-				$input[$new_input] = json_encode($new_value);
-			}
-		}
 
-		// get user attributes
-		$user_attributes = json_decode($site->user_attributes, true);
+		global $vce;
 
-		// start with default
-		$attributes = array('email' => 'text');
+		$input = $this->strip_checkbox($input);
 		
-		// assign values into attributes for order preserving hash in minutia column
-		if (isset($user_attributes)) {
-			foreach ($user_attributes as $user_attributes_key=>$user_attributes_value) {
-				if (isset($user_attributes_value['sortable']) && $user_attributes_value['sortable']) {
-					$value = isset($user_attributes_value['type']) ? $user_attributes_value['type'] : null;
-					$attributes[$user_attributes_key] = $value;
-				}
-			}
-		}
-		
-		$user_id = $user->user_id;
-		
-		// we don't need to store the type, so unset this
+		$user_id = $vce->user->user_id;
+		$email = $input['email'];
+
 		unset($input['type']);
-		
-		// get user vector
-		$query = "SELECT vector FROM " . TABLE_PREFIX . "users WHERE user_id='" . $user_id . "' LIMIT 1";
-		$user_vector = $db->get_data_object($query);
-		
-		// set
-		$vector = $user_vector[0]->vector;
-		
-		// check if email has been changed
-		if (isset($input['email']) && $input['email'] != $user->email) {
-			$input['email'] = filter_var(strtolower($input['email']), FILTER_SANITIZE_EMAIL);
-			if (!filter_var($input['email'], FILTER_VALIDATE_EMAIL)) {
-				echo json_encode(array('response' => 'error','message' => 'Not a valid email address','form' => 'create', 'action' => ''));
-				return;
-			}
-			
-			// create lookup
-			$lookup = user::lookup($input['email']);
-			
-			// get user vector
-			$query = "SELECT id FROM " . TABLE_PREFIX . "users_meta WHERE meta_key='lookup' and meta_value='" . $lookup . "' LIMIT 1";
-			$lookup_check = $db->get_data_object($query);
-			
-			if (!empty($lookup_check)) {
-				echo json_encode(array('response' => 'error','message' => 'Email is already in use','form' => 'create', 'action' => ''));
-				return;
-			}
-				
-			// call to user class to create_hash function
-			$hash = user::create_hash($user->email, $input['password']);
-			
-			$query = "SELECT user_id FROM  " . TABLE_PREFIX . "users WHERE hash='" . $hash . "' LIMIT 1";
-			$password_check = $db->get_data_object($query);
-			
-			// check that password is correct
-			if (empty($password_check)) {
-				echo json_encode(array('response' => 'error','message' => 'Password is not correct','form' => 'create', 'action' => ''));
-				return;
-			}
-			
-			// call to user class to create_hash function
-			$hash = user::create_hash($input['email'], $input['password']);
-			
-			// update hash
-			$update = array( 'hash' => $hash);
-			$update_where = array( 'user_id' => $user->user_id);
-			$db->update( 'users', $update, $update_where );
-			
-			// update hash
-			$update = array( 'meta_value' => $lookup);
-			$update_where = array('user_id' => $user->user_id, 'meta_key' => 'lookup');
-			$db->update( 'users_meta', $update, $update_where );
-			
-		}
-		
-		unset($input['password']);
-		
-		// delete old meta data
-		
-		foreach ($input as $key => $value) {
-				
-			// delete user meta from database
-			$where = array( 'user_id' => $user_id, 'meta_key' => $key);
-			$db->delete('users_meta', $where);
-		
-		}
-		
-		// now add meta data
-		
-		$records = array();
-		
-		foreach ($input as $key => $value) {
+		unset($input['email']);
 
-			// encode user data
-			$encrypted = user::encryption($value, $vector);
-			
-			$minutia = null;
-			
-			// if this is a sortable text attribute
-			if (isset($attributes[$key])) {
-				// check if this is a text field
-				if ($attributes[$key] == 'text') {
-					$minutia = user::order_preserving_hash($value);
-				}
-				// other option will go here
-			}
-			
-			$records[] = array(
-			'user_id' => $user_id,
-			'meta_key' => $key,
-			'meta_value' => $encrypted,
-			'minutia' => $minutia
-			);
-			
+		$msg = user::update_user($user_id, $input, null, $email, $vce->user->email);
+		
+		if (!empty($msg)) {
+			echo json_encode(array('response' => 'error','message' => $msg,'form' => 'create', 'action' => ''));
+			return;
 		}
-		
-		$db->insert('users_meta', $records);
-		
+
 		// reload user object
-		$user->make_user_object($user_id);
+		$vce->user->make_user_object($user_id);
 		
 		echo json_encode(array('response' => 'success','procedure' => 'create','action' => 'reload','message' => 'User Settings Updated'));
 		return;
