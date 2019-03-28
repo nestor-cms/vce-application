@@ -296,7 +296,6 @@ class User {
 
     }
 
-
     /**
      * Creates user object from user_id
      * @global object $db
@@ -625,53 +624,63 @@ class User {
     }
 
     /**
+     * Return true if the user exists (based on email in use)
+     *
+     * @param string $email
+     * @return boolean true if user exists
+     */
+    public static function user_exists($email) {
+
+        global $db;
+
+        $lookup = user::lookup($email);
+
+        // check
+        $query = "SELECT id FROM " . TABLE_PREFIX . "users_meta WHERE meta_key='lookup' and meta_value='" . $lookup . "'";
+        $lookup_check = $db->get_data_object($query);
+
+        if (!empty($lookup_check)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static function generate_password() {
+
+        // anonymous function to generate password
+        $random_password = function ($password = null) use (&$random_password) {
+            $charset = "+-*#&@!?0123456789abcdefghijklmnopqrstuxyvwzABCDEFGHIJKLMNOPQRSTUXYVWZ";
+            $newchar = substr($charset, mt_rand(0, (strlen($charset) - 1)), 1);
+            if (strlen($password) == 8) {
+                return $password;
+            }
+            return $random_password($password . $newchar);
+        };
+
+        // get a new random password
+        return $random_password();
+    }
+
+    /**
      * Create a new user
      *
      * @param string $email the email.
      * @param string $password the password. If not set a random password will be generated
-     * @param string $first_name the first name.
-     * @param string $last_name the last name.
-     * @param string $role the role.  This is a string e.g. Instructor
-     * @param VCE $vce global vce class
+     * @param string $attributes array of attributes and values.
+     * @param string $role_id the role_id.
      * @return integer the new user id
      */
-    public static function create_user($email, $password, $first_name, $last_name, $role, $vce) {
+    public static function create_user($email, $password, $role_id, $attributes) {
 
-        // Translate role to role_id
-        $site_roles = json_decode($vce->site->roles, true);
-
-        $default = null;
-        foreach ($site_roles as $each_key => $each_value) {
-            // create as default
-            $default = $each_key;
-
-            // check against role
-            if ($each_value['role_name'] == $role) {
-                $role_id = $each_key;
-                break;
-            }
-        }
-
-        // set to lowest as a backup
-        $role_id = isset($role_id) ? $role_id : $default;
+        global $vce;
 
         $lookup = user::lookup($email);
 
         $vector = $vce->user->create_vector();
 
-        if (!isset($password)) {
-            // anonymous function to generate password
-            $random_password = function ($password = null) use (&$random_password) {
-                $charset = "+-*#&@!?0123456789abcdefghijklmnopqrstuxyvwzABCDEFGHIJKLMNOPQRSTUXYVWZ";
-                $newchar = substr($charset, mt_rand(0, (strlen($charset) - 1)), 1);
-                if (strlen($password) == 8) {
-                    return $password;
-                }
-                return $random_password($password . $newchar);
-            };
-
-            // get a new random password
-            $password = $random_password();
+        if (empty($password)) {
+            $password = user::generate_password();
         }
 
         // call to user class to create_hash function
@@ -711,25 +720,46 @@ class User {
             'minutia' => $minutia,
         );
 
-        $minutia = User::order_preserving_hash($first_name);
+        // get user attributes
+        $user_attributes = json_decode($vce->site->user_attributes, true);
 
-        // first name
-        $records[] = array(
-            'user_id' => $new_user_id,
-            'meta_key' => 'first_name',
-            'meta_value' => $vce->user->encryption($first_name, $vector),
-            'minutia' => $minutia,
-        );
+        // start with default
+        $meta_attributes = array('email' => 'text');
 
-        $minutia = User::order_preserving_hash($last_name);
+        // assign values into attributes for order preserving hash in minutia column
+        if (isset($user_attributes)) {
+            foreach ($user_attributes as $user_attributes_key => $user_attributes_value) {
+                if (isset($user_attributes_value['sortable']) && $user_attributes_value['sortable']) {
+                    $value = isset($user_attributes_value['type']) ? $user_attributes_value['type'] : null;
+                    $meta_attributes[$user_attributes_key] = $value;
+                }
+            }
+        }
 
-        // last name
-        $records[] = array(
-            'user_id' => $new_user_id,
-            'meta_key' => 'last_name',
-            'meta_value' => $vce->user->encryption($last_name, $vector),
-            'minutia' => $minutia,
-        );
+        foreach ($attributes as $key => $value) {
+
+            // encode user data
+            $encrypted = user::encryption($value, $vector);
+
+            $minutia = null;
+
+            // if this is a sortable text attribute
+            if (isset($meta_attributes[$key])) {
+                // check if this is a text field
+                if ($meta_attributes[$key] == 'text') {
+                    $minutia = user::order_preserving_hash($value);
+                }
+                // other option will go here
+            }
+
+            $records[] = array(
+                'user_id' => $new_user_id,
+                'meta_key' => $key,
+                'meta_value' => $encrypted,
+                'minutia' => $minutia,
+            );
+
+        }
 
         $vce->db->insert('users_meta', $records);
 
