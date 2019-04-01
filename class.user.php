@@ -703,6 +703,10 @@ class User {
 		return null;
     }
     
+    /* 
+    ** CRUD (Create Update Read Delete) functions below
+    */
+
     /**
      * Create a new user
      *
@@ -848,6 +852,33 @@ class User {
     }
 
     /**
+     * Read user based on user_id
+     *
+     * @param integer $user_id
+     * @param boolean $add_metadata true if additional metadata should be added to the user object
+     * @return the user object
+     */
+    public static function read_user($user_id, $add_metadata = false) {
+
+        global $vce;
+
+        $query = "SELECT * FROM  " . TABLE_PREFIX . "users_meta WHERE meta_key='lookup' AND minutia='" . $user_id . "'";
+        $user = $vce->db->get_data_object($query);
+
+        if ($add_metadata) {
+            $query = "SELECT user_id, meta_key, meta_value FROM  " . TABLE_PREFIX . "users_meta WHERE user_id = $user_id";
+            $meta_data = $vce->db->get_data_object($query);
+    
+            // add values to users array
+            foreach ($meta_data as $meta_item) {
+                $user->meta_key = user::decryption($meta_item->meta_value, $user->user_id);
+            }        
+        }
+
+        return $user;
+    }
+
+    /**
      * Delete a user
      *
      * @param integer $user_id
@@ -865,6 +896,10 @@ class User {
         $where = array('user_id' => $user_id);
         $vce->db->delete('users_meta', $where);
     }
+
+    /*
+    ** End CRUD functions
+    */
 
     /**
      * Add meta data to existing user
