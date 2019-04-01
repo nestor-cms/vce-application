@@ -232,7 +232,7 @@ EOF;
             foreach ($user_attributes as $user_attributes_key => $user_attributes_value) {
 
                 // nice title for this user attribute
-                $title = isset($user_attributes_value['title']) ? $user_attributes_value['title'] : ucwords(str_replace('_', ' ', $user_attributes_key));
+                $title = isset($user_attributes_value['title']) ? ucwords(str_replace('_', ' ', $user_attributes_value['title'])) : ucwords(str_replace('_', ' ', $user_attributes_key));
 
                 // check if required
                 $tag = (isset($user_attributes_value['required']) && $user_attributes_value['required'] == '1') ? 'required' : null;
@@ -471,7 +471,7 @@ EOF;
                 foreach ($user_attributes as $user_attributes_key => $user_attributes_value) {
 
                     // nice title for this user attribute
-                    $title = isset($user_attributes_value['title']) ? $user_attributes_value['title'] : ucwords(str_replace('_', ' ', $user_attributes_key));
+                    $title = isset($user_attributes_value['title']) ? ucwords(str_replace('_', ' ', $user_attributes_value['title'])) : ucwords(str_replace('_', ' ', $user_attributes_key));
 
                     // check if required
                     $tag = (isset($user_attributes_value['required']) && $user_attributes_value['required'] == '1') ? 'required' : null;
