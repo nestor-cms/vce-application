@@ -367,15 +367,11 @@ EOF;
 
 		global $vce;
 
-		$input = $this->strip_checkbox($input);
-		
 		$user_id = $vce->user->user_id;
-		$email = $input['email'];
 
 		unset($input['type']);
-		unset($input['email']);
 
-		$msg = user::update_user($user_id, $input, null, $email, $vce->user->email);
+		$msg = user::update_user($user_id, $input, null);
 		
 		if (!empty($msg)) {
 			echo json_encode(array('response' => 'error','message' => $msg,'form' => 'create', 'action' => ''));

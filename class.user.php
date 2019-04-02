@@ -769,14 +769,29 @@ class User {
      *
      * @param integer $user_id the user id.
      * @param string $attributes array of attributes and values.
-     * @param email $email the existing email.
-     * @param email $new_email the new email.  If changed and not in use, email will be updated.
      * @param string $role_id the role_id.
      * @return string return error message if there is an error, null if success
      */
-    public static function update_user($user_id, $attributes, $role_id=null, $email=null, $new_email=null) {
+    public static function update_user($user_id, $attributes, $role_id=null) {
 
         global $vce;
+
+        // loop through to look for checkbox type input
+        foreach ($attributes as $input_key => $input_value) {
+            // for checkbox inputs
+            if (preg_match('/_\d+$/', $input_key, $matches)) {
+                // strip _1 off to find input value for checkbox
+                $new_input = str_replace($matches[0], '', $input_key);
+                // decode previous json object value for input variable
+                $new_value = isset($attributes[$new_input]) ? json_decode($attributes[$new_input], true) : array();
+                // add new value to array
+                $new_value[] = $input_value;
+                // remove the _1
+                unset($attributes[$input_key]);
+                // reset the input with json object
+                $attributes[$new_input] = json_encode($new_value);
+            }
+        }
 
         $query = "SELECT role_id, vector FROM " . TABLE_PREFIX . "users WHERE user_id='" . $user_id . "'";
         $user_info = $vce->db->get_data_object($query);
@@ -794,14 +809,14 @@ class User {
         }
 
         // check if email has been changed
-		if (isset($email) && isset($new_email) && $email != $new_email) {
-			$email = filter_var(strtolower($email), FILTER_SANITIZE_EMAIL);
-			if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+		if (isset($attributes['email']) && $vce->user->email != $attributes['email']) {
+			$attributes['email'] = filter_var(strtolower($attributes['email']), FILTER_SANITIZE_EMAIL);
+			if (!filter_var($attributes['email'], FILTER_VALIDATE_EMAIL)) {
 				return 'Not a valid email address';
 			}
 			
 			// create lookup
-			$lookup = user::lookup($email);
+			$lookup = user::lookup($attributes['email']);
 			
 			// get user vector
 			$query = "SELECT id FROM " . TABLE_PREFIX . "users_meta WHERE meta_key='lookup' and meta_value='" . $lookup . "' LIMIT 1";
@@ -812,7 +827,7 @@ class User {
 			}
 				
 			// call to user class to create_hash function
-			$hash = user::create_hash($email, $attributes['password']);
+			$hash = user::create_hash($vce->user->email, $attributes['password']);
 			
 			$query = "SELECT user_id FROM  " . TABLE_PREFIX . "users WHERE hash='" . $hash . "' LIMIT 1";
 			$password_check = $vce->db->get_data_object($query);
@@ -821,9 +836,11 @@ class User {
 			if (empty($password_check)) {
 				return 'Password is not correct';
 			}
-			
+            
+            // Now ok to change email
+
 			// call to user class to create_hash function
-			$hash = user::create_hash($email, $attributes['password']);
+			$hash = user::create_hash($attributes['email'], $attributes['password']);
 			
 			// update hash
 			$update = array( 'hash' => $hash);
@@ -834,7 +851,6 @@ class User {
 			$update = array( 'meta_value' => $lookup);
 			$update_where = array('user_id' => $user_id, 'meta_key' => 'lookup');
 			$vce->db->update( 'users_meta', $update, $update_where );
-			
         }
         
         // delete old meta data
@@ -856,7 +872,7 @@ class User {
      *
      * @param integer $user_id
      * @param boolean $add_metadata true if additional metadata should be added to the user object
-     * @return the user object
+     * @return the user object or null if not found
      */
     public static function read_user($user_id, $add_metadata = false) {
 
@@ -864,6 +880,12 @@ class User {
 
         $query = "SELECT * FROM  " . TABLE_PREFIX . "users_meta WHERE meta_key='lookup' AND minutia='" . $user_id . "'";
         $user = $vce->db->get_data_object($query);
+        if (sizeof($user) == 1) {
+            $user = $user[0];
+        }
+        else {
+            return null;
+        }
 
         if ($add_metadata) {
             $query = "SELECT user_id, meta_key, meta_value FROM  " . TABLE_PREFIX . "users_meta WHERE user_id = $user_id";

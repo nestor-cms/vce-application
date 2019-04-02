@@ -1079,26 +1079,6 @@ EOF;
 	
 	}
 
-	protected function strip_checkbox($input) {
-        // loop through to look for checkbox type input
-        foreach ($input as $input_key => $input_value) {
-            // for checkbox inputs
-            if (preg_match('/_\d+$/', $input_key, $matches)) {
-                // strip _1 off to find input value for checkbox
-                $new_input = str_replace($matches[0], '', $input_key);
-                // decode previous json object value for input variable
-                $new_value = isset($input[$new_input]) ? json_decode($input[$new_input], true) : array();
-                // add new value to array
-                $new_value[] = $input_value;
-                // remove the _1
-                unset($input[$input_key]);
-                // reset the input with json object
-                $input[$new_input] = json_encode($new_value);
-            }
-		}
-		
-		return $input;
-	}
 
 	/**
 	 * Returns false instead of "Notice: Undefined property error" when reading data from inaccessible properties

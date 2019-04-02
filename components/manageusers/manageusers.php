@@ -1068,8 +1068,6 @@ EOF;
      */
     protected function create($input) {
 
-		$input = $this->strip_checkbox($input);
-
         $email = filter_var(strtolower($input['email']), FILTER_SANITIZE_EMAIL);
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             echo json_encode(array('response' => 'error', 'message' => 'Email is not a valid email address', 'form' => 'create', 'action' => ''));
@@ -1122,8 +1120,6 @@ EOF;
      * update user
      */
     protected function update($input) {
-
-		$input = $this->strip_checkbox($input);
 
 		$user_id = $input['user_id'];
 		$role_id = empty($input['role_id']) ? '' : $input['role_id'];
