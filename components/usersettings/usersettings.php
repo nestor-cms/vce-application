@@ -373,9 +373,8 @@ EOF;
 		$email = $input['email'];
 
 		unset($input['type']);
-		unset($input['email']);
 
-		$msg = user::update_user($user_id, $input, null, $email, $vce->user->email);
+		$msg = user::update_user($user_id, $input, null, $vce->user->email, $email);
 		
 		if (!empty($msg)) {
 			echo json_encode(array('response' => 'error','message' => $msg,'form' => 'create', 'action' => ''));
