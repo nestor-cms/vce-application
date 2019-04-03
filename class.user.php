@@ -645,12 +645,15 @@ class User {
             return false;
         }
     }
-
+	
+	/**
+	 * Method to create and return a random password
+	 */
     public static function generate_password() {
 
         // anonymous function to generate password
         $random_password = function ($password = null) use (&$random_password) {
-            $charset = "+-*#&@!?0123456789abcdefghijklmnopqrstuxyvwzABCDEFGHIJKLMNOPQRSTUXYVWZ";
+            $charset = "+-*#@!?0123456789abcdefghijklmnopqrstuxyvwzABCDEFGHIJKLMNOPQRSTUXYVWZ";
             $newchar = substr($charset, mt_rand(0, (strlen($charset) - 1)), 1);
             if (strlen($password) == 8) {
                 return $password;
@@ -721,6 +724,23 @@ class User {
         }
 
         global $vce;
+        
+        // loop through to look for checkbox type input
+        foreach ($attributes as $input_key => $input_value) {
+            // for checkbox inputs
+            if (preg_match('/_\d+$/', $input_key, $matches)) {
+                // strip _1 off to find input value for checkbox
+                $new_input = str_replace($matches[0], '', $input_key);
+                // decode previous json object value for input variable
+                $new_value = isset($attributes[$new_input]) ? json_decode($attributes[$new_input], true) : array();
+                // add new value to array
+                $new_value[] = $input_value;
+                // remove the _1
+                unset($attributes[$input_key]);
+                // reset the input with json object
+                $attributes[$new_input] = json_encode($new_value);
+            }
+        }
 
         $lookup = user::lookup($attributes['email']);
 
@@ -772,7 +792,7 @@ class User {
      * @param string $role_id the role_id.
      * @return string return error message if there is an error, null if success
      */
-    public static function update_user($user_id, $attributes, $role_id=null) {
+    public static function update_user($user_id, $attributes, $role_id = null) {
 
         global $vce;
 
@@ -810,7 +830,9 @@ class User {
 
         // check if email has been changed
 		if (isset($attributes['email']) && $vce->user->email != $attributes['email']) {
+		
 			$attributes['email'] = filter_var(strtolower($attributes['email']), FILTER_SANITIZE_EMAIL);
+			
 			if (!filter_var($attributes['email'], FILTER_VALIDATE_EMAIL)) {
 				return 'Not a valid email address';
 			}

@@ -18,15 +18,12 @@ function onformsuccess(formsubmitted,data) {
 
 $(document).ready(function() {
 
+	$("input[type='text'][name='email']").on('focus', function(e) {
+		$('#password-required').slideDown();
+	});
+	
 	$("input[type='text'][name='email']").on('keydown', function(e) {
-		if ($(this).val() !== $(this).attr('current')) {
-			$('#password-required-input').attr('tag','required');
-			$('#password-required').slideDown();
-		} else {
-			$('#password-required-input').val('');
-			$('#password-required-input').removeAttr('tag');
-			$('#password-required').slideUp();
-		}
+		$('#password-required-input').attr('tag','required');
 	});
 
 	$('.show-password-input').change(function() {
