@@ -51,6 +51,49 @@ class DB {
             return $results;
         }
     }
+    
+    
+	/** 
+	 * Executes multi_query
+	 * https://www.php.net/manual/en/mysqli.multi-query.php
+	 */
+    public function multi_query($query) {
+    
+		$this->connection->multi_query($query);
+
+		$results = array();
+
+		do // while (true); // exit only on error or when there are no more queries to process
+		{
+			// check if query currently being processed hasn't failed
+			if (0 !== $this->connection->errno) {
+				die('Multi query failed: (' . $this->connection->errno . ') ' . $this->connection->error);
+			}
+
+			// store and possibly process result of the query,
+			// both store_result & use_result will return false 
+			// for queries that do not return results (INSERT for example)
+			if (false !== ($res = $this->connection->store_result() )) {
+			   $results[] = $res->fetch_all(MYSQLI_ASSOC);
+					$res->free();
+			}
+
+			// exit loop if there ar no more queries to process
+			if (false === ($this->connection->more_results() )) {
+				break;
+			}
+
+			// get result of the next query to process
+			// don't bother to check for success/failure of the result
+			// since at the start of the loop there is an error check &
+			// report block.
+			$this->connection->next_result();
+
+		} while (true); // exit only on error or when there are no more queries to process
+	
+		return $results;	
+
+    }
 
     
 	/**  
@@ -241,6 +284,19 @@ class DB {
             	return false;
             }
         }
+    }
+    
+    
+    
+    public function update_multiple($table, $data = array()) {
+    
+	
+		global $vce;
+	
+		$vce->log($table);
+		$vce->log($data);
+		$vce->log('----');    
+    
     }
     
   	/**

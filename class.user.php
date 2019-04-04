@@ -859,7 +859,7 @@ class User {
 				return 'Password is not correct';
 			}
             
-            // Now ok to change email
+            // Now OK to change email
 
 			// call to user class to create_hash function
 			$hash = user::create_hash($attributes['email'], $attributes['password']);

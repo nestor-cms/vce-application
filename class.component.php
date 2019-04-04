@@ -853,10 +853,15 @@ EOF;
 			
 				// check if meta_data already exists, then update
 				if (isset($meta_data[$key])) {
+				
+					$updates[] = array(
+					'update' => array('meta_value' => $value),
+					'update_where' => array('component_id' => $component_id, 'meta_key' => $key)
+					);
 			
-					$update = array('meta_value' => $value);
-					$update_where = array('component_id' => $component_id, 'meta_key' => $key);
-					$db->update('components_meta', $update, $update_where);
+// 					$update = array('meta_value' => $value);
+// 					$update_where = array('component_id' => $component_id, 'meta_key' => $key);
+// 					$db->update('components_meta', $update, $update_where);
 					
 				} else {
 				// meta_data doesn't exists, so create it
@@ -871,6 +876,11 @@ EOF;
 
 				}
 
+			}
+			
+			// if $records exists, insert meta_data
+			if (isset($updates)) {
+				$db->update_multiple('components_meta', $updates);
 			}
 			
 			// if $records exists, insert meta_data
