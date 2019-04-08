@@ -63,23 +63,23 @@ class DB {
 
 		$results = array();
 
-		do // while (true); // exit only on error or when there are no more queries to process
-		{
+		do {
 			// check if query currently being processed hasn't failed
-			if (0 !== $this->connection->errno) {
-				die('Multi query failed: (' . $this->connection->errno . ') ' . $this->connection->error);
+			if ($this->connection->error) {
+				$this->log_db_errors($this->connection->error, $query);
+				return false; 
 			}
 
 			// store and possibly process result of the query,
 			// both store_result & use_result will return false 
 			// for queries that do not return results (INSERT for example)
-			if (false !== ($res = $this->connection->store_result() )) {
-			   $results[] = $res->fetch_all(MYSQLI_ASSOC);
-					$res->free();
+			if (($each_result = $this->connection->store_result()) !== false) {
+			   $results[] = $each_result->fetch_all(MYSQLI_ASSOC);
+					$each_result->free();
 			}
 
 			// exit loop if there ar no more queries to process
-			if (false === ($this->connection->more_results() )) {
+			if (($this->connection->more_results()) === false) {
 				break;
 			}
 
@@ -122,6 +122,23 @@ class DB {
         return $output;
     }
     
+    
+    public function get_data_object_multi($query, $object = true) {
+
+        $output = null;
+        $result = $this->connection->multi_query($query);
+        
+//         if ($this->connection->error) {
+//             $this->log_db_errors($this->connection->error, $query);
+//             return false;
+//         } else {
+//             $output = array();
+//             while ($row = ($object) ? $result->fetch_object() : $result->fetch_assoc()) {
+//                 $output[] = $row;
+//             }
+//         }
+        return $output;
+    }
 
     /**
 	 * Insert data into database table
