@@ -122,23 +122,6 @@ class DB {
         return $output;
     }
     
-    
-    public function get_data_object_multi($query, $object = true) {
-
-        $output = null;
-        $result = $this->connection->multi_query($query);
-        
-//         if ($this->connection->error) {
-//             $this->log_db_errors($this->connection->error, $query);
-//             return false;
-//         } else {
-//             $output = array();
-//             while ($row = ($object) ? $result->fetch_object() : $result->fetch_assoc()) {
-//                 $output[] = $row;
-//             }
-//         }
-        return $output;
-    }
 
     /**
 	 * Insert data into database table
