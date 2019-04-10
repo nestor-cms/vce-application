@@ -1,7 +1,7 @@
 <?php
-	/**
-	 * This class deals with all database communication.
-	 */
+/**
+ * This class deals with all database communication.
+ */
 class DB {
 	
     private $connection = null;
@@ -37,7 +37,7 @@ class DB {
     }
 
 	/** 
-	 * Executes any query.
+	 * Executes any query
 	 */
     public function query($query) {
     	
@@ -54,13 +54,13 @@ class DB {
     
     
 	/** 
-	 * Executes multi_query
-	 * https://www.php.net/manual/en/mysqli.multi-query.php
+	 * Executes multi_query for the provide $query
 	 */
     public function multi_query($query) {
     
 		$this->connection->multi_query($query);
 
+		// this would be when we are wanting to query for somethign
 		$results = array();
 
 		do {
@@ -78,15 +78,12 @@ class DB {
 					$each_result->free();
 			}
 
-			// exit loop if there ar no more queries to process
+			// exit if there are no more results
 			if (($this->connection->more_results()) === false) {
 				break;
 			}
 
-			// get result of the next query to process
-			// don't bother to check for success/failure of the result
-			// since at the start of the loop there is an error check &
-			// report block.
+			// get result of the next query results
 			$this->connection->next_result();
 
 		} while (true); // exit only on error or when there are no more queries to process
@@ -219,85 +216,137 @@ class DB {
         }
     }
 
-
+    
 	/**
      *   Update data in database table
      *   
      *   Example usage:
+     *
+     *   Single Query
      *   $update = array( 'name' => 'Not bennett', 'email' => 'someotheremail@email.com' );
      *   $update_where = array( 'user_id' => 44, 'name' => 'Bennett' );
-     *   $db->update( 'users_table', $update, $update_where, 1 );
-     *   
-     *   if $return_affected_rows == true, this method returns the number of rows affected
+     *   $db->update( 'users_table', $update, $update_where);
+     *    
+     *   Mulit Query
+     *   $update[] = array( 'name' => 'Not bennett', 'email' => 'someotheremail@email.com' );
+     *   $update_where[] = array( 'user_id' => 44, 'name' => 'Bennett' );
+     *   $db->update( 'users_table', $update, $update_where);
      */
-    public function update($table, $data = array(), $where = array(), $limit = '', $return_affected_rows = true) {
-        $table = TABLE_PREFIX . $table;
-		//check to see if data is available
+    public function update($table, $data = array(), $where = array()) {
+    
+    	global $vce;
+
+        // if data is empty return
         if (empty($data)) {
             return false;
         }
-        $sql = "UPDATE " . $table . " SET ";
-        foreach ($data as $field => $value) {
-            $updates[] = "$field = '$value'";
-        }
-        $sql .= implode(', ', $updates);
+         
+        $table = TABLE_PREFIX . $table;
+		
+		// this is a multi_query
+        if (isset($data[0])) {
         
-        //Add the $where clauses as needed
-        if (!empty($where)) {
-            foreach ($where as $field => $value ) {
-                $value = $value;
-                $clause[] = "$field = '$value'";
-            }
-            $sql .= ' WHERE ' . implode(' AND ', $clause);   
-        }
-        
-        if (!empty($limit)) {
-            $sql .= ' LIMIT ' . $limit;
-        }
+			// if where is not an array, trigger error
+			if (!isset($where[0]['component_id'])) {
+				$this->log_db_errors('$where is not an array for multi_query', '$db->update_multiple');
+				return false;
+			}
+		 
+			// if array counts for data and where are not equal, tigger error
+			if (count($data) != count($where)) {
+				$this->log_db_errors('$data and $where are not the same count in multi_query', '$db->update_multiple');
+				return false;
+			}
+         
+			$queries = null;
+		
+			foreach ($data as $data_key=>$data_value) {
+		
+				$sql = "UPDATE " . $table . " SET ";
+				$updates = array();
+				foreach ($data_value as $field=>$value) {
+					$updates[] = "$field='$value'";
+				}
+				$sql .= implode(', ', $updates);
+		
+				// add the $where clauses as needed
+				$clause = array();
+				foreach ($where[$data_key] as $field=>$value ) {
+					$value = $value;
+					$clause[] = "$field='$value'";
+				}
+				$sql .= ' WHERE ' . implode(' AND ', $clause);
+		
+				$queries[] = $sql;
+		 
+			}
+			
+			// send queries to multi_query
+			$this->connection->multi_query(implode(';', $queries));
+		
+			// find and return errors
+			$row = 0;
+			do {
+				if ($this->connection->error) {
+					$this->log_db_errors($this->connection->error, $queries[$row]);
+					return false;
+				}
 
-        $query = $this->connection->query($sql);
+				// exit loop if there ar no more queries to process
+				if (($this->connection->more_results()) === false) {
+					break;
+				}
 
-        if ($this->connection->error) {
-            $this->log_db_errors($this->connection->error, $sql);
-            return false;
+				$this->connection->next_result();
+				$row++;
+			} while (true);
+		
         } else {
+        
+       	 	// single query
+        
+			$sql = "UPDATE " . $table . " SET ";
+			foreach ($data as $field => $value) {
+				$updates[] = "$field = '$value'";
+			}
+			$sql .= implode(', ', $updates);
+		
+			// add the $where clauses as needed
+			if (!empty($where)) {
+				foreach ($where as $field => $value ) {
+					$value = $value;
+					$clause[] = "$field='$value'";
+				}
+				$sql .= ' WHERE ' . implode(' AND ', $clause);   
+			}
+		
+			if (!empty($limit)) {
+				$sql .= ' LIMIT ' . $limit;
+			}
 
-            $rows = mysqli_affected_rows($this->connection);
-            
-			global $site;
-			if (isset($site)) {
-				// db_update hook
-				if (isset($site->hooks['db_update'])) {
-					foreach($site->hooks['db_update'] as $hook) {
-						call_user_func($hook, $table, $where, $data);
-					}
+			$this->connection->query($sql);
+			
+			if ($this->connection->error) {
+				$this->log_db_errors($this->connection->error, $sql);
+				return false;
+			}
+        
+		}
+		
+		global $site;
+		if (isset($site)) {
+			// db_update hook
+			if (isset($site->hooks['db_update'])) {
+				foreach($site->hooks['db_update'] as $hook) {
+					call_user_func($hook, $table, $where, $data);
 				}
 			}
-            
-            if ($rows > 0) {
-            	if ($return_affected_rows) {
-            		return $rows;
-            	} else {
-            		return true;
-            	}
-            } else {
-            	return false;
-            }
-        }
+		}
+		
+		return true;
+		
     }
     
-    
-    
-    public function update_multiple($table, $data = array()) {
-    
-	
-		global $vce;
-	
-		$vce->log($table);
-		$vce->log($data);
-		$vce->log('----');    
-    
-    }
     
   	/**
      *  Delete rows from table
