@@ -53,7 +53,7 @@ class ManageComponents extends Component {
         // get all installed components
         foreach (array('vce-content', 'vce-application') as $components_dir) {
 
-            $directory_itor = new RecursiveDirectoryIterator(BASEPATH . $components_dir . DIRECTORY_SEPARATOR .'components' . DIRECTORY_SEPARATOR);
+            $directory_itor = new RecursiveDirectoryIterator(BASEPATH . $components_dir . '/' .'components' . '/');
             $filter_itor = new RecursiveCallbackFilterIterator($directory_itor, function ($current, $key, $iterator) {
 
                 // Skip hidden files and directories.
@@ -71,7 +71,7 @@ class ManageComponents extends Component {
                 } else {
                     // Only consume .php files that are in a directory of the same name.
                     $ok = fnmatch("*.php", $current->getFilename());
-                    $dirs = explode(DIRECTORY_SEPARATOR, $current->getPathname());
+                    $dirs = explode('/', $current->getPathname());
                     $ok = $ok && (($dirs[count($dirs) - 2] . '.php') === $current->getFilename());
                     return $ok;
                 }
