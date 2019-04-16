@@ -214,7 +214,7 @@ EOF;
 			}
 
 			// the path to the file
-			$file_path = $upload_path . DIRECTORY_SEPARATOR . $file_name;
+			$file_path = $upload_path . '/' . $file_name;
 
 			// This is here in case you need to write out to the log.txt file for debugging purposes
 			// file_put_contents(BASEPATH . 'log.txt', $chunk . PHP_EOL, FILE_APPEND);
@@ -226,7 +226,7 @@ EOF;
 			}
 
 			while (($file = readdir($dir)) !== false) {
-				$temporary_file_path = $upload_path . DIRECTORY_SEPARATOR . $file;
+				$temporary_file_path = $upload_path . '/' . $file;
 
 				// If temp file is current file proceed to the next
 				if ($temporary_file_path == "{$file_path}.part") {
@@ -375,8 +375,8 @@ EOF;
 				}
 	
 				// create user directory if it does not exist
-				if (!file_exists($upload_path .  DIRECTORY_SEPARATOR  . $post['created_by'])) {
-					mkdir($upload_path .  DIRECTORY_SEPARATOR  . $post['created_by'], 0775, TRUE);
+				if (!file_exists($upload_path .  '/'  . $post['created_by'])) {
+					mkdir($upload_path .  '/'  . $post['created_by'], 0775, TRUE);
 				}
 	
 				$source_file_name = "{$file_path}.part";
@@ -384,7 +384,7 @@ EOF;
 				// create the new file name
 				$path = $post['created_by'] . '_' . time() . '.' . pathinfo($file_path)['extension'];	
 
-				$destination_file_name = $upload_path .  DIRECTORY_SEPARATOR  . $post['created_by'] . DIRECTORY_SEPARATOR  . $path;
+				$destination_file_name = $upload_path .  '/'  . $post['created_by'] . '/'  . $path;
 
 				rename($source_file_name, $destination_file_name);
 

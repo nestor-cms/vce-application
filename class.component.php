@@ -1017,7 +1017,7 @@ EOF;
 			$basepath = defined('INSTANCE_BASEPATH') ? INSTANCE_BASEPATH . PATH_TO_UPLOADS : BASEPATH . PATH_TO_UPLOADS;
 		
 			// path of file
-			$unlink_path = $basepath .  DIRECTORY_SEPARATOR  . $created_by[0]->meta_value . DIRECTORY_SEPARATOR  . $file_path[0]->meta_value;
+			$unlink_path = $basepath .  '/' . $created_by[0]->meta_value . '/' . $file_path[0]->meta_value;
 			
 			// make sure file exists before deleteing/unlinking it
 			if (file_exists($unlink_path)) {

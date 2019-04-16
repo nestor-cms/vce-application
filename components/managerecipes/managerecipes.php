@@ -434,7 +434,7 @@ EOF;
             if (isset($activated_components[$each_item['type']])) {
 
                 // load component class
-                require_once BASEPATH . DIRECTORY_SEPARATOR . $activated_components[$each_item['type']];
+                require_once BASEPATH . '/' . $activated_components[$each_item['type']];
 
                 $access = new $each_item['type'];
 
@@ -521,7 +521,7 @@ EOF;
                 foreach (json_decode($vce->site->activated_components, true) as $key => $value) {
 
                     // load component class to get name
-                    require_once BASEPATH . DIRECTORY_SEPARATOR . $value;
+                    require_once BASEPATH . '/' . $value;
 
                     // instance
                     $each_component = new $key;
