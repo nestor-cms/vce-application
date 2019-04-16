@@ -338,8 +338,8 @@ EOF;
                     if ($value['parent'] != "Component") {
                         $components_minions['enabled_' . strtolower($value['parent'])][$value['type']] = $value['url'];
                     }
-	
-                    $components_list[$value['type']] = $url_path;
+    
+                    $components_list[$value['type']] = $value['url'];
 
                 }
 
