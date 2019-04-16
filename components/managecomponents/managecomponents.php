@@ -336,8 +336,11 @@ EOF;
                     if ($value['parent'] != "Component") {
                         $components_minions['enabled_' . strtolower($value['parent'])][$value['type']] = $value['url'];
                     }
+	
+					// prevent any backslashes within url
+					$url_path = str_replace('\\', '/', $value['url']);
 
-                    $components_list[$value['type']] = $value['url'];
+                    $components_list[$value['type']] = $url_path;
 
                 }
 
