@@ -311,7 +311,7 @@ class Site {
         // optional constant in vce-config that allows for another location to be used for javascript
         if (defined('PATH_TO_BASE_JAVASCRIPT')) {
             // add vce javascript
-            $this->add_script($site_url . '/' . PATH_TO_BASE_JAVASCRIPT . '/vce.js' . $ver, 'jquery');
+            $this->add_script($site_url . PATH_TO_BASE_JAVASCRIPT . $ver, 'jquery');
         } else {
             // add vce javascript
             $this->add_script($site_url . '/vce-application/js/vce.js' . $ver, 'jquery');
@@ -320,7 +320,7 @@ class Site {
         // optional constant in vce-config that allows for another location to be used for stylesheet
         if (defined('PATH_TO_BASE_STYLESHEET')) {
             // add vce javascript
-            $this->add_style($site_url . '/' . PATH_TO_BASE_STYLESHEET . '/vce.css' . $ver, 'vce');
+            $this->add_style($site_url . PATH_TO_BASE_STYLESHEET . $ver, 'vce');
         } else {
             // add vce stylesheet
             $this->add_style($site_url . '/vce-application/css/vce.css' . $ver, 'vce');
