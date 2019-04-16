@@ -83,7 +83,6 @@ class ManageComponents extends Component {
 
                 // Strip BASEPATH from this full path, since we add BASEPATH back in code below.
                 $component_path = str_replace(BASEPATH, "", $each_component->getPathname());
-                $component_path = str_replace('\\', '/', $component_path);
 
                 // get the file content to search for Child Class name
                 $component_text = file_get_contents(BASEPATH . $component_path, NULL, NULL, 0, 1000);
@@ -160,6 +159,8 @@ class ManageComponents extends Component {
 
                     // if ASSETS_URL has been set, hide delete because site is using a shared vce
                     if (!isset($activated_components[$type]) && !defined('ASSETS_URL')) {
+                    
+                    	$component_path = str_replace('\\', '/', $component_path);
 
                         $content .= <<<EOF
 <form id="$type-remove" class="delete-component" method="post" action="$vce->input_path" autocomplete="off">
