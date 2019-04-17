@@ -71,7 +71,8 @@ class ManageComponents extends Component {
                 } else {
                     // Only consume .php files that are in a directory of the same name.
                     $ok = fnmatch("*.php", $current->getFilename());
-                    $dirs = explode('/', $current->getPathname());
+                    $path =str_replace('\\', '/', $current->getPathname());
+                    $dirs = explode('/',$path);
                     $ok = $ok && (($dirs[count($dirs) - 2] . '.php') === $current->getFilename());
                     return $ok;
                 }
