@@ -88,7 +88,7 @@ class ManageComponents extends Component {
                 $component_path = str_replace('\\', '/', $each_component->getPathname());
 
                 // Strip BASEPATH from this full path, since we add BASEPATH back in code below.
-                $component_path = str_replace(BASEPATH, "", $each_component->getPathname());
+                $component_path = str_replace(BASEPATH, "", $component_path);
 
                 // get the file content to search for Child Class name
                 $component_text = file_get_contents(BASEPATH . $component_path, NULL, NULL, 0, 1000);
