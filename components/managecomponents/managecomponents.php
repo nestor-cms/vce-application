@@ -71,7 +71,9 @@ class ManageComponents extends Component {
                 } else {
                     // Only consume .php files that are in a directory of the same name.
                     $ok = fnmatch("*.php", $current->getFilename());
-                    $path =str_replace('\\', '/', $current->getPathname());
+
+                    // WINDOWS fix.  use all /
+                    $path = str_replace('\\', '/', $current->getPathname());
                     $dirs = explode('/',$path);
                     $ok = $ok && (($dirs[count($dirs) - 2] . '.php') === $current->getFilename());
                     return $ok;
@@ -81,6 +83,9 @@ class ManageComponents extends Component {
 
 
             foreach ($itor as $each_component) {
+
+                // WINDOWS fix.  use all /
+                $component_path = str_replace('\\', '/', $each_component->getPathname());
 
                 // Strip BASEPATH from this full path, since we add BASEPATH back in code below.
                 $component_path = str_replace(BASEPATH, "", $each_component->getPathname());
