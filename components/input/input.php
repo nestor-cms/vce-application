@@ -30,6 +30,9 @@ class Input extends Component {
 	 * method for page_requested_url hook
 	 */
 	public static function page_requested_url($requested_url, $vce) {
+	
+	    //add javascript
+        $vce->site->add_script(dirname(__FILE__) . '/js/script.js','jquery');
 
 		// add the path to input for form action value
 		$vce->input_path = defined('INPUT_PATH') ? $vce->site->site_url . '/' . INPUT_PATH : $vce->site->site_url . '/input';

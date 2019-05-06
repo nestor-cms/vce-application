@@ -53,7 +53,7 @@ class Comments extends Component {
     public function as_content($each_component, $vce) {
 
         //add javascript
-        $vce->site->add_script(dirname(__FILE__) . '/js/script.js');
+        $vce->site->add_script(dirname(__FILE__) . '/js/script.js','jquery');
 
         //add stylesheet
         $vce->site->add_style(dirname(__FILE__) . '/css/style.css', 'comments-style');
