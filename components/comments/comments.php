@@ -230,23 +230,14 @@ EOF;
 
     }
 
-    public function add_component_finish($each_component, $vce) {
-
-        // check for special property main_*parent_id*
-        $add_component = 'main_' . $each_component->component_id;
-
-        // If there are exiting comments at this level, then "Add Comments" would be placed under comments
-
-        if (!empty($vce->content->$add_component)) {
-            $vce->content->add('main', $vce->content->$add_component);
-        }
-
-    }
-
     /**
      *
      */
     public function add_component($recipe_component, $vce) {
+    
+    	// starting container for comments-container
+    	$vce->content->add('main', '<div class="comments-container">');
+    
         // If no comments have been created, then the "Add Comments" block should be added to main.
 
         $location = 'main';
@@ -349,6 +340,23 @@ EOF;
         $vce->content->add($location, $content);
 
     }
+    
+    
+    public function add_component_finish($each_component, $vce) {
+
+        // check for special property main_*parent_id*
+        $add_component = 'main_' . $each_component->component_id;
+
+        // If there are exiting comments at this level, then "Add Comments" would be placed under comments
+
+        if (!empty($vce->content->$add_component)) {
+            $vce->content->add('main', $vce->content->$add_component);
+        }
+        
+        // closing container for comments-container
+		$vce->content->add('main', '</div>');
+    }
+    
 
     /**
      * Creates component
