@@ -14,6 +14,31 @@ class Clickbox extends Component {
 	}
 	
 	/**
+	 * things to do when this component is preloaded
+	 */
+	public function preload_component() {
+		
+		$content_hook = array (
+		'page_requested_url' => 'Clickbox::page_requested_url'
+		);
+
+		return $content_hook;
+
+	}
+	
+	/**
+	 * method for page_requested_url hook
+	 */
+	public static function page_requested_url($requested_url, $vce) {
+	
+		$vce->site->add_script(dirname(__FILE__) . '/js/script.js', 'jquery-ui');
+		
+		$vce->site->add_style(dirname(__FILE__) . '/css/style.css', 'clickbox-style');
+
+	}
+	
+	
+	/**
 	 * start of clickbox
 	 */
 	public function as_content($each_component, $vce) {
@@ -24,7 +49,6 @@ $content = <<<EOF
 EOF;
 
 		$vce->content->add('main',$content);
-
 
 	}
 	
