@@ -1,5 +1,24 @@
 $(document).ready(function() {
 
+	$(document).on('focus', 'textarea, input[type=text],input[type=email], input[type=password], select', function() {
+		$('.form-error').fadeOut(10000, function(){ 
+    		$(this).remove();
+		});
+		$(this).closest('label').removeClass('highlight-alert').addClass('highlight');
+		$(this).parents().eq(1).children(':submit').addClass('active-button');
+	});
+
+	$(document).on('blur', 'textarea, input[type=text], input[type=email], input[type=password], select', function() {
+		$(this).closest('label').removeClass('highlight');
+		if ($(this).val() === "") {
+			$(this).parents().eq(1).children(':submit').removeClass('active-button');
+		}
+	});
+	
+	$(document).on('click', 'input[type=checkbox]:not(.ignore)', function() {
+		$(this).closest('label').removeClass('highlight-alert').addClass('highlight');
+	});
+
 	$(document).on('submit', '.asynchronous-form', function(e) {
 		e.preventDefault();
 
@@ -148,7 +167,6 @@ $(document).ready(function() {
 		}
 	}
 
-
 	function formsuccess(formsubmitted,data) {
 		if (data.url) {
 			window.location.href = data.url;
@@ -156,7 +174,6 @@ $(document).ready(function() {
 			window.location.reload(true);		
 		}
 	}
-	
 	
 	$('.cancel-button').on('click', function(e) {
 		e.preventDefault();
