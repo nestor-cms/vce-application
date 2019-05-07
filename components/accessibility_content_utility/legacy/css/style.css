@@ -182,3 +182,19 @@ height: 0;
 border-top: 10px solid #995A00; /* #33c6e6 */
 border-left: 15px solid transparent;
 }
+
+/* forms */
+
+.inline-form {
+display: inline-block;
+virtical-align: top;
+}
+
+.float-right-form {
+margin: -25px 0px 0px 0px;
+float: right;
+}
+
+.form-margin {
+padding: 20px;
+}
