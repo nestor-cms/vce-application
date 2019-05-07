@@ -9,7 +9,7 @@ class Clickbox extends Component {
 		return array(
 			'name' => 'Clickbox',
 			'description' => 'Places sub components into a clickbox',
-			'category' => 'site'
+			'category' => 'accessibility'
 		);
 	}
 	

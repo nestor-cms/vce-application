@@ -1,0 +1,184 @@
+form > label, .label-style {
+position: relative;
+display: block;
+background: #fbfbfb;
+border-width: 1px;
+border-style: solid;
+border-color: #d3d3d3;
+border-radius: 5px;
+padding: 0px 0px 0px 0px;
+margin: 0px 0px 20px 0px;
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+
+form > label:hover {
+border-color: #c3c3c3;
+}
+
+form > label hr {
+border-width: 1px 0px 0px 0px;
+border-style: solid;
+border-color: #d3d3d3;
+}
+
+form > label.ignore {
+position: relative;
+display: inline;
+background: transparent;
+border: 0;
+padding: 0;
+margin: 0;
+white-space: nowrap;
+}
+
+form > label.ignore:hover {
+}
+
+.label-text {
+position: relative;
+display: block;
+width: 100%;
+height: 20px;
+background: #d3d3d3;
+text-align: center;
+padding: 0px 0px;
+margin: -4px 0px 0px 0px;
+}
+
+.label-message {
+display: block;
+font-size: 12px;
+line-height: 20px;
+color: #777;
+}
+
+a.label-style {
+text-decoration: none;
+}
+
+a.label-style:hover {
+border-color: #999;
+}
+
+a.label-style:hover .label-text, a.label-style:hover .label-message  {
+background: #999;
+color: #fff;
+}
+
+label > textarea, label > input[type=text], label > input[type=email], label > input[type=password], label > input[type=file] {
+border-radius: 5px 5px 0px 0px;
+outline: none;
+resize: none;
+overflow: auto;
+background: #fbfbfb;
+}
+
+label > select {
+margin: 18px 0px 18px 0px;
+}
+
+
+/* form element active */
+
+.highlight {
+border-color: #999;
+}
+
+
+.highlight .label-text {
+background: #999;
+}
+
+.highlight .label-text .label-message {
+display: block;
+color: #fff;
+}
+
+.textarea-input {
+height: 100px;
+}
+
+/* form element error */
+
+label.highlight-alert {
+border-color: #c33;
+}
+
+label .label-text .label-error {
+display: none;
+}
+
+.highlight-alert .label-text .label-message {
+display: none;
+color: #fff;
+}
+
+.highlight-alert .label-text .label-error {
+display: block;
+font-size: 12px;
+line-height: 20px;
+color: #fff;
+}
+
+.highlight-alert .label-text {
+background: #e33;
+}
+
+/* tool tip */
+
+.tooltip-icon {
+position: absolute;
+display: block;
+top: 0px;
+right: 0px;
+height: 100%;
+}
+
+.tooltip-icon:before {
+position: absolute;
+display: block;
+top: 50%;
+right: 50%;
+transform: translate(-50%, -50%);
+width: 14px;
+height: 14px;
+border-radius: 7px;
+color: #666;
+content: "\003f";
+font-size: 13px;
+font-weight: normal;
+background-color: #fff;
+}
+
+.tooltip-content {
+position: absolute;
+display: none;
+bottom: 32px;
+right: 4px;
+width: 250px;
+background-color: #995A00; /* #33c6e6 */
+border-radius: 5px;
+padding: 10px;
+z-index: 100;
+}
+
+.tooltip-content, .tooltip-content * {
+color: #fff;
+}
+
+.tooltip-content:before {
+position: absolute;
+display: block;
+content: ' ';
+bottom: -10px;
+right: 10px;
+width: 0;
+height: 0;
+border-top: 10px solid #995A00; /* #33c6e6 */
+border-left: 15px solid transparent;
+}

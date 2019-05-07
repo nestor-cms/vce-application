@@ -1,0 +1,401 @@
+/* vce stylesheet added with class.site.php */
+
+.vce-error-message {
+margin: 10px;
+padding: 10px;
+background-color: #e33;
+color: #333;
+}
+
+/* form elements */
+
+label, .label-style {
+position: relative;
+display: block;
+background-color: #fbfbfb;
+border-width: 1px;
+border-style: solid;
+border-color: #d3d3d3;
+border-radius: 5px;
+padding: 0px 0px 0px 0px;
+margin: 0px 0px 20px 0px;
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+
+label:hover {
+border-color: #c3c3c3;
+}
+
+label hr {
+border-width: 1px 0px 0px 0px;
+border-style: solid;
+border-color: #d3d3d3;
+}
+
+label.ignore {
+position: relative;
+display: inline;
+background-color: transparent;
+border: 0;
+padding: 0;
+margin: 0;
+white-space: nowrap;
+}
+
+label.ignore:hover {
+}
+
+.label-text {
+position: relative;
+display: block;
+width: 100%;
+height: 20px;
+background-color: #d3d3d3;
+text-align: center;
+padding: 0px 0px;
+margin: -4px 0px 0px 0px;
+}
+
+.label-text-above {
+margin: 0px;
+}
+
+.label-message {
+display: block;
+font-size: 12px;
+line-height: 20px;
+color: #666;
+}
+
+a.label-style {
+text-decoration: none;
+}
+
+a.label-style:hover {
+border-color: #999;
+}
+
+a.label-style:hover .label-text, a.label-style:hover .label-message  {
+background-color: #999;
+color: #fff;
+}
+
+textarea, input[type=text], input[type=email], input[type=password], input[type=file] {
+width: calc(100% - 30px);
+min-height: 34px;
+font-size: 16px;
+padding: 10px 15px 10px 15px;
+margin: 0;
+border: 0;
+border-radius: 5px 5px 0px 0px;
+outline: none;
+resize: none;
+overflow: auto;
+background-color: #fbfbfb;
+}
+
+input[type=text].no-label {
+border-width: 1px;
+border-style: solid;
+border-color: #d3d3d3;
+border-radius: 5px;
+background-color: #fff;
+}
+
+textarea:focus, input[type=text]:focus {
+border-color: #999;
+}
+
+.input-padding {
+padding: 20px 15px;
+}
+
+.input-padding-small {
+padding: 7px 5px;
+}
+
+select {
+width: 100%;
+font-size: 16px;
+border: 0;
+padding: 0px 15px 0px 15px;
+margin: 18px 0px 18px 0px;
+-webkit-appearance: none;
+-moz-appearance: none;
+text-indent: 0.01px;
+text-overflow: "";
+appearance: none;
+outline: none;
+background: url('../images/arrows.png') no-repeat right center #fbfbfb;
+}
+
+input[type=submit], input[type=reset], button, .link-button {
+display: inline-block;
+border-width: 1px;
+border-style: solid;
+border-color: #d3d3d3;
+border-radius: 5px;
+font-size: 12px;
+color: #666;
+background-color: #fbfbfb;
+cursor: pointer;
+text-decoration: none;
+padding: 4px 7px;
+margin: 0px 10px 0px 0px;
+-webkit-appearance: none;
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+
+input[type=submit]:hover, input[type=reset]:hover, button:hover, .link-button:hover, input[type=submit].highlighted, .link-button.highlighted {
+border-color: #999;
+background-color: #696969;
+border-color: #696969;
+color: #fff;
+text-decoration: none;
+-webkit-appearance: none;
+}
+
+input[type=submit]:focus, input[type=reset]:focus, button:focus {
+outline: 0;
+}
+
+/* form element active */
+
+.highlight {
+border-color: #999;
+}
+
+
+.highlight .label-text {
+background-color: #696969;
+}
+
+.highlight .label-text .label-message {
+display: block;
+color: #fff;
+}
+
+.textarea-input {
+height: 100px;
+}
+
+/* form element error */
+
+label.highlight-alert {
+border-color: #c33;
+}
+
+label .label-text .label-error {
+display: none;
+}
+
+.highlight-alert .label-text .label-message {
+display: none;
+color: #fff;
+}
+
+.highlight-alert .label-text .label-error {
+display: block;
+font-size: 12px;
+line-height: 20px;
+color: #fff;
+}
+
+.highlight-alert .label-text {
+background-color: #e33;
+}
+
+.form-message {
+position: relative;
+display: block;
+color: #fff;
+text-align: center;
+font-size: 16px;
+margin: 0px 0px 20px 0px;
+padding: 10px 0px;
+border-radius: 5px;
+}
+
+/* error */
+
+.form-error {
+background-color: #e33;
+}
+
+/* success */
+
+.form-success {
+background-color: #3c3;
+}
+
+/* clickbar */
+
+.clickbar-container {
+padding: 0px 0px 0px 0px;
+margin: 3px 0px;
+}
+
+.clickbar-content {
+display: none;
+padding: 15px;
+background-color: #fff;
+border-width: 1px;
+border-style: solid;
+border-color: #a3a3a3;
+border-radius: 5px 5px 0px 0px;
+margin: 0;
+}
+
+.clickbar-content.no-padding {
+padding: 0px;
+margin: 0px 0px -17px 0px;
+}
+
+.clickbar-content.clickbar-open {
+display: block;
+}
+
+.clickbar-content.clickbar-open.clickbar-parent {
+background-color: #ffffff;
+}
+
+.clickbar-title {
+position: relative;
+display: block;
+width: 100%;
+color: #fff;
+background-color: #696969;
+border-radius: 0px 0px 5px 5px;
+text-align: center;
+margin: 0px 0px 0px 0px;
+text-decoration: none;
+cursor: pointer;
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+
+.clickbar-title span {
+display: block;
+color: #fff;
+padding: 10px 40px 10px 40px;
+}
+
+.clickbar-closed {
+border-radius: 5px 5px 5px 5px;
+}
+
+.clickbar-closed:hover {
+background-color: #838383;
+}
+
+.disabled {
+cursor: default;
+}
+
+/* clickbox title on top */
+
+.clickbar-container.title-on-top {
+position: relative;
+min-height: 30px;
+}
+
+.clickbar-container.title-on-top .clickbar-content {
+padding-top: 55px;
+border-radius: 5px;
+}
+
+.clickbar-container.title-on-top .clickbar-title {
+position: absolute;
+display: block;
+top: 0px;
+left: 0px;
+border-radius: 5px 5px 0px 0px;
+}
+
+.clickbar-container.title-on-top .clickbar-closed {
+border-radius: 5px 5px 5px 5px;
+}
+
+/* tool tip */
+
+.tooltip-icon {
+position: absolute;
+display: block;
+top: 0px;
+right: 0px;
+height: 100%;
+}
+
+.tooltip-icon:before {
+position: absolute;
+display: block;
+top: 50%;
+right: 50%;
+transform: translate(-50%, -50%);
+width: 14px;
+height: 14px;
+border-radius: 7px;
+color: #666;
+content: "\003f";
+font-size: 13px;
+font-weight: normal;
+background-color: #fff;
+}
+
+.tooltip-content {
+position: absolute;
+display: none;
+bottom: 32px;
+right: 4px;
+width: 250px;
+background-color: #995A00; /* #33c6e6 */
+border-radius: 5px;
+padding: 10px;
+z-index: 100;
+}
+
+.tooltip-content, .tooltip-content * {
+color: #fff;
+}
+
+.tooltip-content:before {
+position: absolute;
+display: block;
+content: ' ';
+bottom: -10px;
+right: 10px;
+width: 0;
+height: 0;
+border-top: 10px solid #995A00; /* #33c6e6 */
+border-left: 15px solid transparent;
+}
+
+/* forms */
+
+.inline-form {
+display: inline-block;
+vertical-align: top;
+}
+
+.float-right-form {
+margin: -25px 0px 0px 0px;
+float: right;
+}
+
+.form-margin {
+padding: 20px;
+}

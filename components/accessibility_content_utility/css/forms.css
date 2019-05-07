@@ -1,0 +1,149 @@
+/* form style */
+
+/* form elements */
+
+.input-label-style {
+position: relative;
+display: block;
+background-color: #fbfbfb;
+border-width: 1px;
+border-style: solid;
+border-color: #d3d3d3;
+border-radius: 0px;
+padding: 0px 0px 0px 0px;
+margin: 0px 0px 20px 0px;
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+
+.input-label-style:hover {
+border-color: #9c3;
+}
+
+.input-label-style.omit {
+position: relative;
+display: inline;
+background-color: transparent;
+border: 0;
+padding: 0;
+margin: 0;
+white-space: nowrap;
+}
+
+.input-label-text {
+position: absolute;
+display: block;
+width: 100%;
+height: 20px;
+background-color: #d3d3d3;
+text-align: center;
+padding: 0px 0px;
+}
+
+.input-label-message {
+display: block;
+font-size: 12px;
+line-height: 20px;
+color: #666;
+border-width: 0px;
+border-style: solid;
+border-color: transparent;
+background-color: transparent;
+}
+
+.input-label-text .input-label-error {
+display: none;
+}
+
+.input-label-style.highlight-alert .input-label-text {
+background-color: #e33;
+}
+
+
+.input-label-style.highlight-alert .input-label-text .input-label-message {
+display: none;
+}
+
+.input-label-style.highlight-alert .input-label-text .input-label-error {
+display: block;
+font-size: 12px;
+line-height: 20px;
+color: #fff;
+}
+
+.input-label-style.highlight-alert {
+border-color: #e33;
+}
+
+textarea, input[type=text], input[type=email], input[type=password], input[type=file] {
+width: calc(100% - 21px);
+min-height: 34px;
+font-size: 16px;
+padding: 20px 10px 5px 10px;
+margin: 0px 0px 0px 1px;
+border: 0;
+resize: none;
+overflow: auto;
+background-color: #fbfbfb;
+}
+
+textarea {
+margin: 0px 0px -5px 1px;
+}
+
+.input-padding {
+padding: 25px 15px 15px 15px;
+}
+
+.input-padding-small {
+padding: 7px 5px;
+}
+
+select {
+width: 100%;
+font-size: 16px;
+border: 0;
+padding: 0px 15px 0px 15px;
+margin: 32px 0px 11px 0px;
+-webkit-appearance: none;
+-moz-appearance: none;
+text-indent: 0.01px;
+text-overflow: "";
+appearance: none;
+outline: none;
+background: url('../images/arrows.png') no-repeat 100% 0% #fbfbfb;
+}
+
+input[type=submit], input[type=reset], button, .link-button {
+display: inline-block;
+border-width: 1px;
+border-style: solid;
+border-color: #696969;
+border-radius: 5px;
+font-size: 12px;
+color: #fbfbfb;
+background-color: #696969;
+cursor: pointer;
+text-decoration: none;
+padding: 4px 7px;
+margin: 0px 10px 0px 0px;
+-webkit-appearance: none;
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+
+input[type=submit]:hover, input[type=reset]:hover, button:hover, .link-button:hover, input[type=submit].highlighted, .link-button.highlighted {
+background-color:#fbfbfb;
+border-color: #696969;
+color: #696969;
+text-decoration: none;
+-webkit-appearance: none;
+}
