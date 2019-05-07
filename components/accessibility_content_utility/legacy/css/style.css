@@ -1,4 +1,4 @@
-form > label, .label-style {
+form > label, .upload-browse > label, .label-style {
 position: relative;
 display: block;
 background: #fbfbfb;
