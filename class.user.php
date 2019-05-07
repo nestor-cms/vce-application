@@ -1185,7 +1185,7 @@ class User {
             if ($meta_item->meta_key == 'persistant_login') {
                 continue;
             }
-            $users[$meta_item->user_id][$meta_item->meta_key] = user::decryption($meta_item->meta_value, $users_vector[$meta_item->user_id]);
+            $users[$meta_item->user_id][$meta_item->meta_key] = stripslashes(user::decryption($meta_item->meta_value, $users_vector[$meta_item->user_id]));
         }
 
         // return this as an object
