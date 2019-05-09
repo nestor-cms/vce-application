@@ -190,7 +190,7 @@ class Page {
 
 	
 	/**
-	 * Gets list of components and associated meta data
+	 * Gets components and associated meta data
 	 * this is done from the component which is being accessed by url backwards to the start of the recipe
 	 * Called by __construct(), takes the $requested_id and returns all associated components
 	 * @global object $db
@@ -1047,6 +1047,22 @@ class Page {
 		
 		return $get_parents($component_id);
 			
+	}
+	
+	
+	/**
+	 * Gets requested component from id
+	 */
+	public function get_requested_component($component_id) {
+			
+		global $vce;
+			
+		// fetch requested component by component_id
+		$query = "SELECT * FROM  " . TABLE_PREFIX . "components INNER JOIN " . TABLE_PREFIX . "components_meta ON " . TABLE_PREFIX . "components.component_id = " . TABLE_PREFIX . "components_meta.component_id WHERE " . TABLE_PREFIX . "components.component_id='" . $component_id. "'";
+		$requested_component_data = $vce->db->get_data_object($query, false);
+					
+		return $this->assemble_component_objects($requested_component_data, $vce)[0];
+
 	}
 	
 	/**
