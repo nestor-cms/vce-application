@@ -1066,6 +1066,74 @@ class Page {
 	}
 	
 	/**
+	 * Gets a requested component tree based on the component_id
+	 * 
+	 * @param component $component_id
+	 * @return component the component tree
+	 */
+	public function get_requested_component_tree($component_id) {
+
+		$component = $this->get_requested_component($component_id);
+		$component->components = $this->get_children($component->component_id, null, array(), array(), false, true);
+		return $component;
+		
+	}
+
+	/**
+	 * Clones an entire component tree and saves to the db.
+	 * 
+	 * @param parent_id the parent id of the new component
+	 * @param source_component the component to be cloned
+	 * @return component the cloned component id
+	 */
+	public function clone_component($parent_id, $source_component)
+	{
+		global $db;
+
+		$do_clone_component = function ($parent_id, $source_component) use (&$do_clone_component, $db) {
+
+			$data = array(
+				'parent_id' => $parent_id,
+				'sequence' => $source_component->sequence,
+				'url' => $source_component->url
+			);
+
+			// insert into components table, which returns new component id
+			$component_id = $db->insert('components', $data);
+
+			// now add meta data
+			$records = array();
+
+			// loop through other meta data
+			foreach ($source_component as $key => $value) {
+
+				if (!in_array($key, ['component_id', 'parent_id', 'sequence', 'url', 'components'])) {
+
+					$records[] = array(
+						'component_id' => $component_id,
+						'meta_key' => $key,
+						'meta_value' => $db->sanitize($value),
+						'minutia' => null
+					);
+				}
+			}
+
+			$db->insert('components_meta', $records);
+
+			// clone children
+			if (isset($source_component->components)) {
+				foreach ($source_component->components as $child) {
+					$do_clone_component($component_id, $child);
+				}
+			}
+
+			return $component_id;
+		};
+
+		return $do_clone_component($parent_id, $source_component);
+	}
+
+	/**
 	 * Gets children of a parent_id
 	 * @param int $parent_id
 	 * @return call self::get_sub_components()
